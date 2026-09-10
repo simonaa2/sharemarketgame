@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Share Market Arena — Student Trading Floor</title>
+  <meta name="description" content="Manage your $50,000 AUD portfolio, trade ASX, NYSE, and NASDAQ equities, and analyze market trends."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+
+  <!-- Chart.js for High Performance Financial & Portfolio Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+
+  <div class="app-wrapper">
+    <!-- Top Live Ticker Tape -->
+    <div class="ticker-tape-wrap">
+      <div class="ticker-tape-title">
+        <span class="live-dot"></span> LIVE TICKER
+      </div>
+      <div class="ticker-tape-track" id="ticker-tape-track">
+        <!-- Injected via GameApp.renderTickerTape() -->
+      </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="main-header">
+      <div class="container">
+        <div class="header-inner">
+          <div class="brand-group">
+            <div class="brand-logo">📈</div>
+            <div>
+              <div class="brand-title">Market <span class="accent">Arena</span></div>
+              <span class="class-tag" id="header-class-tag">ASX • NYSE • NASDAQ</span>
+            </div>
+          </div>
+
+          <div class="user-controls">
+            <div class="market-status-badge">
+              <span class="status-pill" id="status-asx">🇦🇺 ASX ...</span>
+              <span style="opacity:0.3;">|</span>
+              <span class="status-pill" id="status-us">🇺🇸 US ...</span>
+            </div>
+
+            <div class="user-profile-badge">
+              <div class="user-avatar" id="header-avatar">S</div>
+              <div class="user-info">
+                <span class="user-name" id="header-student-name">Student</span>
+                <span class="user-code" id="header-student-code">COMMERCE2026</span>
+              </div>
+            </div>
+
+            <button class="btn-secondary" id="btn-logout" title="Log out">
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="nav-tabs-wrapper">
+        <div class="container">
+          <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="tab-portfolio">
+              <span>💼</span> My Portfolio
+            </button>
+            <button class="tab-btn" data-tab="tab-explorer">
+              <span>🔍</span> Market Explorer <span class="tab-badge" id="stocks-count-badge">30+</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-ledger">
+              <span>📜</span> Trade Ledger
+            </button>
+            <button class="tab-btn" data-tab="tab-leaderboard">
+              <span>🏆</span> Class Leaderboard &amp; Learning
+            </button>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container">
+
+      <!-- ==========================================
+           TAB 1: MY PORTFOLIO DASHBOARD
+           ========================================== -->
+      <section id="tab-portfolio" class="tab-content active">
+        <!-- KPI Summary Cards Grid -->
+        <div class="kpi-grid">
+          <div class="kpi-card profit">
+            <div class="kpi-label">
+              <span>Total Portfolio Value</span>
+              <span title="Total value of cash balance plus all active share holdings in AUD">ℹ️</span>
+            </div>
+            <div class="kpi-value" id="kpi-total-val">$50,000.00</div>
+            <div class="kpi-sub">
+              <span class="kpi-badge up" id="kpi-return-badge">▲ +$0.00 (+0.00%)</span>
+              <span style="color:var(--text-dim);font-size:0.75rem;">from $50k base</span>
+            </div>
+          </div>
+
+          <div class="kpi-card cash">
+            <div class="kpi-label">
+              <span>Available Cash</span>
+              <span title="Liquid funds available to buy shares and pay brokerage">💵</span>
+            </div>
+            <div class="kpi-value" id="kpi-cash-val">$50,000.00</div>
+            <div class="kpi-sub">
+              <span style="color:var(--text-muted);font-size:0.75rem;">AUD purchasing power</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">
+              <span>Invested Equities</span>
+              <span title="Current market value of all held ASX and US stocks">📊</span>
+            </div>
+            <div class="kpi-value" id="kpi-invested-val">$0.00</div>
+            <div class="kpi-sub">
+              <span class="kpi-badge up" id="kpi-day-badge">▲ $0.00</span>
+              <span style="color:var(--text-dim);font-size:0.75rem;">today's movement</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Grid: Portfolio Timeline + Asset Allocation Donut -->
+        <div class="dashboard-grid">
+          <!-- Whole Portfolio Timeline Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title-group">
+                <h3>Portfolio Valuation Over Time</h3>
+                <p>Track your cumulative net worth (Cash + Active Holdings) in AUD</p>
+              </div>
+              <div class="timeline-pills" id="portfolio-timeline-pills">
+                <button class="time-pill" data-range="1w">1W</button>
+                <button class="time-pill active" data-range="1m">1M</button>
+                <button class="time-pill" data-range="3m">3M</button>
+                <button class="time-pill" data-range="6m">6M</button>
+                <button class="time-pill" data-range="1y">1Y</button>
+                <button class="time-pill" data-range="all">ALL</button>
+              </div>
+            </div>
+            <div class="chart-canvas-wrap">
+              <canvas id="portfolio-chart-canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- Asset Allocation Donut Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title-group">
+                <h3>Asset Allocation</h3>
+                <p>Distribution between Cash and individual share holdings</p>
+              </div>
+            </div>
+            <div class="chart-canvas-wrap" style="height: 250px;">
+              <canvas id="allocation-chart-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Holdings Table -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              <span>💼</span> Active Share Holdings
+              <span class="tab-badge" id="holdings-count-badge">0 stocks</span>
+            </div>
+            <button class="btn-secondary" onclick="GameApp.switchTab('tab-explorer')">
+              <span>+ Buy New Shares</span>
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Asset</th>
+                  <th>Exchange</th>
+                  <th>Shares Owned</th>
+                  <th>Avg Purchase Price</th>
+                  <th>Current Price</th>
+                  <th>Total Value (AUD)</th>
+                  <th>Total Unrealised P&amp;L</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="holdings-table-body">
+                <!-- Holdings injected via GameApp.renderHoldingsTable() -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="holdings-empty-state" style="text-align:center;padding:3rem 1rem;display:none;">
+            <div style="font-size:2.5rem;margin-bottom:0.5rem;">🧺</div>
+            <h4 style="font-family:var(--font-head);font-size:1.15rem;color:#fff;margin-bottom:0.3rem;">No Shares in Portfolio Yet</h4>
+            <p style="color:var(--text-dim);font-size:0.85rem;max-width:420px;margin:0 auto 1.25rem;">
+              You have $50,000 AUD ready to invest! Explore Australian (ASX) and US (NYSE/NASDAQ) markets to place your first trade.
+            </p>
+            <button class="btn-secondary" style="background:var(--asx-blue);color:#070b14;font-weight:700;" onclick="GameApp.switchTab('tab-explorer')">
+              Open Market Explorer ➔
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 2: MARKET EXPLORER & RESEARCH
+           ========================================== -->
+      <section id="tab-explorer" class="tab-content">
+        <div class="filter-bar">
+          <div class="filter-chips">
+            <button class="filter-chip active" data-filter="all">🌐 All Equities</button>
+            <button class="filter-chip" data-filter="asx">🇦🇺 ASX Blue Chips</button>
+            <button class="filter-chip" data-filter="nasdaq">🇺🇸 NASDAQ Tech</button>
+            <button class="filter-chip" data-filter="nyse">🇺🇸 NYSE Leaders</button>
+            <button class="filter-chip" data-filter="tech">💻 Technology &amp; AI</button>
+            <button class="filter-chip" data-filter="mining">⛏️ Resources &amp; Mining</button>
+            <button class="filter-chip" data-filter="banks">🏦 Banking &amp; Finance</button>
+          </div>
+
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="stock-search-input" class="search-input" placeholder="Search ticker, company, or sector..."/>
+          </div>
+        </div>
+
+        <!-- Grid of Available Stocks -->
+        <div class="stock-grid" id="market-stocks-grid">
+          <!-- Injected via GameApp.renderMarketExplorer() -->
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 3: TRADE LEDGER / AUDIT HISTORY
+           ========================================== -->
+      <section id="tab-ledger" class="tab-content">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              <span>📜</span> Complete Order Audit Trail
+            </div>
+            <button class="btn-secondary" id="btn-export-ledger">
+              <span>📥 Download Trade History (CSV)</span>
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date &amp; Time</th>
+                  <th>Action</th>
+                  <th>Security</th>
+                  <th>Quantity</th>
+                  <th>Execution Price</th>
+                  <th>Brokerage (AUD)</th>
+                  <th>Total Consideration (AUD)</th>
+                  <th>Realized P&amp;L</th>
+                </tr>
+              </thead>
+              <tbody id="ledger-table-body">
+                <!-- Injected via GameApp.renderTradeLedger() -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="ledger-empty-state" style="text-align:center;padding:3rem 1rem;display:none;">
+            <div style="font-size:2rem;margin-bottom:0.5rem;">📝</div>
+            <h4 style="font-family:var(--font-head);color:#fff;">No Orders Executed Yet</h4>
+            <p style="color:var(--text-dim);font-size:0.85rem;">Every buy and sell transaction you submit will appear here with execution timestamps and brokerage audit details.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 4: CLASS LEADERBOARD & COMMERCE HUB
+           ========================================== -->
+      <section id="tab-leaderboard" class="tab-content">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              <span>🏆</span> Class Portfolio Rankings
+            </div>
+            <div style="font-size:0.8rem;color:var(--text-dim);">
+              Initial Capital: <strong>$50,000 AUD</strong> • Brokerage: <strong>$10.00</strong>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Student Name</th>
+                  <th>Portfolio Value (AUD)</th>
+                  <th>Return on Investment (%)</th>
+                  <th>Cash Balance</th>
+                  <th>Total Trades</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-table-body">
+                <!-- Injected via GameApp.renderLeaderboard() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Commerce Curriculum Learning Cards -->
+        <h3 style="font-family:var(--font-head);font-size:1.25rem;color:#fff;margin-top:2rem;">
+          📚 Commerce &amp; Economics Investor Toolkit
+        </h3>
+        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1rem;">
+          Key financial concepts to help you build a resilient, high-performing share portfolio.
+        </p>
+
+        <div class="study-grid">
+          <div class="study-card">
+            <div class="study-card-icon">🧺</div>
+            <h4>Portfolio Diversification</h4>
+            <p>
+              "Don't put all your eggs in one basket." Spreading investments across different sectors (mining, banking, healthcare, technology) and international markets cushions against company-specific shocks.
+            </p>
+          </div>
+
+          <div class="study-card">
+            <div class="study-card-icon">💱</div>
+            <h4>Currency Risk (AUD vs. USD)</h4>
+            <p>
+              When investing in US shares (NYSE/NASDAQ), your returns depend on both the stock price and the AUD/USD exchange rate. If the Aussie Dollar falls against the US Dollar, your US holdings gain value when converted back to AUD.
+            </p>
+          </div>
+
+          <div class="study-card">
+            <div class="study-card-icon">💸</div>
+            <h4>Brokerage Impact &amp; Over-Trading</h4>
+            <p>
+              Every trade incurs a $10 AUD transaction fee. Day-trading tiny share parcels frequently can quickly erode student profits. Consider position sizing before placing orders.
+            </p>
+          </div>
+
+          <div class="study-card">
+            <div class="study-card-icon">🐂</div>
+            <h4>Market Cycles (Bull vs. Bear)</h4>
+            <p>
+              A Bull market represents sustained rising equity prices and investor optimism. A Bear market occurs when shares drop by 20% or more from recent peaks. Long-term fundamental value often outlasts short-term panic.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==========================================
+       STOCK DETAILS & BUY / SELL ORDER MODAL
+       ========================================== -->
+  <div class="modal-overlay" id="stock-modal">
+    <div class="modal-box">
+      <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+
+      <div class="modal-content-grid">
+        <!-- Left: Stock Overview & Interactive Timeline Chart -->
+        <div>
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.6rem;">
+            <div>
+              <div style="display:flex;align-items:center;gap:0.5rem;">
+                <span id="modal-stock-flag" style="font-size:1.3rem;">🇦🇺</span>
+                <h2 id="modal-stock-sym" style="font-family:var(--font-mono);font-size:1.6rem;font-weight:800;color:#fff;">BHP.AX</h2>
+                <span id="modal-exchange-badge" class="exchange-chip asx">ASX</span>
+              </div>
+              <p id="modal-stock-name" style="color:var(--text-muted);font-size:0.88rem;margin-top:0.2rem;">BHP Group Ltd</p>
+            </div>
+            <div style="text-align:right;">
+              <div id="modal-stock-price" style="font-family:var(--font-mono);font-size:1.6rem;font-weight:800;color:#fff;">$41.80</div>
+              <div id="modal-stock-price-aud" style="font-size:0.8rem;color:var(--text-dim);"></div>
+              <span id="modal-stock-change" class="kpi-badge up">+1.25%</span>
+            </div>
+          </div>
+
+          <!-- Per-Share Timeline Controls -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:1.25rem 0 0.75rem;">
+            <span style="font-size:0.75rem;text-transform:uppercase;color:var(--text-dim);font-weight:700;">Price History</span>
+            <div class="timeline-pills" id="stock-timeline-pills">
+              <button class="time-pill" data-range="1d">1D</button>
+              <button class="time-pill" data-range="5d">5D</button>
+              <button class="time-pill active" data-range="1mo">1M</button>
+              <button class="time-pill" data-range="6mo">6M</button>
+              <button class="time-pill" data-range="1y">1Y</button>
+              <button class="time-pill" data-range="5y">5Y</button>
+              <button class="time-pill" data-range="max">MAX</button>
+            </div>
+          </div>
+
+          <!-- Single Stock Interactive Canvas Chart -->
+          <div class="chart-canvas-wrap" style="height:260px;margin-bottom:1.25rem;">
+            <canvas id="stock-modal-canvas"></canvas>
+          </div>
+
+          <!-- Key Financial Statistics -->
+          <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:0.75rem;background:var(--bg-card2);padding:0.9rem;border-radius:12px;border:1px solid var(--border);font-size:0.78rem;">
+            <div>
+              <span style="color:var(--text-dim);display:block;margin-bottom:0.2rem;">52W Range</span>
+              <strong id="modal-meta-range52" style="font-family:var(--font-mono);color:#fff;">$38.20 - $47.40</strong>
+            </div>
+            <div>
+              <span style="color:var(--text-dim);display:block;margin-bottom:0.2rem;">Market Cap</span>
+              <strong id="modal-meta-mktcap" style="font-family:var(--font-mono);color:#fff;">$212B</strong>
+            </div>
+            <div>
+              <span style="color:var(--text-dim);display:block;margin-bottom:0.2rem;">P/E Ratio</span>
+              <strong id="modal-meta-pe" style="font-family:var(--font-mono);color:#fff;">11.8</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Order Execution Panel -->
+        <div class="order-panel">
+          <div class="order-panel-title">Trade Execution Panel</div>
+
+          <!-- Buy / Sell Mode Toggle -->
+          <div class="order-toggle">
+            <button class="order-toggle-btn buy active" id="btn-order-buy">BUY SHARES</button>
+            <button class="order-toggle-btn sell" id="btn-order-sell">SELL SHARES</button>
+          </div>
+
+          <div style="background:rgba(0,0,0,0.2);padding:0.6rem 0.8rem;border-radius:8px;margin-bottom:1rem;font-size:0.78rem;display:flex;justify-content:space-between;">
+            <span style="color:var(--text-dim);">You Currently Own:</span>
+            <strong id="modal-owned-shares" style="color:#fff;font-family:var(--font-mono);">0 shares</strong>
+          </div>
+
+          <div class="order-field">
+            <label for="order-shares-input">Number of Shares</label>
+            <div class="order-input-group">
+              <input type="number" id="order-shares-input" class="order-input" min="1" step="1" value="10"/>
+              <button class="btn-secondary" id="btn-max-shares" style="margin-right:0.4rem;padding:0.3rem 0.6rem;font-size:0.72rem;">MAX</button>
+            </div>
+          </div>
+
+          <div class="order-calc-breakdown">
+            <div class="calc-row">
+              <span>Subtotal:</span>
+              <span id="calc-subtotal" style="font-family:var(--font-mono);">$0.00 AUD</span>
+            </div>
+            <div class="calc-row">
+              <span>Brokerage Fee:</span>
+              <span id="calc-brokerage" style="font-family:var(--font-mono);">$10.00 AUD</span>
+            </div>
+            <div class="calc-row total">
+              <span>Total Consideration:</span>
+              <span id="calc-total" style="font-family:var(--font-mono);color:var(--asx-blue);">$0.00 AUD</span>
+            </div>
+          </div>
+
+          <div id="order-warning-msg" style="display:none;color:#fca5a5;font-size:0.78rem;margin-bottom:0.75rem;padding:0.5rem;background:rgba(239,68,68,0.1);border-radius:6px;">
+            Warning text
+          </div>
+
+          <button class="btn-execute buy" id="btn-execute-order">
+            Confirm Buy Order ➔
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Alerts Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Application Scripts -->
+  <script src="config.js"></script>
+  <script src="market_service.js"></script>
+  <script src="chart_manager.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

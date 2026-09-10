@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Global Share Market Challenge — Student Portal</title>
+  <meta name="description" content="Interactive ASX, NYSE, and NASDAQ Portfolio Simulation Game for Commerce and Economics students."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+
+  <style>
+    .login-wrapper {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      position: relative;
+    }
+    .login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      animation: fadeInUp 0.4s ease both;
+    }
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 24px 24px 0 0;
+      background: linear-gradient(90deg, var(--asx-blue), var(--us-purple), var(--profit));
+    }
+    .login-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: #67e8f9;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.9rem;
+      border-radius: 100px;
+      margin-bottom: 1.2rem;
+    }
+    .login-title {
+      font-family: var(--font-head);
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.4rem;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .login-title .accent {
+      background: linear-gradient(135deg, var(--asx-blue), #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .login-subtitle {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 1.8rem;
+      line-height: 1.5;
+    }
+    .market-badges-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.8rem;
+    }
+    .market-mini-pill {
+      flex: 1;
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.45rem 0.6rem;
+      text-align: center;
+      font-size: 0.75rem;
+    }
+    .market-mini-pill .flag { margin-right: 0.2rem; }
+    .market-mini-pill .txt { font-weight: 700; color: #fff; }
+
+    .login-field {
+      margin-bottom: 1.25rem;
+    }
+    .login-field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.45rem;
+    }
+    .login-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+    .login-input::placeholder { color: var(--text-dim); }
+    .login-input:focus {
+      outline: none;
+      border-color: var(--asx-blue);
+      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 0.95rem;
+      background: linear-gradient(135deg, var(--asx-blue), #7c3aed);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.25);
+      transition: all 0.2s;
+      margin-top: 0.5rem;
+    }
+    .login-btn:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(6, 182, 212, 0.35);
+    }
+    .login-btn-demo {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-family: var(--font-head);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.65rem;
+      transition: all 0.2s;
+    }
+    .login-btn-demo:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border-color: var(--border-light);
+    }
+
+    .login-error {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      color: #fca5a5;
+      font-size: 0.85rem;
+      padding: 0.7rem 0.9rem;
+      margin-top: 1rem;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .login-error.show {
+      display: flex;
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .login-footer a {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .login-footer a:hover {
+      color: var(--asx-blue);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+
+  <!-- Live Top Ticker Tape -->
+  <div class="ticker-tape-wrap">
+    <div class="ticker-tape-title">
+      <span class="live-dot"></span> LIVE MARKETS
+    </div>
+    <div class="ticker-tape-track" id="ticker-tape-track">
+      <!-- Generated via JS -->
+      <div class="ticker-item"><span class="sym">ASX 200</span> <span class="price">8,180.40</span> <span class="chg up">+0.42%</span></div>
+      <div class="ticker-item"><span class="sym">BHP.AX</span> <span class="price">$41.80</span> <span class="chg up">+1.15%</span></div>
+      <div class="ticker-item"><span class="sym">CBA.AX</span> <span class="price">$142.50</span> <span class="chg up">+0.75%</span></div>
+      <div class="ticker-item"><span class="sym">S&amp;P 500</span> <span class="price">5,620.10</span> <span class="chg up">+0.28%</span></div>
+      <div class="ticker-item"><span class="sym">AAPL</span> <span class="price">US$228.50</span> <span class="chg down">-0.45%</span></div>
+      <div class="ticker-item"><span class="sym">NVDA</span> <span class="price">US$118.20</span> <span class="chg up">+2.34%</span></div>
+      <div class="ticker-item"><span class="sym">TSLA</span> <span class="price">US$230.10</span> <span class="chg up">+1.80%</span></div>
+      <div class="ticker-item"><span class="sym">AUD/USD</span> <span class="price">0.6540</span> <span class="chg up">+0.12%</span></div>
+    </div>
+  </div>
+
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="login-badge">
+        <span>📈</span> Commerce &amp; Economics Simulator
+      </div>
+      <h1 class="login-title">Share Market <span class="accent">Arena</span></h1>
+      <p class="login-subtitle">Trade live equities on the ASX, NYSE, and NASDAQ with a starting portfolio of $50,000 AUD.</p>
+
+      <div class="market-badges-row">
+        <div class="market-mini-pill">
+          <span class="flag">🇦🇺</span> <span class="txt">ASX</span><br>
+          <small style="color:var(--text-dim);">Sydney</small>
+        </div>
+        <div class="market-mini-pill">
+          <span class="flag">🇺🇸</span> <span class="txt">NYSE</span><br>
+          <small style="color:var(--text-dim);">Wall Street</small>
+        </div>
+        <div class="market-mini-pill">
+          <span class="flag">🇺🇸</span> <span class="txt">NASDAQ</span><br>
+          <small style="color:var(--text-dim);">Tech Giants</small>
+        </div>
+      </div>
+
+      <div class="login-field">
+        <label for="login-name">Student Full Name</label>
+        <input type="text" id="login-name" class="login-input" placeholder="e.g. Samuel Green" autocomplete="name" autocapitalize="words"/>
+      </div>
+
+      <div class="login-field">
+        <label for="login-code">Class Code / Password</label>
+        <input type="password" id="login-code" class="login-input" placeholder="Enter class code (e.g. COMMERCE2026)"/>
+      </div>
+
+      <button class="login-btn" id="btn-login" onclick="attemptLogin()">
+        Enter Trading Floor ➔
+      </button>
+
+      <button class="login-btn-demo" onclick="demoLogin()">
+        ⚡ Quick Demo / Guest Trader
+      </button>
+
+      <div class="login-error" id="login-error">
+        <span>⚠️</span> <span id="error-message">Name or class code not recognised.</span>
+      </div>
+    </div>
+
+    <div class="login-footer">
+      <a href="teacher.html">Teacher &amp; Admin Dashboard ➔</a>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    // Login Verification Logic
+    function attemptLogin() {
+      const name = document.getElementById('login-name').value.trim();
+      const code = document.getElementById('login-code').value.trim();
+
+      if (!name) {
+        showError('Please enter your full name.');
+        return;
+      }
+      if (!code) {
+        showError('Please enter the class code or your student password.');
+        return;
+      }
+
+      const useRoster = CONFIG.STUDENTS && CONFIG.STUDENTS.length > 0;
+
+      if (useRoster) {
+        const inputLower = name.toLowerCase();
+        const match = CONFIG.STUDENTS.find(s => {
+          return s.name.toLowerCase() === inputLower && s.password.trim() === code;
+        });
+
+        if (!match) {
+          showError('Student name or password not recognised in the roster.');
+          return;
+        }
+
+        sessionStorage.setItem('studentName', match.name);
+        sessionStorage.setItem('classCode', CONFIG.CLASS_CODE);
+      } else {
+        // Class code verification
+        if (code.toUpperCase() !== CONFIG.CLASS_CODE.toUpperCase()) {
+          showError(`Incorrect class code. Check with your teacher (Default: ${CONFIG.CLASS_CODE})`);
+          return;
+        }
+
+        sessionStorage.setItem('studentName', name);
+        sessionStorage.setItem('classCode', code.toUpperCase());
+      }
+
+      window.location.href = 'game.html';
+    }
+
+    function demoLogin() {
+      const sampleNames = ['Jordan Reed', 'Taylor Smith', 'Morgan Lee', 'Alex Chen'];
+      const randomName = sampleNames[Math.floor(Math.random() * sampleNames.length)];
+      sessionStorage.setItem('studentName', randomName);
+      sessionStorage.setItem('classCode', CONFIG.CLASS_CODE);
+      window.location.href = 'game.html';
+    }
+
+    function showError(msg) {
+      const errorDiv = document.getElementById('login-error');
+      const errorMsg = document.getElementById('error-message');
+      errorMsg.textContent = msg;
+      errorDiv.classList.add('show');
+      setTimeout(() => errorDiv.classList.remove('show'), 5000);
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') attemptLogin();
+    });
+
+    // Check if logout requested
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('logout')) {
+      sessionStorage.removeItem('studentName');
+      sessionStorage.removeItem('classCode');
+    }
+  </script>
+</body>
+</html>
