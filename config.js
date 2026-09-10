@@ -11,8 +11,8 @@ const CONFIG = {
   AUD_USD_RATE: 0.65,           // Fallback AUD to USD exchange rate (1 AUD = 0.65 USD; 1 USD = ~1.538 AUD)
 
   // Educational Guardrails & Diversification Rules
-  DIVERSIFICATION_CAP_ENABLED: true, // If true, limits how much of the portfolio can be in a single stock
-  MAX_POSITION_PERCENT: 25,          // Maximum 25% of total portfolio value allowed in any single company
+  DIVERSIFICATION_CAP_ENABLED: false, // Unrestricted sandbox (0-100% allowed; evaluated in grading)
+  MAX_POSITION_PERCENT: 100,          // Allows up to 100% allocation for teacher assessment of risk
 
   // Trading Hours Mode:
   // 'INSTANT': Orders execute 24/7 at latest prices (allows trading US stocks during Australian school day)
@@ -45,13 +45,14 @@ const CONFIG = {
   // Teacher Authentication
   TEACHER_PASSWORD: 'market10',
 
-  // Assessment Marking Rubric Settings (Out of 20 marks)
+  // Assessment Marking Rubric Settings (Stage 5 Commerce / Stage 6 Economics - Out of 20 marks)
   RUBRIC: {
     maxMarks: 20,
     criteria: [
-      { id: 'crit_journal', name: 'Investment Journal & Research Rationale', max: 10, desc: 'Depth of economic research, company valuation, and thesis.' },
-      { id: 'crit_diversification', name: 'Diversification & Risk Management', max: 5, desc: 'Portfolio spread across industries and compliance with the 25% cap.' },
-      { id: 'crit_reflection', name: 'Market Reflection & Performance Analysis', max: 5, desc: 'Understanding of market drivers, Alpha, and economic trends.' }
+      { id: 'crit_research', name: 'Financial Research & Market Analysis', max: 5, desc: 'Quality of company research, sector trends, and data grounding.' },
+      { id: 'crit_rationale', name: 'Trade Rationale & Investment Thesis', max: 5, desc: 'Clear qualitative justification written for each trade execution.' },
+      { id: 'crit_risk', name: 'Risk Evaluation & Asset Allocation', max: 5, desc: 'Portfolio concentration awareness, diversification, and downside management.' },
+      { id: 'crit_context', name: 'Economic Context & Performance Evaluation', max: 5, desc: 'Analysis of macroeconomic forces, interest rates, and Alpha vs ASX 200.' }
     ]
   },
 
