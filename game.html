@@ -71,6 +71,9 @@
             <button class="tab-btn" data-tab="tab-explorer">
               <span>🔍</span> Market Explorer <span class="tab-badge" id="stocks-count-badge">30+</span>
             </button>
+            <button class="tab-btn" data-tab="tab-journal">
+              <span>📔</span> Investment Journal
+            </button>
             <button class="tab-btn" data-tab="tab-ledger">
               <span>📜</span> Trade Ledger
             </button>
@@ -125,6 +128,17 @@
               <span style="color:var(--text-dim);font-size:0.75rem;">today's movement</span>
             </div>
           </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">
+              <span>Alpha vs ASX 200</span>
+              <span title="Comparison against passive investment in the S&P/ASX 200 index">🏛️</span>
+            </div>
+            <div class="kpi-value" id="kpi-alpha-val">+0.00%</div>
+            <div class="kpi-sub">
+              <span id="kpi-alpha-sub" style="color:var(--text-dim);font-size:0.75rem;">Matching Market</span>
+            </div>
+          </div>
         </div>
 
         <!-- Charts Grid: Portfolio Timeline + Asset Allocation Donut -->
@@ -134,7 +148,7 @@
             <div class="chart-header">
               <div class="chart-title-group">
                 <h3>Portfolio Valuation Over Time</h3>
-                <p>Track your cumulative net worth (Cash + Active Holdings) in AUD</p>
+                <p>Track cumulative net worth in AUD vs S&amp;P/ASX 200 Benchmark</p>
               </div>
               <div class="timeline-pills" id="portfolio-timeline-pills">
                 <button class="time-pill" data-range="1w">1W</button>
@@ -237,7 +251,30 @@
       </section>
 
       <!-- ==========================================
-           TAB 3: TRADE LEDGER / AUDIT HISTORY
+           TAB 3: INVESTMENT JOURNAL (ASSESSMENT)
+           ========================================== -->
+      <section id="tab-journal" class="tab-content">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">
+                <span>📔</span> Student Investment Journal &amp; Rationale
+              </div>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.2rem;">
+                Document your economic research, risk assessment, and justification for your investment decisions. Your teacher can review this for assessment.
+              </p>
+            </div>
+            <span class="kpi-badge up" id="journal-autosave-badge">✓ Autosaved</span>
+          </div>
+
+          <div id="journal-cards-wrap">
+            <!-- Rendered dynamically by GameApp.renderJournal() -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 4: TRADE LEDGER / AUDIT HISTORY
            ========================================== -->
       <section id="tab-ledger" class="tab-content">
         <div class="section-card">
@@ -262,6 +299,7 @@
                   <th>Brokerage (AUD)</th>
                   <th>Total Consideration (AUD)</th>
                   <th>Realized P&amp;L</th>
+                  <th>Trade Rationale</th>
                 </tr>
               </thead>
               <tbody id="ledger-table-body">
@@ -279,7 +317,7 @@
       </section>
 
       <!-- ==========================================
-           TAB 4: CLASS LEADERBOARD & COMMERCE HUB
+           TAB 5: CLASS LEADERBOARD & COMMERCE HUB
            ========================================== -->
       <section id="tab-leaderboard" class="tab-content">
         <div class="section-card">
@@ -288,7 +326,7 @@
               <span>🏆</span> Class Portfolio Rankings
             </div>
             <div style="font-size:0.8rem;color:var(--text-dim);">
-              Initial Capital: <strong>$50,000 AUD</strong> • Brokerage: <strong>$10.00</strong>
+              Initial Capital: <strong>$50,000 AUD</strong> • Brokerage: <strong>$10.00</strong> • Position Cap: <strong>25% Max</strong>
             </div>
           </div>
 
@@ -297,7 +335,7 @@
               <thead>
                 <tr>
                   <th>Rank</th>
-                  <th>Student Name</th>
+                  <th>Trader</th>
                   <th>Portfolio Value (AUD)</th>
                   <th>Return on Investment (%)</th>
                   <th>Cash Balance</th>
@@ -322,9 +360,9 @@
         <div class="study-grid">
           <div class="study-card">
             <div class="study-card-icon">🧺</div>
-            <h4>Portfolio Diversification</h4>
+            <h4>Portfolio Diversification (25% Rule)</h4>
             <p>
-              "Don't put all your eggs in one basket." Spreading investments across different sectors (mining, banking, healthcare, technology) and international markets cushions against company-specific shocks.
+              "Don't put all your eggs in one basket." Under our classroom rules, no single stock can exceed 25% of your total portfolio. Spreading investments across different sectors cushions against company-specific shocks.
             </p>
           </div>
 
@@ -346,9 +384,9 @@
 
           <div class="study-card">
             <div class="study-card-icon">🐂</div>
-            <h4>Market Cycles (Bull vs. Bear)</h4>
+            <h4>Market Cycles &amp; Benchmarks</h4>
             <p>
-              A Bull market represents sustained rising equity prices and investor optimism. A Bear market occurs when shares drop by 20% or more from recent peaks. Long-term fundamental value often outlasts short-term panic.
+              Compare your portfolio's performance against the S&amp;P/ASX 200 benchmark line. Generating "Alpha" means delivering a return higher than simply holding the broader market index fund.
             </p>
           </div>
         </div>
@@ -440,6 +478,15 @@
               <input type="number" id="order-shares-input" class="order-input" min="1" step="1" value="10"/>
               <button class="btn-secondary" id="btn-max-shares" style="margin-right:0.4rem;padding:0.3rem 0.6rem;font-size:0.72rem;">MAX</button>
             </div>
+          </div>
+
+          <!-- Trade Rationale Field for Assessment -->
+          <div class="order-field" id="trade-justification-field">
+            <label for="order-justification-input">
+              Trade Rationale / Research
+              <span style="color:var(--text-dim);font-weight:400;text-transform:none;">(for Teacher Assessment)</span>
+            </label>
+            <textarea id="order-justification-input" class="order-input" rows="2" style="resize:vertical;font-size:0.85rem;padding:0.6rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;" placeholder="Why are you placing this trade? (e.g. strong earnings report, dividend yield, sector diversification)..."></textarea>
           </div>
 
           <div class="order-calc-breakdown">

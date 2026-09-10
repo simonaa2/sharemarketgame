@@ -45,12 +45,6 @@
       padding: 1.5rem;
       margin-bottom: 2rem;
     }
-    .admin-controls-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.25rem;
-      margin-top: 1rem;
-    }
 
     /* Drawer/Modal for Student Inspector */
     .inspector-modal {
@@ -91,7 +85,7 @@
         <span>🔐</span> Teacher &amp; Faculty Access
       </div>
       <h1 class="login-title" style="font-size:1.8rem;">Educator <span class="accent" style="background:linear-gradient(135deg,#fbbf24,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Dashboard</span></h1>
-      <p class="login-subtitle">Enter teacher password to inspect student performance, view rankings, and manage class parameters.</p>
+      <p class="login-subtitle">Enter teacher password to inspect student performance, view rankings, and review investment journals.</p>
 
       <div class="login-field">
         <label for="teacher-pw-input">Teacher Password</label>
@@ -170,7 +164,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
           <div>
             <h3 style="font-family:var(--font-head);color:#fff;font-size:1.15rem;">Class Market Controls</h3>
-            <p style="color:var(--text-dim);font-size:0.8rem;">Adjust global competition rules or distribute classroom bonuses.</p>
+            <p style="color:var(--text-dim);font-size:0.8rem;">Adjust global competition rules, trigger dividend bonuses, or seed demo classmates.</p>
           </div>
           <div style="display:flex;gap:0.6rem;">
             <button class="btn-secondary" onclick="TeacherApp.triggerDividendBonus()">
@@ -218,7 +212,7 @@
     </main>
   </div>
 
-  <!-- STUDENT PORTFOLIO INSPECTOR MODAL -->
+  <!-- STUDENT PORTFOLIO & JOURNAL INSPECTOR MODAL -->
   <div class="inspector-modal" id="inspector-modal">
     <div class="inspector-box">
       <button class="modal-close-btn" onclick="TeacherApp.closeInspector()">&times;</button>
@@ -234,8 +228,8 @@
         </div>
       </div>
 
-      <!-- Inspector Tabs: Current Holdings & Trade History -->
-      <div style="margin-bottom:1.25rem;">
+      <!-- Active Holdings -->
+      <div style="margin-bottom:1.5rem;">
         <h4 style="font-family:var(--font-head);color:#fff;margin-bottom:0.75rem;">Active Holdings</h4>
         <div class="table-responsive">
           <table class="data-table">
@@ -255,8 +249,17 @@
         </div>
       </div>
 
+      <!-- Student Investment Journal & Theses -->
+      <div style="margin-bottom:1.5rem;">
+        <h4 style="font-family:var(--font-head);color:#fff;margin-bottom:0.75rem;">📔 Student Investment Journal &amp; Rationale</h4>
+        <div id="insp-journal-wrap" style="background:var(--bg-card2);border-radius:12px;padding:1rem;border:1px solid var(--border);font-size:0.85rem;">
+          <!-- Injected via teacher.js -->
+        </div>
+      </div>
+
+      <!-- Full Trade Ledger -->
       <div>
-        <h4 style="font-family:var(--font-head);color:#fff;margin-bottom:0.75rem;">Full Trade Ledger</h4>
+        <h4 style="font-family:var(--font-head);color:#fff;margin-bottom:0.75rem;">Full Trade Ledger &amp; Order History</h4>
         <div class="table-responsive" style="max-height:240px;overflow-y:auto;">
           <table class="data-table">
             <thead>
@@ -267,6 +270,7 @@
                 <th>Qty</th>
                 <th>Price</th>
                 <th>Total (AUD)</th>
+                <th>Trade Rationale</th>
               </tr>
             </thead>
             <tbody id="insp-trades-tbody">

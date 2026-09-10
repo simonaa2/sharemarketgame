@@ -11,6 +11,7 @@ const GameApp = {
   selectedPortfolioRange: '1m',
   orderType: 'BUY',
   refreshTimer: null,
+  journalSaveTimeout: null,
 
   /**
    * Initialization
@@ -23,6 +24,9 @@ const GameApp = {
     this.renderHeader();
     this.setupEventListeners();
     await this.refreshAllData();
+
+    // Check for automated periodic dividends
+    this.processAutomatedDividends();
 
     // Start background market ticker refresh every 45s
     this.refreshTimer = setInterval(() => this.backgroundRefresh(), 45000);
@@ -69,6 +73,8 @@ const GameApp = {
         cash: CONFIG.INITIAL_CASH,
         holdings: [],
         trades: [],
+        journal: {}, // symbol -> { thesis, riskFactors, priceTarget, updated }
+        lastDividendTimestamp: now,
         equityHistory: [
           {
             timestamp: now - (7 * 86400000),
@@ -87,6 +93,9 @@ const GameApp = {
         lastUpdated: now
       };
       this.savePortfolio();
+    } else {
+      if (!this.portfolio.journal) this.portfolio.journal = {};
+      if (!this.portfolio.lastDividendTimestamp) this.portfolio.lastDividendTimestamp = Date.now();
     }
   },
 
@@ -98,7 +107,6 @@ const GameApp = {
     const storageKey = `portfolio_v1_${this.student.name.replace(/\s+/g, '_').toLowerCase()}`;
     localStorage.setItem(storageKey, JSON.stringify(this.portfolio));
 
-    // Also update class-wide roster in localStorage for instant teacher view
     this._updateClassRoster();
 
     // Sync with Google Apps Script if URL provided
@@ -141,7 +149,7 @@ const GameApp = {
    * Render Top Header Info & Market Status
    */
   renderHeader() {
-    document.getElementById('header-student-name').textContent = this.student.name;
+    document.getElementById('header-student-name').textContent = this.formatStudentName(this.student.name, false);
     document.getElementById('header-student-code').textContent = this.student.classCode;
     const initial = this.student.name.charAt(0).toUpperCase();
     document.getElementById('header-avatar').textContent = initial;
@@ -150,11 +158,31 @@ const GameApp = {
   },
 
   /**
+   * Formats student name according to PRIVACY_MODE
+   */
+  formatStudentName(fullName, applyPrivacy = true) {
+    if (!applyPrivacy || CONFIG.PRIVACY_MODE === 'FULL') return fullName;
+
+    if (CONFIG.PRIVACY_MODE === 'ANONYMOUS') {
+      let hash = 0;
+      for (let i = 0; i < fullName.length; i++) hash = (hash << 5) - hash + fullName.charCodeAt(i);
+      return `Trader #${Math.abs(hash % 900) + 100}`;
+    }
+
+    // Default 'INITIALS': e.g. "Samuel Green" -> "Samuel G."
+    const parts = fullName.trim().split(' ');
+    if (parts.length > 1) {
+      return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
+    }
+    return fullName;
+  },
+
+  /**
    * Compute Open / Closed status for Sydney and New York
    */
   updateMarketStatusBadges() {
     const now = new Date();
-    // AEST/AEDT Sydney Check (Weekdays 10:00 - 16:00)
+    // AEST Sydney Check (Weekdays 10:00 - 16:00)
     const sydTimeStr = now.toLocaleTimeString('en-US', { timeZone: 'Australia/Sydney', hour12: false });
     const sydDay = new Date(now.toLocaleString('en-US', { timeZone: 'Australia/Sydney' })).getDay();
     const [sydH, sydM] = sydTimeStr.split(':').map(Number);
@@ -184,7 +212,6 @@ const GameApp = {
    * Set up tab switching and global modal triggers
    */
   setupEventListeners() {
-    // Navigation tabs
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const tabId = btn.getAttribute('data-tab');
@@ -192,16 +219,14 @@ const GameApp = {
       });
     });
 
-    // Market Explorer filter chips
     document.querySelectorAll('.filter-chip').forEach(chip => {
-      chip.addEventListener('click', (e) => {
+      chip.addEventListener('click', () => {
         document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         this.filterStockGrid(chip.getAttribute('data-filter'));
       });
     });
 
-    // Stock search input
     const searchInput = document.getElementById('stock-search-input');
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
@@ -209,13 +234,11 @@ const GameApp = {
       });
     }
 
-    // Modal close button
     const modalClose = document.getElementById('modal-close-btn');
     if (modalClose) {
       modalClose.addEventListener('click', () => this.closeStockModal());
     }
 
-    // Close modal on background click
     const modalOverlay = document.getElementById('stock-modal');
     if (modalOverlay) {
       modalOverlay.addEventListener('click', (e) => {
@@ -223,7 +246,6 @@ const GameApp = {
       });
     }
 
-    // Order modal Buy / Sell toggle
     const btnOrderBuy = document.getElementById('btn-order-buy');
     const btnOrderSell = document.getElementById('btn-order-sell');
     if (btnOrderBuy && btnOrderSell) {
@@ -231,25 +253,21 @@ const GameApp = {
       btnOrderSell.addEventListener('click', () => this.setOrderType('SELL'));
     }
 
-    // Shares quantity input
     const sharesInput = document.getElementById('order-shares-input');
     if (sharesInput) {
       sharesInput.addEventListener('input', () => this.updateOrderCalculations());
     }
 
-    // Max shares button
     const btnMaxShares = document.getElementById('btn-max-shares');
     if (btnMaxShares) {
       btnMaxShares.addEventListener('click', () => this.calculateMaxShares());
     }
 
-    // Execute order button
     const btnExecute = document.getElementById('btn-execute-order');
     if (btnExecute) {
       btnExecute.addEventListener('click', () => this.submitOrder());
     }
 
-    // Portfolio chart timeline buttons
     document.querySelectorAll('#portfolio-timeline-pills .time-pill').forEach(pill => {
       pill.addEventListener('click', () => {
         document.querySelectorAll('#portfolio-timeline-pills .time-pill').forEach(p => p.classList.remove('active'));
@@ -259,7 +277,6 @@ const GameApp = {
       });
     });
 
-    // Stock modal timeline buttons
     document.querySelectorAll('#stock-timeline-pills .time-pill').forEach(pill => {
       pill.addEventListener('click', async () => {
         document.querySelectorAll('#stock-timeline-pills .time-pill').forEach(p => p.classList.remove('active'));
@@ -271,13 +288,11 @@ const GameApp = {
       });
     });
 
-    // Download CSV buttons
     const btnExportLedger = document.getElementById('btn-export-ledger');
     if (btnExportLedger) {
       btnExportLedger.addEventListener('click', () => this.exportTradeLedgerCSV());
     }
 
-    // Logout
     const btnLogout = document.getElementById('btn-logout');
     if (btnLogout) {
       btnLogout.addEventListener('click', () => {
@@ -301,10 +316,11 @@ const GameApp = {
     if (activeBtn) activeBtn.classList.add('active');
     if (activeContent) activeContent.classList.add('active');
 
-    // Trigger re-render of charts if tab has canvas
     if (tabId === 'tab-portfolio') {
       ChartManager.renderPortfolioChart('portfolio-chart-canvas', this.portfolio.equityHistory, this.selectedPortfolioRange);
       ChartManager.renderAllocationChart('allocation-chart-canvas', this.portfolio.holdings, this.portfolio.cash);
+    } else if (tabId === 'tab-journal') {
+      this.renderJournal();
     } else if (tabId === 'tab-leaderboard') {
       this.renderLeaderboard();
     }
@@ -316,7 +332,6 @@ const GameApp = {
   async refreshAllData() {
     this.updateMarketStatusBadges();
 
-    // 1. Fetch quotes for all holdings
     let totalInvestedAUD = 0;
     let todayHoldingsGainAUD = 0;
 
@@ -338,54 +353,47 @@ const GameApp = {
     const totalReturnAUD = totalPortfolioValue - CONFIG.INITIAL_CASH;
     const totalReturnPct = (totalReturnAUD / CONFIG.INITIAL_CASH) * 100;
 
-    // Record snapshot into equity history
+    // Calculate Alpha against ASX 200 benchmark
+    const now = Date.now();
+    const startTime = this.portfolio.createdAt || (now - 7 * 86400000);
+    const elapsedDays = Math.max(1, (now - startTime) / 86400000);
+    const benchmarkGrowthPct = (Math.pow(1 + CONFIG.BENCHMARK_ANNUAL_RETURN, elapsedDays / 365) - 1) * 100;
+    const alphaPct = totalReturnPct - benchmarkGrowthPct;
+
     this._recordEquitySnapshot(totalPortfolioValue, totalInvestedAUD);
 
-    // 2. Render KPI Cards
     this.renderKPIs({
       totalValue: totalPortfolioValue,
       cash: this.portfolio.cash,
       invested: totalInvestedAUD,
       totalReturnAUD: totalReturnAUD,
       totalReturnPct: totalReturnPct,
-      dayChangeAUD: todayHoldingsGainAUD
+      dayChangeAUD: todayHoldingsGainAUD,
+      alphaPct: alphaPct,
+      benchmarkGrowthPct: benchmarkGrowthPct
     });
 
-    // 3. Render Holdings Table
     this.renderHoldingsTable();
 
-    // 4. Render Portfolio Charts
     ChartManager.renderPortfolioChart('portfolio-chart-canvas', this.portfolio.equityHistory, this.selectedPortfolioRange);
     ChartManager.renderAllocationChart('allocation-chart-canvas', this.portfolio.holdings, this.portfolio.cash);
 
-    // 5. Render Market Explorer
     await this.renderMarketExplorer();
-
-    // 6. Render Trade Ledger
     this.renderTradeLedger();
-
-    // 7. Render Ticker Tape
     await this.renderTickerTape();
 
     this.savePortfolio();
   },
 
-  /**
-   * Background tick refresh
-   */
   async backgroundRefresh() {
     await this.refreshAllData();
   },
 
-  /**
-   * Append equity snapshot to portfolio history
-   */
   _recordEquitySnapshot(totalVal, investedVal) {
     const now = Date.now();
     const hist = this.portfolio.equityHistory;
     const last = hist[hist.length - 1];
 
-    // If last point was less than 5 minutes ago, update it; otherwise append
     if (last && (now - last.timestamp < 300000)) {
       last.totalValue = Number(totalVal.toFixed(2));
       last.cash = Number(this.portfolio.cash.toFixed(2));
@@ -400,15 +408,9 @@ const GameApp = {
       });
     }
 
-    // Keep history manageable (last 300 data points)
-    if (hist.length > 300) {
-      hist.shift();
-    }
+    if (hist.length > 300) hist.shift();
   },
 
-  /**
-   * Render KPI Summary Cards
-   */
   renderKPIs(metrics) {
     document.getElementById('kpi-total-val').textContent = `$${metrics.totalValue.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     document.getElementById('kpi-cash-val').textContent = `$${metrics.cash.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -425,11 +427,63 @@ const GameApp = {
     const dayBadge = document.getElementById('kpi-day-badge');
     dayBadge.className = `kpi-badge ${dayUp ? 'up' : 'down'}`;
     dayBadge.innerHTML = `${dayUp ? '▲' : '▼'} ${daySign}$${Math.abs(metrics.dayChangeAUD).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    // Alpha / Market Benchmark Card
+    const alphaElem = document.getElementById('kpi-alpha-val');
+    const alphaSub = document.getElementById('kpi-alpha-sub');
+    if (alphaElem && alphaSub) {
+      const alphaUp = metrics.alphaPct >= 0;
+      const alphaSign = alphaUp ? '+' : '';
+      alphaElem.textContent = `${alphaSign}${metrics.alphaPct.toFixed(2)}%`;
+      alphaElem.style.color = alphaUp ? 'var(--profit)' : 'var(--loss)';
+      alphaSub.textContent = alphaUp
+        ? `Beating ASX 200 by ${alphaSign}${metrics.alphaPct.toFixed(2)}%`
+        : `Trailing ASX 200 by ${metrics.alphaPct.toFixed(2)}%`;
+    }
   },
 
   /**
-   * Render Top Scrolling Ticker Ribbon
+   * Automated Periodic Dividend Engine
    */
+  processAutomatedDividends() {
+    if (!CONFIG.AUTO_DIVIDENDS_ENABLED) return;
+    const now = Date.now();
+    const lastCheck = this.portfolio.lastDividendTimestamp || this.portfolio.createdAt || now;
+    const elapsedHours = (now - lastCheck) / (3600 * 1000);
+
+    // If more than 6 hours have passed since last check, credit prorated simulated dividend
+    if (elapsedHours >= 6 && this.portfolio.holdings.length > 0) {
+      const investedAUD = this.portfolio.holdings.reduce((sum, h) => sum + (h.currentValueAUD || h.shares * h.avgPriceAUD), 0);
+      // Prorated based on elapsed days: (invested * 0.038 * days / 365)
+      const elapsedDays = elapsedHours / 24;
+      const dividendAUD = Number(((investedAUD * CONFIG.DIVIDEND_ANNUAL_YIELD_RATE * elapsedDays) / 365).toFixed(2));
+
+      if (dividendAUD >= 0.50) {
+        this.portfolio.cash += dividendAUD;
+        this.portfolio.lastDividendTimestamp = now;
+
+        this.portfolio.trades.unshift({
+          id: `div_${now}`,
+          timestamp: now,
+          type: 'DIVIDEND',
+          symbol: 'PORTFOLIO',
+          name: 'Simulated Quarterly Holding Dividend Yield',
+          exchange: 'AUTOMATED',
+          shares: 0,
+          price: 0,
+          currency: 'AUD',
+          exchangeRate: 1.0,
+          brokerageAUD: 0,
+          totalAUD: dividendAUD,
+          rationale: `Automated yield distribution (${(CONFIG.DIVIDEND_ANNUAL_YIELD_RATE * 100).toFixed(1)}% p.a.) on invested portfolio.`
+        });
+
+        this.showToast(`Received $${dividendAUD.toFixed(2)} AUD in simulated portfolio dividends!`, 'success');
+        this.savePortfolio();
+      }
+    }
+  },
+
   async renderTickerTape() {
     const track = document.getElementById('ticker-tape-track');
     if (!track) return;
@@ -453,13 +507,9 @@ const GameApp = {
       `;
     }
 
-    // Duplicate track content for seamless infinite CSS scroll
     track.innerHTML = html + html;
   },
 
-  /**
-   * Render Active Portfolio Holdings Table
-   */
   renderHoldingsTable() {
     const tbody = document.getElementById('holdings-table-body');
     const emptyState = document.getElementById('holdings-empty-state');
@@ -517,9 +567,6 @@ const GameApp = {
     if (tbody) tbody.innerHTML = rows;
   },
 
-  /**
-   * Render Market Explorer Stock Cards
-   */
   async renderMarketExplorer() {
     const grid = document.getElementById('market-stocks-grid');
     if (!grid) return;
@@ -562,9 +609,6 @@ const GameApp = {
     grid.innerHTML = html;
   },
 
-  /**
-   * Filter Stock Grid by Exchange / Sector
-   */
   filterStockGrid(filter) {
     const cards = document.querySelectorAll('.stock-card');
     cards.forEach(card => {
@@ -589,9 +633,6 @@ const GameApp = {
     });
   },
 
-  /**
-   * Search Stock Grid
-   */
   searchStockGrid(query) {
     const q = query.toLowerCase().trim();
     const cards = document.querySelectorAll('.stock-card');
@@ -604,8 +645,103 @@ const GameApp = {
   },
 
   /**
-   * Open Stock Detailed Modal with Timeline Chart & Order Execution
+   * Render Investment Journal Tab
    */
+  renderJournal() {
+    const wrap = document.getElementById('journal-cards-wrap');
+    if (!wrap) return;
+
+    if (!this.portfolio.holdings || this.portfolio.holdings.length === 0) {
+      wrap.innerHTML = `
+        <div style="text-align:center;padding:3rem 1rem;">
+          <div style="font-size:2rem;margin-bottom:0.5rem;">📖</div>
+          <h4 style="font-family:var(--font-head);color:#fff;">No Active Holdings to Document</h4>
+          <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1rem;">Buy your first shares in the Market Explorer, and their investment analysis cards will appear here automatically.</p>
+          <button class="btn-secondary" onclick="GameApp.switchTab('tab-explorer')">Explore Market ➔</button>
+        </div>
+      `;
+      return;
+    }
+
+    let html = '';
+    this.portfolio.holdings.forEach(h => {
+      const j = (this.portfolio.journal && this.portfolio.journal[h.symbol]) || {
+        thesis: '',
+        riskFactors: '',
+        priceTarget: ''
+      };
+      const flag = h.exchange === 'ASX' ? '🇦🇺' : '🇺🇸';
+
+      html += `
+        <div class="section-card" style="background:var(--bg-card2);margin-bottom:1.5rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+            <div>
+              <span style="font-size:1.1rem;margin-right:0.3rem;">${flag}</span>
+              <strong style="font-family:var(--font-mono);font-size:1.15rem;color:#fff;">${h.symbol}</strong>
+              <span style="color:var(--text-muted);font-size:0.85rem;margin-left:0.4rem;">${h.name}</span>
+            </div>
+            <div style="font-size:0.8rem;color:var(--text-dim);">
+              Position: <strong>${h.shares} shares</strong> ($${(h.currentValueAUD || h.shares * h.avgPriceAUD).toFixed(2)} AUD)
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.8fr 1fr;gap:1.25rem;">
+            <div>
+              <label style="display:block;font-size:0.75rem;text-transform:uppercase;color:var(--text-dim);font-weight:700;margin-bottom:0.4rem;">
+                Investment Thesis &amp; Research Rationale
+              </label>
+              <textarea class="order-input" rows="3" style="width:100%;font-size:0.85rem;padding:0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;resize:vertical;"
+                placeholder="Why did you invest in this company? (Earnings outlook, competitive moat, ESG factors, macroeconomic tailwinds)..."
+                oninput="GameApp.updateJournalField('${h.symbol}', 'thesis', this.value)">${j.thesis || ''}</textarea>
+            </div>
+
+            <div>
+              <div style="margin-bottom:0.75rem;">
+                <label style="display:block;font-size:0.75rem;text-transform:uppercase;color:var(--text-dim);font-weight:700;margin-bottom:0.4rem;">
+                  Primary Risk Factors
+                </label>
+                <input type="text" class="order-input" style="width:100%;font-size:0.85rem;padding:0.6rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;"
+                  placeholder="e.g. Commodity price fall, interest rates, currency risk"
+                  value="${j.riskFactors || ''}"
+                  oninput="GameApp.updateJournalField('${h.symbol}', 'riskFactors', this.value)"/>
+              </div>
+
+              <div>
+                <label style="display:block;font-size:0.75rem;text-transform:uppercase;color:var(--text-dim);font-weight:700;margin-bottom:0.4rem;">
+                  Target Exit Price / Goal (AUD)
+                </label>
+                <input type="text" class="order-input" style="width:100%;font-size:0.85rem;padding:0.6rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;"
+                  placeholder="e.g. $52.00 AUD"
+                  value="${j.priceTarget || ''}"
+                  oninput="GameApp.updateJournalField('${h.symbol}', 'priceTarget', this.value)"/>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    wrap.innerHTML = html;
+  },
+
+  updateJournalField(symbol, field, value) {
+    if (!this.portfolio.journal) this.portfolio.journal = {};
+    if (!this.portfolio.journal[symbol]) {
+      this.portfolio.journal[symbol] = { thesis: '', riskFactors: '', priceTarget: '', updated: Date.now() };
+    }
+    this.portfolio.journal[symbol][field] = value;
+    this.portfolio.journal[symbol].updated = Date.now();
+
+    const badge = document.getElementById('journal-autosave-badge');
+    if (badge) badge.textContent = 'Saving...';
+
+    clearTimeout(this.journalSaveTimeout);
+    this.journalSaveTimeout = setTimeout(() => {
+      this.savePortfolio();
+      if (badge) badge.textContent = '✓ Autosaved';
+    }, 800);
+  },
+
   async openStockModal(symbol, defaultOrder = 'BUY') {
     const quote = await MarketService.fetchQuote(symbol);
     this.selectedStock = quote;
@@ -614,7 +750,6 @@ const GameApp = {
     const modal = document.getElementById('stock-modal');
     if (!modal) return;
 
-    // Header info
     document.getElementById('modal-stock-sym').textContent = quote.symbol;
     document.getElementById('modal-stock-name').textContent = quote.name;
     document.getElementById('modal-exchange-badge').textContent = quote.exchange;
@@ -623,7 +758,6 @@ const GameApp = {
     const flag = quote.exchange === 'ASX' ? '🇦🇺' : '🇺🇸';
     document.getElementById('modal-stock-flag').textContent = flag;
 
-    // Prices
     document.getElementById('modal-stock-price').textContent = `${quote.currency === 'USD' ? 'US$' : '$'}${quote.price.toFixed(2)}`;
     const audPrice = MarketService.toAUD(quote.price, quote.currency);
     document.getElementById('modal-stock-price-aud').textContent = quote.currency === 'USD' ? `≈ $${audPrice.toFixed(2)} AUD` : '';
@@ -634,69 +768,64 @@ const GameApp = {
     chgBadge.className = `kpi-badge ${isUp ? 'up' : 'down'}`;
     chgBadge.textContent = `${sign}$${quote.change.toFixed(2)} (${sign}${quote.changePercent.toFixed(2)}%)`;
 
-    // Metadata
     document.getElementById('modal-meta-range52').textContent = `$${quote.fiftyTwoWeekLow.toFixed(2)} - $${quote.fiftyTwoWeekHigh.toFixed(2)}`;
     document.getElementById('modal-meta-mktcap').textContent = quote.marketCap;
     document.getElementById('modal-meta-pe').textContent = quote.peRatio;
 
-    // Holding Info
     const holding = this.portfolio.holdings.find(h => h.symbol === quote.symbol);
     const ownedShares = holding ? holding.shares : 0;
     document.getElementById('modal-owned-shares').textContent = `${ownedShares.toLocaleString()} shares`;
 
-    // Reset inputs
     document.getElementById('order-shares-input').value = 10;
-    this.setOrderType(defaultOrder);
+    const justInput = document.getElementById('order-justification-input');
+    if (justInput) {
+      const existingThesis = this.portfolio.journal && this.portfolio.journal[quote.symbol] && this.portfolio.journal[quote.symbol].thesis;
+      justInput.value = existingThesis || '';
+    }
 
+    this.setOrderType(defaultOrder);
     modal.classList.add('open');
 
-    // Render stock chart
     await this.loadStockChart(symbol, this.selectedRange);
   },
 
-  /**
-   * Load Historical Chart Series into Modal
-   */
   async loadStockChart(symbol, range) {
     const chartData = await MarketService.fetchChart(symbol, range);
     ChartManager.renderStockChart('stock-modal-canvas', chartData, range);
   },
 
-  /**
-   * Close Stock Modal
-   */
   closeStockModal() {
     const modal = document.getElementById('stock-modal');
     if (modal) modal.classList.remove('open');
     this.selectedStock = null;
   },
 
-  /**
-   * Set order type: BUY or SELL
-   */
   setOrderType(type) {
     this.orderType = type;
     const btnBuy = document.getElementById('btn-order-buy');
     const btnSell = document.getElementById('btn-order-sell');
     const btnExec = document.getElementById('btn-execute-order');
+    const justField = document.getElementById('trade-justification-field');
 
     if (type === 'BUY') {
       btnBuy.classList.add('active');
       btnSell.classList.remove('active');
       btnExec.className = 'btn-execute buy';
       btnExec.textContent = 'Confirm Buy Order ➔';
+      if (justField) justField.style.display = 'block';
     } else {
       btnBuy.classList.remove('active');
       btnSell.classList.add('active');
       btnExec.className = 'btn-execute sell';
       btnExec.textContent = 'Confirm Sell Order ➔';
+      if (justField) justField.style.display = 'none';
     }
 
     this.updateOrderCalculations();
   },
 
   /**
-   * Live calculations inside order execution panel
+   * Live calculations with Diversification Position Cap Guard (25% max)
    */
   updateOrderCalculations() {
     if (!this.selectedStock) return;
@@ -714,16 +843,30 @@ const GameApp = {
     const btnExec = document.getElementById('btn-execute-order');
     const warning = document.getElementById('order-warning-msg');
 
+    // Total portfolio valuation
+    const totalPortfolioVal = this.portfolio.equityHistory[this.portfolio.equityHistory.length - 1]?.totalValue || this.portfolio.cash;
+
     if (this.orderType === 'BUY') {
       const totalCostAUD = subtotalAUD + brokerage;
       document.getElementById('calc-total').textContent = `$${totalCostAUD.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} AUD`;
+
+      // Diversification Cap Check (e.g. max 25%)
+      const existingHolding = this.portfolio.holdings.find(h => h.symbol === quote.symbol);
+      const existingVal = existingHolding ? (existingHolding.currentValueAUD || existingHolding.shares * existingHolding.avgPriceAUD) : 0;
+      const resultingVal = existingVal + subtotalAUD;
+      const maxAllowed = totalPortfolioVal * (CONFIG.MAX_POSITION_PERCENT / 100);
 
       if (shares <= 0) {
         btnExec.disabled = true;
         warning.style.display = 'none';
       } else if (totalCostAUD > this.portfolio.cash) {
         btnExec.disabled = true;
-        warning.textContent = `Insufficient cash ($${this.portfolio.cash.toFixed(2)} available).`;
+        warning.textContent = `Insufficient cash ($${this.portfolio.cash.toFixed(2)} AUD available).`;
+        warning.style.display = 'block';
+      } else if (CONFIG.DIVERSIFICATION_CAP_ENABLED && resultingVal > maxAllowed && totalPortfolioVal >= CONFIG.INITIAL_CASH * 0.7) {
+        // Enforce 25% cap
+        btnExec.disabled = true;
+        warning.textContent = `Diversification Rule: Single stock cannot exceed ${CONFIG.MAX_POSITION_PERCENT}% ($${maxAllowed.toFixed(2)} AUD) of total portfolio.`;
         warning.style.display = 'block';
       } else {
         btnExec.disabled = false;
@@ -751,9 +894,6 @@ const GameApp = {
     }
   },
 
-  /**
-   * Calculate maximum shares user can afford to buy or sell
-   */
   calculateMaxShares() {
     if (!this.selectedStock) return;
     const quote = this.selectedStock;
@@ -761,7 +901,19 @@ const GameApp = {
 
     if (this.orderType === 'BUY') {
       const usableCash = this.portfolio.cash - CONFIG.BROKERAGE_FEE;
-      const maxShares = usableCash > 0 ? Math.floor(usableCash / unitAUD) : 0;
+      let maxShares = usableCash > 0 ? Math.floor(usableCash / unitAUD) : 0;
+
+      // Restrict by Diversification Cap if enabled
+      if (CONFIG.DIVERSIFICATION_CAP_ENABLED) {
+        const totalPortfolioVal = this.portfolio.equityHistory[this.portfolio.equityHistory.length - 1]?.totalValue || this.portfolio.cash;
+        const maxAllowedVal = totalPortfolioVal * (CONFIG.MAX_POSITION_PERCENT / 100);
+        const existingHolding = this.portfolio.holdings.find(h => h.symbol === quote.symbol);
+        const existingVal = existingHolding ? (existingHolding.currentValueAUD || existingHolding.shares * existingHolding.avgPriceAUD) : 0;
+        const headroomVal = Math.max(0, maxAllowedVal - existingVal);
+        const maxCapShares = Math.floor(headroomVal / unitAUD);
+        maxShares = Math.min(maxShares, maxCapShares);
+      }
+
       document.getElementById('order-shares-input').value = Math.max(0, maxShares);
     } else {
       const holding = this.portfolio.holdings.find(h => h.symbol === quote.symbol);
@@ -771,9 +923,6 @@ const GameApp = {
     this.updateOrderCalculations();
   },
 
-  /**
-   * Submit Order
-   */
   submitOrder() {
     if (!this.selectedStock) return;
 
@@ -786,6 +935,7 @@ const GameApp = {
     const subtotalAUD = shares * unitAUD;
     const brokerage = CONFIG.BROKERAGE_FEE;
     const now = Date.now();
+    const rationale = (document.getElementById('order-justification-input')?.value || '').trim();
 
     if (this.orderType === 'BUY') {
       const totalCostAUD = subtotalAUD + brokerage;
@@ -794,10 +944,8 @@ const GameApp = {
         return;
       }
 
-      // Deduct cash
       this.portfolio.cash -= totalCostAUD;
 
-      // Update or insert into holdings
       const existing = this.portfolio.holdings.find(h => h.symbol === quote.symbol);
       if (existing) {
         const prevTotalCost = existing.totalCostAUD;
@@ -816,7 +964,17 @@ const GameApp = {
         });
       }
 
-      // Log trade
+      // Save rationale into journal if provided
+      if (rationale) {
+        if (!this.portfolio.journal) this.portfolio.journal = {};
+        if (!this.portfolio.journal[quote.symbol]) {
+          this.portfolio.journal[quote.symbol] = { thesis: rationale, riskFactors: '', priceTarget: '', updated: now };
+        } else {
+          this.portfolio.journal[quote.symbol].thesis = rationale;
+          this.portfolio.journal[quote.symbol].updated = now;
+        }
+      }
+
       this.portfolio.trades.unshift({
         id: `tr_${now}`,
         timestamp: now,
@@ -829,7 +987,8 @@ const GameApp = {
         currency: quote.currency,
         exchangeRate: quote.currency === 'USD' ? MarketService.audUsdRate : 1.0,
         brokerageAUD: brokerage,
-        totalAUD: totalCostAUD
+        totalAUD: totalCostAUD,
+        rationale: rationale || 'Market order purchase'
       });
 
       this.showToast(`Bought ${shares} shares of ${quote.symbol} for $${totalCostAUD.toFixed(2)} AUD!`, 'success');
@@ -848,19 +1007,16 @@ const GameApp = {
       const netProceedsAUD = Math.max(0, subtotalAUD - brokerage);
       this.portfolio.cash += netProceedsAUD;
 
-      // Realized gain calculation
       const costBasis = holding.avgPriceAUD * shares;
       const realizedGainAUD = netProceedsAUD - costBasis;
 
       holding.shares -= shares;
       holding.totalCostAUD -= costBasis;
 
-      // Remove holding if all shares sold
       if (holding.shares <= 0) {
         this.portfolio.holdings.splice(holdingIdx, 1);
       }
 
-      // Log trade
       this.portfolio.trades.unshift({
         id: `tr_${now}`,
         timestamp: now,
@@ -874,7 +1030,8 @@ const GameApp = {
         exchangeRate: quote.currency === 'USD' ? MarketService.audUsdRate : 1.0,
         brokerageAUD: brokerage,
         totalAUD: netProceedsAUD,
-        realizedGainAUD: realizedGainAUD
+        realizedGainAUD: realizedGainAUD,
+        rationale: 'Position liquidation'
       });
 
       const sign = realizedGainAUD >= 0 ? '+' : '';
@@ -885,9 +1042,6 @@ const GameApp = {
     this.refreshAllData();
   },
 
-  /**
-   * Render Trade History Ledger
-   */
   renderTradeLedger() {
     const tbody = document.getElementById('ledger-table-body');
     const emptyState = document.getElementById('ledger-empty-state');
@@ -907,8 +1061,8 @@ const GameApp = {
         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
       });
       const isBuy = t.type === 'BUY';
-      const badgeClass = isBuy ? 'up' : 'down';
-      const flag = t.exchange === 'ASX' ? '🇦🇺' : '🇺🇸';
+      const badgeClass = isBuy ? 'up' : (t.type === 'DIVIDEND' ? 'up' : 'down');
+      const flag = t.exchange === 'ASX' ? '🇦🇺' : (t.exchange === 'AUTOMATED' ? '💰' : '🇺🇸');
 
       rows += `
         <tr>
@@ -930,6 +1084,9 @@ const GameApp = {
               </span>
             ` : '<span style="color:var(--text-dim);">—</span>'}
           </td>
+          <td style="font-size:0.8rem;color:var(--text-muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${t.rationale || ''}">
+            ${t.rationale || '<span style="color:var(--text-dim);">—</span>'}
+          </td>
         </tr>
       `;
     });
@@ -937,20 +1094,15 @@ const GameApp = {
     tbody.innerHTML = rows;
   },
 
-  /**
-   * Render Class Leaderboard
-   */
   renderLeaderboard() {
     const tbody = document.getElementById('leaderboard-table-body');
     if (!tbody) return;
 
-    // Load registered classmates from localStorage
     let roster = [];
     try {
       roster = JSON.parse(localStorage.getItem('class_leaderboard_all_students') || '[]');
     } catch (e) {}
 
-    // Add baseline realistic classmates if roster has few students
     if (roster.length < 5) {
       const simulatedClassmates = [
         { name: 'Liam Zhang', classCode: CONFIG.CLASS_CODE, totalValue: 54320.50, cash: 12400.00, tradesCount: 9 },
@@ -967,7 +1119,6 @@ const GameApp = {
       });
     }
 
-    // Always include current student
     const currentTotalVal = this.portfolio.equityHistory[this.portfolio.equityHistory.length - 1]?.totalValue || this.portfolio.cash;
     const currentStudentObj = {
       name: this.student.name,
@@ -985,7 +1136,6 @@ const GameApp = {
       roster.push(currentStudentObj);
     }
 
-    // Sort descending by total portfolio value
     roster.sort((a, b) => b.totalValue - a.totalValue);
 
     let rows = '';
@@ -996,12 +1146,13 @@ const GameApp = {
       const isProfit = roi >= 0;
       const sign = isProfit ? '+' : '';
       const isCurrentUser = s.name.toLowerCase() === this.student.name.toLowerCase();
+      const displayName = isCurrentUser ? this.student.name : this.formatStudentName(s.name, true);
 
       rows += `
         <tr style="${isCurrentUser ? 'background:rgba(6,182,212,0.1);font-weight:600;' : ''}">
           <td style="font-family:var(--font-mono);">${rankBadge}</td>
           <td>
-            ${s.name} ${isCurrentUser ? '<span class="tab-badge" style="background:var(--asx-blue);color:#070b14;margin-left:0.4rem;">YOU</span>' : ''}
+            ${displayName} ${isCurrentUser ? '<span class="tab-badge" style="background:var(--asx-blue);color:#070b14;margin-left:0.4rem;">YOU</span>' : ''}
           </td>
           <td class="num-cell" style="font-weight:700;">$${s.totalValue.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} AUD</td>
           <td class="num-cell ${isProfit ? 'val-up' : 'val-down'}">${sign}${roi.toFixed(2)}%</td>
@@ -1014,16 +1165,13 @@ const GameApp = {
     tbody.innerHTML = rows;
   },
 
-  /**
-   * Export Student Trade Ledger to CSV
-   */
   exportTradeLedgerCSV() {
     if (!this.portfolio.trades || this.portfolio.trades.length === 0) {
       this.showToast('No trades executed yet to export.', 'error');
       return;
     }
 
-    const headers = ['Timestamp', 'Type', 'Symbol', 'Name', 'Exchange', 'Shares', 'Price', 'Currency', 'ExchangeRate', 'BrokerageAUD', 'TotalAUD', 'RealizedGainAUD'];
+    const headers = ['Timestamp', 'Type', 'Symbol', 'Name', 'Exchange', 'Shares', 'Price', 'Currency', 'ExchangeRate', 'BrokerageAUD', 'TotalAUD', 'RealizedGainAUD', 'Rationale'];
     const rows = this.portfolio.trades.map(t => [
       `"${new Date(t.timestamp).toISOString()}"`,
       `"${t.type}"`,
@@ -1036,7 +1184,8 @@ const GameApp = {
       t.exchangeRate,
       t.brokerageAUD,
       t.totalAUD,
-      t.realizedGainAUD || 0
+      t.realizedGainAUD || 0,
+      `"${(t.rationale || '').replace(/"/g, '""')}"`
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -1051,9 +1200,6 @@ const GameApp = {
     this.showToast('Trade ledger exported to CSV successfully!', 'success');
   },
 
-  /**
-   * Show Toast Notification
-   */
   showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -1072,7 +1218,6 @@ const GameApp = {
   }
 };
 
-// Start Game App when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   GameApp.init();
 });

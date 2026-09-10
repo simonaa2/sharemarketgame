@@ -298,21 +298,50 @@ const TeacherApp = {
       holdTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-dim);">No active holdings (100% Cash).</td></tr>';
     }
 
+    // Render student investment journal
+    const journalWrap = document.getElementById('insp-journal-wrap');
+    if (journalWrap) {
+      const journalKeys = Object.keys(p.journal || {});
+      if (journalKeys.length > 0) {
+        journalWrap.innerHTML = journalKeys.map(sym => {
+          const entry = p.journal[sym];
+          return `
+            <div style="border-bottom:1px solid var(--border);padding-bottom:0.75rem;margin-bottom:0.75rem;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem;">
+                <strong style="color:#fff;font-family:var(--font-mono);font-size:0.95rem;">${sym}</strong>
+                <span style="color:var(--text-dim);font-size:0.75rem;">Target: <strong style="color:var(--asx-blue);">${entry.priceTarget || 'N/A'}</strong></span>
+              </div>
+              <div style="color:var(--text);margin-bottom:0.35rem;line-height:1.4;">
+                <span style="color:var(--text-dim);font-size:0.75rem;display:block;text-transform:uppercase;font-weight:700;">Investment Thesis:</span>
+                ${entry.thesis || '<em style="color:var(--text-dim);">No thesis entered.</em>'}
+              </div>
+              ${entry.riskFactors ? `<div style="font-size:0.8rem;color:var(--text-muted);"><span style="color:var(--text-dim);font-weight:600;">Key Risks:</span> ${entry.riskFactors}</div>` : ''}
+            </div>
+          `;
+        }).join('');
+      } else {
+        journalWrap.innerHTML = '<span style="color:var(--text-dim);">No journal rationale recorded yet for this student.</span>';
+      }
+    }
+
     // Render trades
     const tradeTbody = document.getElementById('insp-trades-tbody');
     if (p.trades && p.trades.length > 0) {
       tradeTbody.innerHTML = p.trades.map(t => `
         <tr>
           <td style="color:var(--text-dim);font-size:0.78rem;">${new Date(t.timestamp).toLocaleString('en-AU')}</td>
-          <td><span class="kpi-badge ${t.type === 'BUY' ? 'up' : 'down'}">${t.type}</span></td>
+          <td><span class="kpi-badge ${t.type === 'BUY' ? 'up' : (t.type === 'DIVIDEND' ? 'up' : 'down')}">${t.type}</span></td>
           <td><strong style="color:#fff;">${t.symbol}</strong></td>
           <td class="num-cell">${t.shares}</td>
           <td class="num-cell">${t.currency === 'USD' ? 'US$' : '$'}${t.price.toFixed(2)}</td>
           <td class="num-cell" style="font-weight:700;">$${t.totalAUD.toFixed(2)} AUD</td>
+          <td style="font-size:0.78rem;color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${t.rationale || ''}">
+            ${t.rationale || '<span style="color:var(--text-dim);">—</span>'}
+          </td>
         </tr>
       `).join('');
     } else {
-      tradeTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-dim);">No trades executed yet.</td></tr>';
+      tradeTbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-dim);">No trades executed yet.</td></tr>';
     }
 
     modal.classList.add('open');

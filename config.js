@@ -10,6 +10,29 @@ const CONFIG = {
   DEFAULT_CURRENCY: 'AUD',      // Base currency for portfolios and leaderboard
   AUD_USD_RATE: 0.65,           // Fallback AUD to USD exchange rate (1 AUD = 0.65 USD; 1 USD = ~1.538 AUD)
 
+  // Educational Guardrails & Diversification Rules
+  DIVERSIFICATION_CAP_ENABLED: true, // If true, limits how much of the portfolio can be in a single stock
+  MAX_POSITION_PERCENT: 25,          // Maximum 25% of total portfolio value allowed in any single company
+
+  // Trading Hours Mode:
+  // 'INSTANT': Orders execute 24/7 at latest prices (allows trading US stocks during Australian school day)
+  // 'STRICT': Orders only execute during official market hours, queueing as pending outside hours
+  MARKET_HOURS_MODE: 'INSTANT',
+
+  // Privacy & Leaderboard Display Mode:
+  // 'INITIALS': Displays First Name + Last Initial (e.g. Samuel G.) - Recommended for student privacy
+  // 'FULL': Displays Full Student Name
+  // 'ANONYMOUS': Displays Trader Alias / Code (e.g. Trader #4)
+  PRIVACY_MODE: 'INITIALS',
+
+  // Automated Dividend Yield (3.8% p.a. prorated weekly into cash balances)
+  AUTO_DIVIDENDS_ENABLED: true,
+  DIVIDEND_ANNUAL_YIELD_RATE: 0.038,
+
+  // Market Benchmark Comparison (Overlaid on Portfolio Chart)
+  BENCHMARK_INDEX: 'ASX 200',
+  BENCHMARK_ANNUAL_RETURN: 0.082, // 8.2% historical annualized baseline
+
   // Class & Authentication Settings
   CLASS_NAME: 'Commerce & Economics Market Challenge 2026',
   CLASS_CODE: 'COMMERCE2026',   // Default class code for open student login
@@ -20,8 +43,6 @@ const CONFIG = {
   SCRIPT_URL: '',
 
   // Optional: Pre-defined Student Roster
-  // If populated, students can select their name or enter their exact password.
-  // If empty, any student entering the CLASS_CODE can register and play.
   STUDENTS: [
     // { name: 'Alex Taylor', password: 'alex' },
     // { name: 'Jordan Lee', password: 'jordan' }
