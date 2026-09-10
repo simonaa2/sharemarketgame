@@ -74,6 +74,7 @@ const GameApp = {
         holdings: [],
         trades: [],
         journal: {}, // symbol -> { thesis, riskFactors, priceTarget, updated }
+        watchlist: ['BHP.AX', 'NVDA', 'CBA.AX'], // default starter watchlist
         lastDividendTimestamp: now,
         equityHistory: [
           {
@@ -96,6 +97,7 @@ const GameApp = {
     } else {
       if (!this.portfolio.journal) this.portfolio.journal = {};
       if (!this.portfolio.lastDividendTimestamp) this.portfolio.lastDividendTimestamp = Date.now();
+      if (!this.portfolio.watchlist) this.portfolio.watchlist = ['BHP.AX', 'NVDA', 'CBA.AX'];
     }
   },
 
@@ -374,6 +376,8 @@ const GameApp = {
     });
 
     this.renderHoldingsTable();
+    await this.renderWatchlist();
+    this.renderMarketNews();
 
     ChartManager.renderPortfolioChart('portfolio-chart-canvas', this.portfolio.equityHistory, this.selectedPortfolioRange);
     ChartManager.renderAllocationChart('allocation-chart-canvas', this.portfolio.holdings, this.portfolio.cash);
@@ -508,6 +512,106 @@ const GameApp = {
     }
 
     track.innerHTML = html + html;
+  },
+
+  async renderWatchlist() {
+    const card = document.getElementById('watchlist-card');
+    const tbody = document.getElementById('watchlist-table-body');
+    const countBadge = document.getElementById('watchlist-count-badge');
+    if (!card || !tbody) return;
+
+    const list = this.portfolio.watchlist || [];
+    if (countBadge) countBadge.textContent = `${list.length} watched`;
+
+    if (list.length === 0) {
+      card.style.display = 'none';
+      return;
+    }
+
+    card.style.display = 'block';
+    let rows = '';
+    for (const sym of list) {
+      const q = await MarketService.fetchQuote(sym);
+      const isUp = q.change >= 0;
+      const sign = isUp ? '+' : '';
+      const flag = q.exchange === 'ASX' ? '🇦🇺' : '🇺🇸';
+      const exchClass = q.exchange.toLowerCase();
+
+      rows += `
+        <tr>
+          <td>
+            <div class="ticker-cell">
+              <span class="market-flag">${flag}</span>
+              <div class="ticker-text">
+                <span class="ticker-sym">${q.symbol}</span>
+                <span class="ticker-name">${q.name}</span>
+              </div>
+            </div>
+          </td>
+          <td><span class="exchange-chip ${exchClass}">${q.exchange}</span></td>
+          <td class="num-cell" style="font-weight:700;">
+            ${q.currency === 'USD' ? `US$${q.price.toFixed(2)} ` : `$${q.price.toFixed(2)} AUD`}
+          </td>
+          <td class="num-cell ${isUp ? 'val-up' : 'val-down'}" style="font-weight:700;">
+            ${sign}${q.changePercent.toFixed(2)}%
+          </td>
+          <td>
+            <button class="btn-action-sm btn-buy-sm" onclick="GameApp.openStockModal('${q.symbol}', 'BUY')">Trade ➔</button>
+            <button class="btn-action-sm btn-sell-sm" style="background:rgba(255,255,255,0.05);color:var(--text-dim);border-color:var(--border);" onclick="GameApp.removeFromWatchlist('${q.symbol}')" title="Remove from watchlist">✕</button>
+          </td>
+        </tr>
+      `;
+    }
+    tbody.innerHTML = rows;
+  },
+
+  toggleWatchlistCurrent() {
+    if (!this.selectedStock) return;
+    const sym = this.selectedStock.symbol;
+    if (!this.portfolio.watchlist) this.portfolio.watchlist = [];
+    const idx = this.portfolio.watchlist.indexOf(sym);
+    const btn = document.getElementById('modal-btn-watchlist');
+
+    if (idx >= 0) {
+      this.portfolio.watchlist.splice(idx, 1);
+      if (btn) { btn.textContent = '⭐ Watch'; btn.style.color = ''; }
+      this.showToast(`Removed ${sym} from Watchlist.`, 'success');
+    } else {
+      this.portfolio.watchlist.push(sym);
+      if (btn) { btn.textContent = '★ Watching'; btn.style.color = 'var(--gold)'; }
+      this.showToast(`Added ${sym} to your Watchlist!`, 'success');
+    }
+
+    this.savePortfolio();
+    this.renderWatchlist();
+  },
+
+  removeFromWatchlist(symbol) {
+    if (!this.portfolio.watchlist) return;
+    const idx = this.portfolio.watchlist.indexOf(symbol);
+    if (idx >= 0) {
+      this.portfolio.watchlist.splice(idx, 1);
+      this.savePortfolio();
+      this.renderWatchlist();
+      this.showToast(`Removed ${symbol} from watchlist.`, 'success');
+    }
+  },
+
+  renderMarketNews() {
+    const listWrap = document.getElementById('market-news-list');
+    if (!listWrap) return;
+    const items = MarketService.getMarketNews();
+    listWrap.innerHTML = items.map(n => `
+      <div style="background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.35rem;">
+          <span style="font-size:0.68rem;font-weight:700;color:var(--asx-blue);background:rgba(6,182,212,0.12);padding:0.15rem 0.45rem;border-radius:4px;letter-spacing:0.05em;">${n.tag}</span>
+          <span style="font-size:0.7rem;color:var(--text-dim);">${n.time}</span>
+        </div>
+        <h5 style="font-size:0.85rem;color:#fff;font-weight:700;margin-bottom:0.25rem;line-height:1.3;">${n.title}</h5>
+        <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.4;">${n.summary}</p>
+        <div style="font-size:0.7rem;color:var(--text-dim);margin-top:0.35rem;">Source: ${n.source}</div>
+      </div>
+    `).join('');
   },
 
   renderHoldingsTable() {
@@ -771,6 +875,18 @@ const GameApp = {
     document.getElementById('modal-meta-range52').textContent = `$${quote.fiftyTwoWeekLow.toFixed(2)} - $${quote.fiftyTwoWeekHigh.toFixed(2)}`;
     document.getElementById('modal-meta-mktcap').textContent = quote.marketCap;
     document.getElementById('modal-meta-pe').textContent = quote.peRatio;
+
+    // Catalyst and Watchlist state
+    const catalystElem = document.getElementById('modal-stock-catalyst');
+    if (catalystElem) {
+      catalystElem.textContent = `⚡ Market Catalyst: ${MarketService.getStockCatalyst(quote.symbol)}`;
+    }
+    const watchBtn = document.getElementById('modal-btn-watchlist');
+    if (watchBtn) {
+      const isWatched = (this.portfolio.watchlist || []).includes(quote.symbol);
+      watchBtn.textContent = isWatched ? '★ Watching' : '⭐ Watch';
+      watchBtn.style.color = isWatched ? 'var(--gold)' : '';
+    }
 
     const holding = this.portfolio.holdings.find(h => h.symbol === quote.symbol);
     const ownedShares = holding ? holding.shares : 0;
@@ -1136,10 +1252,22 @@ const GameApp = {
       roster.push(currentStudentObj);
     }
 
-    roster.sort((a, b) => b.totalValue - a.totalValue);
+    // Populate class filter dropdown
+    const filterSelect = document.getElementById('leaderboard-class-filter');
+    if (filterSelect && filterSelect.options.length === 0 && CONFIG.CLASSES) {
+      filterSelect.innerHTML = `<option value="ALL">All Classes (Global)</option>` +
+        CONFIG.CLASSES.map(c => `<option value="${c.code}" ${c.code === this.student.classCode ? 'selected' : ''}>${c.name}</option>`).join('');
+    }
+
+    const selectedClass = filterSelect ? filterSelect.value : 'ALL';
+    const filteredRoster = (selectedClass === 'ALL')
+      ? roster
+      : roster.filter(s => (s.classCode || CONFIG.DEFAULT_CLASS_CODE) === selectedClass || s.name.toLowerCase() === this.student.name.toLowerCase());
+
+    filteredRoster.sort((a, b) => b.totalValue - a.totalValue);
 
     let rows = '';
-    roster.forEach((s, idx) => {
+    filteredRoster.forEach((s, idx) => {
       const rank = idx + 1;
       const rankBadge = rank === 1 ? '🥇 1' : rank === 2 ? '🥈 2' : rank === 3 ? '🥉 3' : `#${rank}`;
       const roi = ((s.totalValue - CONFIG.INITIAL_CASH) / CONFIG.INITIAL_CASH) * 100;

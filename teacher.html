@@ -183,9 +183,12 @@
           <div class="section-title">
             <span>📊</span> Student Portfolio Standings
           </div>
-          <div class="search-input-wrap">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="teacher-search-input" class="search-input" placeholder="Search student name..."/>
+          <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+            <select id="teacher-class-filter" class="search-input" style="max-width:220px;cursor:pointer;" onchange="TeacherApp.renderDashboard()"></select>
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="teacher-search-input" class="search-input" placeholder="Search student name..."/>
+            </div>
           </div>
         </div>
 
@@ -277,6 +280,54 @@
               <!-- Injected via teacher.js -->
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- Assessment Marking Rubric -->
+      <div style="margin-top:1.5rem;background:var(--bg-card2);border-radius:14px;padding:1.25rem;border:1px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+          <div>
+            <h4 style="font-family:var(--font-head);color:#fff;font-size:1.05rem;">📝 Assessment Marking Rubric</h4>
+            <p style="color:var(--text-dim);font-size:0.78rem;">Assign marks against Commerce / Economics syllabus outcomes.</p>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;">Total Mark:</span>
+            <span id="rubric-total-display" style="font-family:var(--font-mono);font-size:1.3rem;font-weight:800;color:var(--asx-blue);margin-left:0.3rem;">0 / 20</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;margin-bottom:1rem;">
+          <div>
+            <label style="display:block;font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;margin-bottom:0.3rem;">
+              1. Journal &amp; Rationale (/10)
+            </label>
+            <input type="number" id="grade-journal" min="0" max="10" step="0.5" class="login-input" placeholder="0 - 10" oninput="TeacherApp.calcTotalGrade()"/>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;margin-bottom:0.3rem;">
+              2. Diversification (/5)
+            </label>
+            <input type="number" id="grade-divers" min="0" max="5" step="0.5" class="login-input" placeholder="0 - 5" oninput="TeacherApp.calcTotalGrade()"/>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;margin-bottom:0.3rem;">
+              3. Market Reflection (/5)
+            </label>
+            <input type="number" id="grade-reflect" min="0" max="5" step="0.5" class="login-input" placeholder="0 - 5" oninput="TeacherApp.calcTotalGrade()"/>
+          </div>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <label style="display:block;font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;margin-bottom:0.3rem;">
+            Teacher Feedback &amp; Commentary
+          </label>
+          <textarea id="grade-comments" class="order-input" rows="2" style="width:100%;font-size:0.85rem;padding:0.6rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;" placeholder="Constructive feedback on portfolio construction, research thesis, and risk management..."></textarea>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;">
+          <button class="btn-secondary" style="background:var(--profit);color:#fff;font-weight:700;border:none;padding:0.5rem 1.2rem;" onclick="TeacherApp.saveGrade()">
+            💾 Save Student Grade
+          </button>
         </div>
       </div>
 

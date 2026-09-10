@@ -33,22 +33,37 @@ const CONFIG = {
   BENCHMARK_INDEX: 'ASX 200',
   BENCHMARK_ANNUAL_RETURN: 0.082, // 8.2% historical annualized baseline
 
-  // Class & Authentication Settings
-  CLASS_NAME: 'Commerce & Economics Market Challenge 2026',
-  CLASS_CODE: 'COMMERCE2026',   // Default class code for open student login
-  TEACHER_PASSWORD: 'market10', // Teacher dashboard password
+  // Multi-Class Configurations
+  CLASSES: [
+    { code: '10COMM1', name: 'Year 10 Commerce (Class 1)' },
+    { code: '10COMM2', name: 'Year 10 Commerce (Class 2)' },
+    { code: '11ECON', name: 'Year 11 Preliminary Economics' },
+    { code: 'COMMERCE2026', name: 'General Commerce Challenge' }
+  ],
+  DEFAULT_CLASS_CODE: '10COMM1',
+
+  // Teacher Authentication
+  TEACHER_PASSWORD: 'market10',
+
+  // Assessment Marking Rubric Settings (Out of 20 marks)
+  RUBRIC: {
+    maxMarks: 20,
+    criteria: [
+      { id: 'crit_journal', name: 'Investment Journal & Research Rationale', max: 10, desc: 'Depth of economic research, company valuation, and thesis.' },
+      { id: 'crit_diversification', name: 'Diversification & Risk Management', max: 5, desc: 'Portfolio spread across industries and compliance with the 25% cap.' },
+      { id: 'crit_reflection', name: 'Market Reflection & Performance Analysis', max: 5, desc: 'Understanding of market drivers, Alpha, and economic trends.' }
+    ]
+  },
 
   // Google Apps Script Web App URL (leave empty to use local/fallback mode)
-  // When deployed, this proxies Yahoo Finance without CORS and syncs portfolio data to a Google Sheet
   SCRIPT_URL: '',
 
   // Optional: Pre-defined Student Roster
   STUDENTS: [
-    // { name: 'Alex Taylor', password: 'alex' },
-    // { name: 'Jordan Lee', password: 'jordan' }
+    // { name: 'Alex Taylor', classCode: '10COMM1', password: 'alex' }
   ],
 
-  // Supported Exchanges and Information
+  // Supported Exchanges
   EXCHANGES: {
     ASX: {
       name: 'Australian Securities Exchange',
@@ -82,9 +97,9 @@ const CONFIG = {
     }
   },
 
-  // Featured Curated Stocks for Quick Discovery
+  // Featured Curated Stocks
   FEATURED_STOCKS: [
-    // ASX Blue Chips (Australia - AUD)
+    // ASX Blue Chips
     { symbol: 'BHP.AX', name: 'BHP Group Ltd', exchange: 'ASX', sector: 'Materials & Mining', currency: 'AUD' },
     { symbol: 'CBA.AX', name: 'Commonwealth Bank of Australia', exchange: 'ASX', sector: 'Financials', currency: 'AUD' },
     { symbol: 'CSL.AX', name: 'CSL Limited', exchange: 'ASX', sector: 'Healthcare', currency: 'AUD' },
@@ -101,7 +116,7 @@ const CONFIG = {
     { symbol: 'REA.AX', name: 'REA Group Ltd', exchange: 'ASX', sector: 'Communication Services', currency: 'AUD' },
     { symbol: 'XRO.AX', name: 'Xero Limited', exchange: 'ASX', sector: 'Information Technology', currency: 'AUD' },
 
-    // NASDAQ Leaders (US - USD)
+    // NASDAQ Leaders
     { symbol: 'AAPL', name: 'Apple Inc.', exchange: 'NASDAQ', sector: 'Technology', currency: 'USD' },
     { symbol: 'MSFT', name: 'Microsoft Corporation', exchange: 'NASDAQ', sector: 'Technology', currency: 'USD' },
     { symbol: 'NVDA', name: 'NVIDIA Corporation', exchange: 'NASDAQ', sector: 'Semiconductors', currency: 'USD' },
@@ -113,7 +128,7 @@ const CONFIG = {
     { symbol: 'COST', name: 'Costco Wholesale Corp', exchange: 'NASDAQ', sector: 'Consumer Staples', currency: 'USD' },
     { symbol: 'AMD', name: 'Advanced Micro Devices', exchange: 'NASDAQ', sector: 'Semiconductors', currency: 'USD' },
 
-    // NYSE Giants (US - USD)
+    // NYSE Giants
     { symbol: 'BRK-B', name: 'Berkshire Hathaway Inc.', exchange: 'NYSE', sector: 'Financials', currency: 'USD' },
     { symbol: 'JPM', name: 'JPMorgan Chase & Co.', exchange: 'NYSE', sector: 'Financials', currency: 'USD' },
     { symbol: 'V', name: 'Visa Inc.', exchange: 'NYSE', sector: 'Financial Services', currency: 'USD' },

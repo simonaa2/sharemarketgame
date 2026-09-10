@@ -31,6 +31,14 @@ const TeacherApp = {
   showDashboard() {
     document.getElementById('teacher-gate').style.display = 'none';
     document.getElementById('teacher-dashboard').style.display = 'block';
+
+    // Populate class filter dropdown
+    const classFilter = document.getElementById('teacher-class-filter');
+    if (classFilter && classFilter.options.length === 0 && CONFIG.CLASSES) {
+      classFilter.innerHTML = `<option value="ALL">All Classes (Global)</option>` +
+        CONFIG.CLASSES.map(c => `<option value="${c.code}">${c.name} (${c.code})</option>`).join('');
+    }
+
     this.loadClassData();
   },
 
@@ -196,13 +204,19 @@ const TeacherApp = {
   renderDashboard() {
     this.students.sort((a, b) => b.totalValue - a.totalValue);
 
+    const classFilter = document.getElementById('teacher-class-filter');
+    const selectedClass = classFilter ? classFilter.value : 'ALL';
+    const activeList = (selectedClass === 'ALL')
+      ? this.students
+      : this.students.filter(s => (s.classCode || CONFIG.DEFAULT_CLASS_CODE) === selectedClass);
+
     // 1. KPI Calculations
-    const totalCount = this.students.length;
-    const topStudent = this.students[0];
+    const totalCount = activeList.length;
+    const topStudent = activeList[0];
     const topROI = topStudent ? ((topStudent.totalValue - CONFIG.INITIAL_CASH) / CONFIG.INITIAL_CASH) * 100 : 0;
-    const avgVal = totalCount > 0 ? this.students.reduce((acc, s) => acc + s.totalValue, 0) / totalCount : CONFIG.INITIAL_CASH;
+    const avgVal = totalCount > 0 ? activeList.reduce((acc, s) => acc + s.totalValue, 0) / totalCount : CONFIG.INITIAL_CASH;
     const avgROI = ((avgVal - CONFIG.INITIAL_CASH) / CONFIG.INITIAL_CASH) * 100;
-    const totalTrades = this.students.reduce((acc, s) => acc + (s.tradesCount || 0), 0);
+    const totalTrades = activeList.reduce((acc, s) => acc + (s.tradesCount || 0), 0);
 
     document.getElementById('t-kpi-students').textContent = totalCount;
     document.getElementById('t-kpi-top-roi').textContent = `${topROI >= 0 ? '+' : ''}${topROI.toFixed(2)}%`;
@@ -212,7 +226,7 @@ const TeacherApp = {
     document.getElementById('t-kpi-trades').textContent = totalTrades;
 
     // 2. Render Roster Table
-    this.renderRosterTable(this.students);
+    this.renderRosterTable(activeList);
   },
 
   renderRosterTable(list) {
@@ -344,7 +358,56 @@ const TeacherApp = {
       tradeTbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-dim);">No trades executed yet.</td></tr>';
     }
 
+    // Populate Assessment Rubric inputs
+    const g = p.grades || { journal: '', divers: '', reflect: '', total: 0, comments: '' };
+    document.getElementById('grade-journal').value = (g.journal !== undefined && g.journal !== '') ? g.journal : '';
+    document.getElementById('grade-divers').value = (g.divers !== undefined && g.divers !== '') ? g.divers : '';
+    document.getElementById('grade-reflect').value = (g.reflect !== undefined && g.reflect !== '') ? g.reflect : '';
+    document.getElementById('grade-comments').value = g.comments || '';
+    this.calcTotalGrade();
+
     modal.classList.add('open');
+  },
+
+  calcTotalGrade() {
+    const j = parseFloat(document.getElementById('grade-journal').value) || 0;
+    const d = parseFloat(document.getElementById('grade-divers').value) || 0;
+    const r = parseFloat(document.getElementById('grade-reflect').value) || 0;
+    const total = Math.min(20, Math.max(0, j + d + r));
+    const display = document.getElementById('rubric-total-display');
+    if (display) {
+      display.textContent = `${total.toFixed(1)} / 20`;
+    }
+    return total;
+  },
+
+  saveGrade() {
+    if (!this.selectedStudent) return;
+    const name = this.selectedStudent.studentName;
+    const key = `portfolio_v1_${name.replace(/\s+/g, '_').toLowerCase()}`;
+    const raw = localStorage.getItem(key);
+    if (!raw) return;
+
+    const p = JSON.parse(raw);
+    const j = parseFloat(document.getElementById('grade-journal').value) || 0;
+    const d = parseFloat(document.getElementById('grade-divers').value) || 0;
+    const r = parseFloat(document.getElementById('grade-reflect').value) || 0;
+    const total = this.calcTotalGrade();
+    const comments = (document.getElementById('grade-comments').value || '').trim();
+
+    p.grades = {
+      journal: j,
+      divers: d,
+      reflect: r,
+      total: total,
+      comments: comments,
+      gradedAt: Date.now()
+    };
+
+    localStorage.setItem(key, JSON.stringify(p));
+    this.selectedStudent = p;
+    this.loadClassData();
+    this.showToast(`Saved grades for ${name} (${total.toFixed(1)} / 20)!`, 'success');
   },
 
   closeInspector() {
@@ -438,10 +501,16 @@ const TeacherApp = {
       return;
     }
 
-    const headers = ['Rank', 'Student Name', 'Class Code', 'Total Portfolio Value (AUD)', 'Return on Investment (%)', 'Available Cash (AUD)', 'Total Trades', 'Last Active'];
+    const headers = [
+      'Rank', 'Student Name', 'Class Code', 'Total Portfolio Value (AUD)',
+      'Return on Investment (%)', 'Available Cash (AUD)', 'Total Trades',
+      'Journal Mark (/10)', 'Diversification Mark (/5)', 'Reflection Mark (/5)',
+      'Total Grade (/20)', 'Teacher Feedback', 'Last Active'
+    ];
     const rows = this.students.map((s, idx) => {
       const rank = idx + 1;
       const roi = ((s.totalValue - CONFIG.INITIAL_CASH) / CONFIG.INITIAL_CASH) * 100;
+      const g = (s.portfolioRef && s.portfolioRef.grades) || {};
       return [
         rank,
         `"${s.name.replace(/"/g, '""')}"`,
@@ -450,6 +519,11 @@ const TeacherApp = {
         roi.toFixed(2),
         s.cash.toFixed(2),
         s.tradesCount || 0,
+        g.journal !== undefined ? g.journal : '',
+        g.divers !== undefined ? g.divers : '',
+        g.reflect !== undefined ? g.reflect : '',
+        g.total !== undefined ? g.total : '',
+        `"${(g.comments || '').replace(/"/g, '""')}"`,
         `"${new Date(s.lastUpdated).toISOString()}"`
       ];
     });

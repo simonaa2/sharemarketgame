@@ -247,8 +247,8 @@
       </div>
 
       <div class="login-field">
-        <label for="login-code">Class Code / Password</label>
-        <input type="password" id="login-code" class="login-input" placeholder="Enter class code (e.g. COMMERCE2026)"/>
+        <label for="login-class-select">Select Your Class</label>
+        <select id="login-class-select" class="login-input" style="cursor:pointer;"></select>
       </div>
 
       <button class="login-btn" id="btn-login" onclick="attemptLogin()">
@@ -260,7 +260,7 @@
       </button>
 
       <div class="login-error" id="login-error">
-        <span>⚠️</span> <span id="error-message">Name or class code not recognised.</span>
+        <span>⚠️</span> <span id="error-message">Please enter your name and select a class.</span>
       </div>
     </div>
 
@@ -271,45 +271,29 @@
 
   <script src="config.js"></script>
   <script>
+    // Populate Classes Dropdown
+    document.addEventListener('DOMContentLoaded', () => {
+      const select = document.getElementById('login-class-select');
+      if (select && CONFIG.CLASSES) {
+        select.innerHTML = CONFIG.CLASSES.map(c => `
+          <option value="${c.code}">${c.name} (${c.code})</option>
+        `).join('');
+      }
+    });
+
     // Login Verification Logic
     function attemptLogin() {
       const name = document.getElementById('login-name').value.trim();
-      const code = document.getElementById('login-code').value.trim();
+      const classSelect = document.getElementById('login-class-select');
+      const code = classSelect ? classSelect.value : (CONFIG.DEFAULT_CLASS_CODE || '10COMM1');
 
       if (!name) {
         showError('Please enter your full name.');
         return;
       }
-      if (!code) {
-        showError('Please enter the class code or your student password.');
-        return;
-      }
 
-      const useRoster = CONFIG.STUDENTS && CONFIG.STUDENTS.length > 0;
-
-      if (useRoster) {
-        const inputLower = name.toLowerCase();
-        const match = CONFIG.STUDENTS.find(s => {
-          return s.name.toLowerCase() === inputLower && s.password.trim() === code;
-        });
-
-        if (!match) {
-          showError('Student name or password not recognised in the roster.');
-          return;
-        }
-
-        sessionStorage.setItem('studentName', match.name);
-        sessionStorage.setItem('classCode', CONFIG.CLASS_CODE);
-      } else {
-        // Class code verification
-        if (code.toUpperCase() !== CONFIG.CLASS_CODE.toUpperCase()) {
-          showError(`Incorrect class code. Check with your teacher (Default: ${CONFIG.CLASS_CODE})`);
-          return;
-        }
-
-        sessionStorage.setItem('studentName', name);
-        sessionStorage.setItem('classCode', code.toUpperCase());
-      }
+      sessionStorage.setItem('studentName', name);
+      sessionStorage.setItem('classCode', code);
 
       window.location.href = 'game.html';
     }
