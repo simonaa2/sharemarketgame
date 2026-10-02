@@ -383,34 +383,80 @@ const ChartManager = {
 
   _formatDate(timestamp, range) {
     const d = new Date(timestamp);
-    if (range === '1d') {
+    const r = (range || '').toLowerCase().trim();
+
+    if (r === '1d') {
       return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
-    if (range === '5d') {
+    if (r === '5d') {
       return `${d.toLocaleDateString([], { weekday: 'short' })} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     }
-    if (range === '1mo' || range === '1w') {
+    if (r === '1w') {
+      return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+    if (r === '1m' || r === '1mo') {
       return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
     }
-    if (range === '6mo' || range === '1y' || range === '3m') {
+    if (r === '3m' || r === '3mo') {
+      return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+    if (r === '6m' || r === '6mo') {
       return d.toLocaleDateString([], { month: 'short', day: 'numeric', year: '2-digit' });
     }
-    return d.toLocaleDateString([], { month: 'short', year: 'numeric' });
+    if (r === '1y') {
+      return d.toLocaleDateString([], { month: 'short', year: '2-digit' });
+    }
+    if (r === '5y' || r === 'max' || r === 'all') {
+      return d.toLocaleDateString([], { month: 'short', year: 'numeric' });
+    }
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
   },
 
   _filterHistoryByRange(points, range) {
-    if (range === 'all' || points.length <= 1) return points;
+    if (!points || points.length === 0) return [];
     const now = Date.now();
     const durations = {
       '1w': 7 * 86400000,
+      '5d': 5 * 86400000,
       '1m': 30 * 86400000,
+      '1mo': 30 * 86400000,
       '3m': 90 * 86400000,
+      '3mo': 90 * 86400000,
       '6m': 180 * 86400000,
-      '1y': 365 * 86400000
+      '6mo': 180 * 86400000,
+      '1y': 365 * 86400000,
+      '5y': 5 * 365 * 86400000,
+      'all': 365 * 86400000
     };
-    const span = durations[range] || 30 * 86400000;
+    const span = durations[range] || (30 * 86400000);
     const cutoff = now - span;
-    const subset = points.filter(p => p.timestamp >= cutoff);
-    return subset.length >= 2 ? subset : points.slice(-Math.min(points.length, 10));
+
+    const inRange = points.filter(p => p.timestamp >= cutoff);
+    const earliestRecorded = points[0];
+    const baseVal = (typeof CONFIG !== 'undefined' && CONFIG.INITIAL_CASH) ? CONFIG.INITIAL_CASH : 50000;
+
+    // If existing points do not span the requested range window (e.g. user selected 6M or 1Y, but only traded recently),
+    // generate historical baseline points starting from the window cutoff at initial capital ($50,000)
+    // so the timeline spans the full requested duration and compares properly with the ASX 200 benchmark!
+    if (!earliestRecorded || earliestRecorded.timestamp > cutoff + (2 * 86400000)) {
+      const fullPoints = [];
+      const numAnchorPoints = (range === '1y' || range === 'all') ? 12 : ((range === '6m' || range === '6mo') ? 8 : (range === '3m' || range === '3mo' ? 6 : 4));
+      const targetEnd = earliestRecorded ? earliestRecorded.timestamp : now;
+      const step = (targetEnd - cutoff) / numAnchorPoints;
+
+      for (let i = 0; i < numAnchorPoints; i++) {
+        fullPoints.push({
+          timestamp: cutoff + (i * step),
+          totalValue: baseVal,
+          cash: baseVal,
+          investedValue: 0
+        });
+      }
+
+      inRange.forEach(p => fullPoints.push(p));
+      return fullPoints;
+    }
+
+    return inRange.length >= 2 ? inRange : points;
   }
 };

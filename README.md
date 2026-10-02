@@ -45,15 +45,16 @@ Students manage a virtual portfolio starting with **$50,000 AUD**, research equi
 
 ```
 portfolio_sharemarket_game/
-├── config.js               # Central parameters (cash, brokerage, class code, teacher pass)
+├── config.js               # Central parameters (cash, brokerage, class rosters, teacher pass)
+├── firestore_sync.js       # Real-time Google Cloud Firestore synchronization & live leaderboard
 ├── index.html              # Student login portal & market status ticker
-├── game.html               # Student trading floor (Portfolio, Explorer, Ledger, Leaderboard)
+├── game.html               # Student trading floor (Portfolio, Explorer, Journal, Ledger, Leaderboard)
 ├── style.css               # Modern fintech dark theme (glowing neon charts, ticker tape, modals)
-├── market_service.js       # Live Yahoo Finance API fetcher with multi-tier CORS fallback
-├── chart_manager.js        # Chart.js engine for single-stock and portfolio timeline charts
-├── game.js                 # Trading engine (buy/sell execution, portfolio valuation, autosave)
+├── market_service.js       # Live Yahoo Finance API fetcher with multi-tier CORS fallback & range normalizer
+├── chart_manager.js        # Chart.js engine for single-stock and portfolio timeline charts across intervals
+├── game.js                 # Trading engine (buy/sell execution, portfolio valuation, autosave, badges)
 ├── teacher.html            # Teacher command center & student inspector
-├── teacher.js              # Teacher dashboard logic & CSV gradebook export
+├── teacher.js              # Teacher dashboard logic, market catalyst broadcast & CSV export
 ├── google_script.js        # Google Apps Script backend for Google Sheets sync & zero-CORS proxy
 └── README.md               # Teacher guide and documentation
 ```

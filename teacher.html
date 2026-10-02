@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+    <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Teacher &amp; Admin Dashboard — Share Market Arena</title>
   <meta name="description" content="Monitor student portfolios, inspect trade logs, view rankings, and manage class market parameters."/>
@@ -161,17 +161,33 @@
 
       <!-- Administrative Controls Bar -->
       <div class="admin-controls-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
           <div>
-            <h3 style="font-family:var(--font-head);color:#fff;font-size:1.15rem;">Class Market Controls</h3>
-            <p style="color:var(--text-dim);font-size:0.8rem;">Adjust global competition rules, trigger dividend bonuses, or seed demo classmates.</p>
+            <h3 style="font-family:var(--font-head);color:#fff;font-size:1.15rem;display:flex;align-items:center;gap:0.5rem;">
+              <span>👨‍🏫</span> Classroom Market Controls &amp; Macro Catalysts
+            </h3>
+            <p style="color:var(--text-dim);font-size:0.8rem;margin-top:0.2rem;">
+              Trigger real-time economic events to all student screens, freeze trading for assessment, or manage class rosters.
+            </p>
           </div>
-          <div style="display:flex;gap:0.6rem;">
-            <button class="btn-secondary" onclick="TeacherApp.triggerDividendBonus()">
-              <span>💰 Issue 2% Dividend Payout</span>
+          <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+            <!-- Macro Catalyst Trigger Dropdown -->
+            <select id="teacher-catalyst-select" class="search-input" style="max-width:260px;font-size:0.82rem;cursor:pointer;background:rgba(124,58,237,0.15);border-color:rgba(167,139,250,0.4);color:#e9d5ff;">
+              <option value="">⚡ Trigger Macro Catalyst...</option>
+              <option value="rba_hike">🏦 RBA Hikes Cash Rate (+25 bps)</option>
+              <option value="mining_boom">⛏️ Resources Super-Cycle Surge</option>
+              <option value="tech_correction">📉 Tech &amp; AI Valuation Pullback</option>
+              <option value="oil_shock">⚡ Energy Supply Disruption</option>
+              <option value="dividend_season">💰 ASX Semi-Annual Dividend (2%)</option>
+            </select>
+            <button class="btn-primary" onclick="TeacherApp.broadcastSelectedCatalyst()" style="font-size:0.8rem;padding:0.45rem 0.9rem;">
+              Broadcast Event ➔
             </button>
-            <button class="btn-secondary" onclick="TeacherApp.seedSampleData()">
-              <span>⚡ Populate Demo Classmates</span>
+            <button class="btn-secondary" id="btn-freeze-toggle" onclick="TeacherApp.toggleTradingFreeze()" style="font-size:0.8rem;">
+              <span>🔒 Freeze Trading</span>
+            </button>
+            <button class="btn-secondary" onclick="TeacherApp.clearAllData()" style="color:#f87171;border-color:rgba(248,113,113,0.3);font-size:0.8rem;">
+              <span>🗑️ Reset Roster</span>
             </button>
           </div>
         </div>
@@ -344,7 +360,13 @@
 
   <div class="toast-container" id="toast-container"></div>
 
-  <script src="config.js"></script>
+  <!-- Firebase SDK Compat for Live Real-Time Dashboard Sync -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <script src="/config.js"></script>
+    <script src="config.js"></script>
+  <script src="firestore_sync.js"></script>
   <script src="market_service.js"></script>
   <script src="teacher.js"></script>
 </body>

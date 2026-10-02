@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+    <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Global Share Market Challenge — Student Portal</title>
   <meta name="description" content="Interactive ASX, NYSE, and NASDAQ Portfolio Simulation Game for Commerce and Economics students."/>
@@ -243,7 +243,12 @@
 
       <div class="login-field">
         <label for="login-name">Student Full Name</label>
-        <input type="text" id="login-name" class="login-input" placeholder="e.g. Samuel Green" autocomplete="name" autocapitalize="words"/>
+        <input type="text" id="login-name" class="login-input" placeholder="e.g. Joshua Duffey" autocomplete="name" autocapitalize="words"/>
+      </div>
+
+      <div class="login-field">
+        <label for="login-password">Student Password / Class Code</label>
+        <input type="password" id="login-password" class="login-input" placeholder="e.g. joshua5192 or 10COMM1" autocomplete="current-password"/>
       </div>
 
       <div class="login-field">
@@ -260,7 +265,7 @@
       </button>
 
       <div class="login-error" id="login-error">
-        <span>⚠️</span> <span id="error-message">Please enter your name and select a class.</span>
+        <span>⚠️</span> <span id="error-message">Please enter your name and password.</span>
       </div>
     </div>
 
@@ -269,10 +274,28 @@
     </div>
   </div>
 
-  <script src="config.js"></script>
+      <script src="config.js"></script>
   <script>
-    // Populate Classes Dropdown
+    const params = new URLSearchParams(window.location.search);
+
+    // Populate Classes Dropdown & Auto-Detect Active Portal Session
     document.addEventListener('DOMContentLoaded', () => {
+      // 1. Unified Single Sign-On (SSO): Auto-detect active login from DataTrends Portal
+      if (typeof DataTrendsAuth !== 'undefined') {
+        try {
+          DataTrendsAuth.init();
+          const user = DataTrendsAuth.getUser();
+          if (user && user.name && !params.get('logout')) {
+            sessionStorage.setItem('studentName', user.name);
+            sessionStorage.setItem('classCode', user.classCode || CONFIG.DEFAULT_CLASS_CODE || '10COMM1');
+            window.location.href = 'game.html';
+            return;
+          }
+        } catch (e) {
+          console.warn('SSO check error:', e);
+        }
+      }
+
       const select = document.getElementById('login-class-select');
       if (select && CONFIG.CLASSES) {
         select.innerHTML = CONFIG.CLASSES.map(c => `
@@ -284,6 +307,7 @@
     // Login Verification Logic
     function attemptLogin() {
       const name = document.getElementById('login-name').value.trim();
+      const pass = (document.getElementById('login-password')?.value || '').trim();
       const classSelect = document.getElementById('login-class-select');
       const code = classSelect ? classSelect.value : (CONFIG.DEFAULT_CLASS_CODE || '10COMM1');
 
@@ -292,17 +316,37 @@
         return;
       }
 
-      sessionStorage.setItem('studentName', name);
-      sessionStorage.setItem('classCode', code);
-
-      window.location.href = 'game.html';
+      // Check against DataTrends student roster if auth is loaded, or fallback to standalone CONFIG
+      if (typeof DataTrendsAuth !== 'undefined' && pass) {
+        try {
+          const user = DataTrendsAuth.attemptRosterLogin(name, pass);
+          if (user) {
+            sessionStorage.setItem('studentName', user.name);
+            sessionStorage.setItem('classCode', user.classCode || code);
+            window.location.href = 'game.html';
+            return;
+          }
+        } catch (err) {
+          showError(err.message || 'Name or password not recognised on class roster.');
+          return;
+        }
+      } else if (typeof DataTrendsAuth === 'undefined') {
+        // Standalone mode: Check against CONFIG.TEACHER PIN if teacher, or accept student login
+        sessionStorage.setItem('studentName', name);
+        sessionStorage.setItem('classCode', code);
+        window.location.href = 'game.html';
+        return;
+      } else if (!pass) {
+        showError('Please enter your student password or class code.');
+        return;
+      }
     }
 
     function demoLogin() {
       const sampleNames = ['Jordan Reed', 'Taylor Smith', 'Morgan Lee', 'Alex Chen'];
       const randomName = sampleNames[Math.floor(Math.random() * sampleNames.length)];
       sessionStorage.setItem('studentName', randomName);
-      sessionStorage.setItem('classCode', CONFIG.CLASS_CODE);
+      sessionStorage.setItem('classCode', CONFIG.DEFAULT_CLASS_CODE || '10COMM1');
       window.location.href = 'game.html';
     }
 
@@ -319,7 +363,6 @@
     });
 
     // Check if logout requested
-    const params = new URLSearchParams(window.location.search);
     if (params.get('logout')) {
       sessionStorage.removeItem('studentName');
       sessionStorage.removeItem('classCode');

@@ -65,20 +65,41 @@ const MarketService = {
     return quote;
   },
 
+  normalizeRange(r) {
+    const raw = (r || '1mo').toLowerCase().trim();
+    const map = {
+      '1d': '1d',
+      '5d': '5d',
+      '1w': '5d',
+      '1m': '1mo',
+      '1mo': '1mo',
+      '3m': '3mo',
+      '3mo': '3mo',
+      '6m': '6mo',
+      '6mo': '6mo',
+      '1y': '1y',
+      '5y': '5y',
+      'max': 'max',
+      'all': 'max'
+    };
+    return map[raw] || '1mo';
+  },
+
   async fetchChart(symbol, range = '1mo') {
     const sym = symbol.toUpperCase().trim();
-    const cacheKey = `${sym}_${range}`;
+    const normRange = this.normalizeRange(range);
+    const cacheKey = `${sym}_${normRange}`;
     if (this.chartCache[cacheKey] && (Date.now() - this.chartCache[cacheKey].timestamp < 120000)) {
       return this.chartCache[cacheKey].data;
     }
 
     let chartData = null;
     try {
-      chartData = await this._fetchYahooChart(sym, range);
+      chartData = await this._fetchYahooChart(sym, normRange);
     } catch (e) {}
 
     if (!chartData || !chartData.points || chartData.points.length === 0) {
-      chartData = this._getSimulatedChart(sym, range);
+      chartData = this._getSimulatedChart(sym, normRange);
     }
 
     this.chartCache[cacheKey] = {
@@ -90,17 +111,19 @@ const MarketService = {
   },
 
   async _fetchYahooChart(symbol, range) {
+    const normRange = this.normalizeRange(range);
     const intervalMap = {
       '1d': '5m',
       '5d': '15m',
       '1mo': '1d',
+      '3mo': '1d',
       '6mo': '1d',
       '1y': '1d',
       '5y': '1wk',
       'max': '1mo'
     };
-    const interval = intervalMap[range] || '1d';
-    const rawUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${range}&interval=${interval}&includePrePost=false`;
+    const interval = intervalMap[normRange] || '1d';
+    const rawUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${normRange}&interval=${interval}&includePrePost=false`;
 
     const json = await this._requestWithProxy(rawUrl);
     if (!json || !json.chart || !json.chart.result || !json.chart.result[0]) {
@@ -214,6 +237,21 @@ const MarketService = {
     'WBC.AX': { price: 32.80, name: 'Westpac Banking Corp', exchange: 'ASX', currency: 'AUD', pe: 16.0, mktCap: '$114B', range52: [20.80, 33.40] },
     'REA.AX': { price: 215.00, name: 'REA Group Ltd', exchange: 'ASX', currency: 'AUD', pe: 62.0, mktCap: '$28B', range52: [155.00, 225.00] },
     'XRO.AX': { price: 148.00, name: 'Xero Limited', exchange: 'ASX', currency: 'AUD', pe: 110.0, mktCap: '$22B', range52: [99.00, 155.00] },
+    'WDS.AX': { price: 26.80, name: 'Woodside Energy Group Ltd', exchange: 'ASX', currency: 'AUD', pe: 14.2, mktCap: '$50.8B', range52: [24.50, 32.50] },
+    'STO.AX': { price: 7.15, name: 'Santos Limited', exchange: 'ASX', currency: 'AUD', pe: 12.5, mktCap: '$23.4B', range52: [6.80, 8.20] },
+    'ORG.AX': { price: 9.85, name: 'Origin Energy Ltd', exchange: 'ASX', currency: 'AUD', pe: 15.1, mktCap: '$17.0B', range52: [8.10, 10.40] },
+    'QAN.AX': { price: 6.45, name: 'Qantas Airways Ltd', exchange: 'ASX', currency: 'AUD', pe: 7.8, mktCap: '$10.5B', range52: [4.90, 6.80] },
+    'COL.AX': { price: 17.80, name: 'Coles Group Ltd', exchange: 'ASX', currency: 'AUD', pe: 22.5, mktCap: '$23.9B', range52: [15.20, 18.90] },
+    'GMG.AX': { price: 35.40, name: 'Goodman Group', exchange: 'ASX', currency: 'AUD', pe: 28.0, mktCap: '$67.5B', range52: [21.50, 37.20] },
+    'TCL.AX': { price: 13.20, name: 'Transurban Group', exchange: 'ASX', currency: 'AUD', pe: 38.0, mktCap: '$40.8B', range52: [12.20, 14.30] },
+    'COH.AX': { price: 315.00, name: 'Cochlear Limited', exchange: 'ASX', currency: 'AUD', pe: 48.0, mktCap: '$20.6B', range52: [240.00, 335.00] },
+    'PLS.AX': { price: 2.85, name: 'Pilbara Minerals Ltd', exchange: 'ASX', currency: 'AUD', pe: 18.5, mktCap: '$8.6B', range52: [2.50, 4.40] },
+    'MIN.AX': { price: 42.10, name: 'Mineral Resources Ltd', exchange: 'ASX', currency: 'AUD', pe: 16.0, mktCap: '$8.2B', range52: [35.00, 75.00] },
+    'JBH.AX': { price: 78.50, name: 'JB Hi-Fi Limited', exchange: 'ASX', currency: 'AUD', pe: 17.2, mktCap: '$8.6B', range52: [46.00, 83.00] },
+    'FLT.AX': { price: 21.50, name: 'Flight Centre Travel Group', exchange: 'ASX', currency: 'AUD', pe: 19.0, mktCap: '$4.7B', range52: [18.00, 24.50] },
+    'DRO.AX': { price: 1.15, name: 'DroneShield Ltd', exchange: 'ASX', currency: 'AUD', pe: 35.0, mktCap: '$950M', range52: [0.35, 2.60] },
+    'ZIP.AX': { price: 2.65, name: 'Zip Co Limited', exchange: 'ASX', currency: 'AUD', pe: 25.0, mktCap: '$3.2B', range52: [0.30, 3.15] },
+    'NXT.AX': { price: 16.80, name: 'NEXTDC Limited', exchange: 'ASX', currency: 'AUD', pe: 45.0, mktCap: '$9.8B', range52: [11.50, 18.20] },
 
     // US Tech & Leaders
     'AAPL': { price: 228.50, name: 'Apple Inc.', exchange: 'NASDAQ', currency: 'USD', pe: 34.1, mktCap: '$3.48T', range52: [164.00, 237.23] },
@@ -236,7 +274,10 @@ const MarketService = {
     'WMT': { price: 78.50, name: 'Walmart Inc.', exchange: 'NYSE', currency: 'USD', pe: 31.0, mktCap: '$630B', range52: [49.85, 80.00] },
     'NKE': { price: 82.20, name: 'NIKE, Inc.', exchange: 'NYSE', currency: 'USD', pe: 24.1, mktCap: '$124B', range52: [70.75, 123.39] },
     'MCD': { price: 292.10, name: 'McDonald\'s Corporation', exchange: 'NYSE', currency: 'USD', pe: 25.8, mktCap: '$209B', range52: [243.00, 302.00] },
-    'BA': { price: 160.50, name: 'The Boeing Company', exchange: 'NYSE', currency: 'USD', pe: 'N/A', mktCap: '$98B', range52: [155.00, 267.54] }
+    'BA': { price: 160.50, name: 'The Boeing Company', exchange: 'NYSE', currency: 'USD', pe: 'N/A', mktCap: '$98B', range52: [155.00, 267.54] },
+    'PLTR': { price: 37.50, name: 'Palantir Technologies Inc.', exchange: 'NYSE', currency: 'USD', pe: 85.0, mktCap: '$83B', range52: [15.00, 38.50] },
+    'XOM': { price: 116.00, name: 'Exxon Mobil Corporation', exchange: 'NYSE', currency: 'USD', pe: 13.5, mktCap: '$505B', range52: [98.00, 123.00] },
+    'GME': { price: 22.40, name: 'GameStop Corp.', exchange: 'NYSE', currency: 'USD', pe: 'N/A', mktCap: '$9.6B', range52: [9.95, 64.83] }
   },
 
   _getSimulatedQuote(symbol) {
@@ -280,16 +321,18 @@ const MarketService = {
     const quote = this._getSimulatedQuote(symbol);
     const now = Date.now();
     const points = [];
+    const normRange = this.normalizeRange(range);
 
     const config = {
       '1d': { count: 48, stepMs: 5 * 60 * 1000, volatility: 0.004, trend: (quote.changePercent / 100) },
       '5d': { count: 40, stepMs: 30 * 60 * 1000, volatility: 0.008, trend: (quote.changePercent / 100) * 1.5 },
       '1mo': { count: 30, stepMs: 24 * 3600 * 1000, volatility: 0.015, trend: 0.03 },
+      '3mo': { count: 45, stepMs: 2 * 24 * 3600 * 1000, volatility: 0.018, trend: 0.05 },
       '6mo': { count: 50, stepMs: 3.6 * 24 * 3600 * 1000, volatility: 0.02, trend: 0.08 },
       '1y': { count: 52, stepMs: 7 * 24 * 3600 * 1000, volatility: 0.025, trend: 0.14 },
       '5y': { count: 60, stepMs: 30 * 24 * 3600 * 1000, volatility: 0.04, trend: 0.65 },
       'max': { count: 70, stepMs: 45 * 24 * 3600 * 1000, volatility: 0.05, trend: 1.20 }
-    }[range] || { count: 30, stepMs: 24 * 3600 * 1000, volatility: 0.015, trend: 0.03 };
+    }[normRange] || { count: 30, stepMs: 24 * 3600 * 1000, volatility: 0.015, trend: 0.03 };
 
     const endPrice = quote.price;
     const startPrice = endPrice / (1 + config.trend);

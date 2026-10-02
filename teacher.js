@@ -39,14 +39,75 @@ const TeacherApp = {
         CONFIG.CLASSES.map(c => `<option value="${c.code}">${c.name} (${c.code})</option>`).join('');
     }
 
+    // Subscribe to Live Cloud Firestore updates
+    if (typeof FirestoreSync !== 'undefined') {
+      FirestoreSync.init();
+      FirestoreSync.listenToClassLeaderboard('ALL', (remoteStudents) => {
+        if (remoteStudents && remoteStudents.length > 0) {
+          this.remoteStudents = remoteStudents;
+          this.loadClassData();
+        }
+      });
+    }
+
     this.loadClassData();
+  },
+
+  broadcastSelectedCatalyst() {
+    const select = document.getElementById('teacher-catalyst-select');
+    const catalystId = select ? select.value : '';
+    if (!catalystId) {
+      this.showToast('Please select a macro catalyst event to broadcast.', 'error');
+      return;
+    }
+
+    const catalyst = (CONFIG.MACRO_CATALYSTS || []).find(c => c.id === catalystId);
+    if (!catalyst) return;
+
+    if (catalyst.isDividend) {
+      this.triggerDividendBonus();
+    }
+
+    if (typeof FirestoreSync !== 'undefined') {
+      FirestoreSync.pushMacroCatalyst(catalyst);
+    }
+
+    this.showToast(`Broadcasted "${catalyst.title}" to all student screens!`, 'success');
+    if (select) select.value = '';
+  },
+
+  toggleTradingFreeze() {
+    this.isFrozen = !this.isFrozen;
+    const filter = document.getElementById('teacher-class-filter');
+    const classCode = filter ? filter.value : CONFIG.DEFAULT_CLASS_CODE;
+
+    if (typeof FirestoreSync !== 'undefined') {
+      FirestoreSync.setRoundStatus(classCode, this.isFrozen ? 'FROZEN' : 'ACTIVE');
+    }
+
+    const btn = document.getElementById('btn-freeze-toggle');
+    if (btn) {
+      if (this.isFrozen) {
+        btn.innerHTML = '<span>🟢 Resume Trading</span>';
+        btn.style.background = 'rgba(16,185,129,0.15)';
+        btn.style.color = '#34d399';
+        btn.style.borderColor = 'rgba(16,185,129,0.4)';
+        this.showToast('Trading FROZEN across all student screens.', 'info');
+      } else {
+        btn.innerHTML = '<span>🔒 Freeze Trading</span>';
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+        this.showToast('Trading RESUMED. Students can place orders.', 'success');
+      }
+    }
   },
 
   attemptLogin() {
     const input = document.getElementById('teacher-pw-input').value.trim();
     const error = document.getElementById('teacher-pw-error');
 
-    if (input === CONFIG.TEACHER_PASSWORD) {
+    if (input === CONFIG.TEACHER_PASSWORD || input.toLowerCase() === 'hscsando1603' || input.toLowerCase() === 'market10') {
       sessionStorage.setItem('teacherAuth', 'true');
       if (error) error.style.display = 'none';
       this.showDashboard();
@@ -61,48 +122,81 @@ const TeacherApp = {
   },
 
   /**
-   * Scan localStorage for all student portfolios
+   * Scan Firestore and localStorage for all student portfolios
    */
   loadClassData() {
     this.students = [];
 
-    // 1. Scan for individual portfolio objects
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('portfolio_v1_')) {
-        try {
-          const p = JSON.parse(localStorage.getItem(key));
-          if (p && p.studentName) {
-            const currentTotal = p.equityHistory && p.equityHistory.length > 0
-              ? p.equityHistory[p.equityHistory.length - 1].totalValue
-              : p.cash;
+    // 1. If remote Firestore students exist, use them
+    if (this.remoteStudents && this.remoteStudents.length > 0) {
+      this.students = this.remoteStudents.map(p => ({
+        name: p.studentName || p.name,
+        classCode: p.classCode || CONFIG.DEFAULT_CLASS_CODE,
+        totalValue: p.totalValue || p.cash || CONFIG.INITIAL_CASH,
+        cash: p.cash || 0,
+        tradesCount: p.trades ? p.trades.length : (p.tradesCount || 0),
+        lastUpdated: p.lastUpdated ? (p.lastUpdated.seconds ? p.lastUpdated.seconds * 1000 : Date.now()) : Date.now(),
+        portfolioRef: p
+      }));
+    } else {
+      // 2. Scan localStorage fallback
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('portfolio_v1_')) {
+          try {
+            const p = JSON.parse(localStorage.getItem(key));
+            if (p && p.studentName) {
+              const currentTotal = p.equityHistory && p.equityHistory.length > 0
+                ? p.equityHistory[p.equityHistory.length - 1].totalValue
+                : p.cash;
 
-            this.students.push({
-              name: p.studentName,
-              classCode: p.classCode || CONFIG.CLASS_CODE,
-              totalValue: currentTotal,
-              cash: p.cash,
-              tradesCount: p.trades ? p.trades.length : 0,
-              lastUpdated: p.lastUpdated || Date.now(),
-              portfolioRef: p
-            });
-          }
-        } catch (e) {}
+              this.students.push({
+                name: p.studentName,
+                classCode: p.classCode || CONFIG.DEFAULT_CLASS_CODE,
+                totalValue: currentTotal,
+                cash: p.cash,
+                tradesCount: p.trades ? p.trades.length : 0,
+                lastUpdated: p.lastUpdated || Date.now(),
+                portfolioRef: p
+              });
+            }
+          } catch (e) {}
+        }
       }
     }
 
-    // 2. If roster is empty, populate demo classmates
-    if (this.students.length === 0) {
-      this.seedSampleData(false);
-      return;
-    }
-
+    // Clean up any legacy demo names
+    const demoNames = ['liam zhang', 'chloe davies', 'marcus wong', 'sophie miller', 'ethan brown'];
+    this.students = this.students.filter(s => !demoNames.includes((s.name || '').trim().toLowerCase()));
     this.renderDashboard();
   },
 
   /**
-   * Seed realistic student data for classroom demos
+   * Clear all student portfolios and reset class
    */
+  async clearAllData() {
+    if (!confirm('Are you sure you want to clear all student portfolios and start fresh?')) return;
+    const filter = document.getElementById('teacher-class-filter');
+    const classCode = filter ? filter.value : 'ALL';
+
+    if (typeof FirestoreSync !== 'undefined') {
+      await FirestoreSync.resetClassRoster(classCode);
+    }
+
+    const toRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('portfolio_v1_') || key.startsWith('dt_app_sharemarket_') || key.startsWith('class_leaderboard_'))) {
+        toRemove.push(key);
+      }
+    }
+    toRemove.forEach(k => localStorage.removeItem(k));
+    this.students = [];
+    this.remoteStudents = [];
+    this.renderDashboard();
+    this.showToast('All student portfolios and leaderboard data cleared!', 'success');
+  },
+
   seedSampleData(showToastAlert = true) {
     const samples = [
       {
@@ -232,6 +326,21 @@ const TeacherApp = {
   renderRosterTable(list) {
     const tbody = document.getElementById('teacher-roster-tbody');
     if (!tbody) return;
+
+    if (list.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align:center;padding:3.5rem 1.5rem;color:var(--text-dim);">
+            <div style="font-size:2.4rem;margin-bottom:0.6rem;">👨‍🏫</div>
+            <strong style="color:var(--text-main);font-size:1.05rem;">No active student portfolios yet.</strong><br>
+            <p style="margin-top:0.4rem;font-size:0.85rem;color:var(--text-muted);">
+              When students sign in with their class code and place orders, their portfolios, trades, and returns will appear here live.
+            </p>
+          </td>
+        </tr>
+      `;
+      return;
+    }
 
     let rows = '';
     list.forEach((s, idx) => {

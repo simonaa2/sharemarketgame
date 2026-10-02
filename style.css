@@ -707,6 +707,68 @@ body {
   font-size: 0.85rem;
 }
 
+/* Autocomplete Dropdown */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75);
+  z-index: 100;
+  max-height: 340px;
+  overflow-y: auto;
+  backdrop-filter: blur(16px);
+}
+.search-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.search-result-item:hover {
+  background: rgba(6, 182, 212, 0.12);
+}
+.search-result-item:last-child {
+  border-bottom: none;
+}
+.search-result-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.search-result-sym {
+  font-family: var(--font-head);
+  font-weight: 700;
+  color: #fff;
+  font-size: 0.95rem;
+}
+.search-result-name {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.search-result-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.search-result-price {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #fff;
+  font-size: 0.88rem;
+  text-align: right;
+}
+
 /* Stock Cards Grid in Explorer */
 .stock-grid {
   display: grid;

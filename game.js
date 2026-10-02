@@ -30,23 +30,133 @@ const GameApp = {
 
     // Start background market ticker refresh every 45s
     this.refreshTimer = setInterval(() => this.backgroundRefresh(), 45000);
+
+    // Initialize Cloud Firestore Real-Time Subscriptions
+    this.initCloudSync();
   },
 
   /**
-   * Auth Guard
+   * Cloud Firestore Real-Time Subscriptions & Event Listeners
+   */
+  initCloudSync() {
+    if (typeof FirestoreSync === 'undefined') return;
+
+    FirestoreSync.init();
+
+    // 1. Subscribe to Live Class Leaderboard (Cross-laptop real-time sync)
+    FirestoreSync.listenToClassLeaderboard(this.student.classCode, (remoteStudents) => {
+      if (remoteStudents && remoteStudents.length > 0) {
+        this.remoteClassmates = remoteStudents;
+        this.renderLeaderboard();
+      }
+    });
+
+    // 2. Subscribe to Teacher Macro Catalysts & Market Events
+    FirestoreSync.listenToMacroCatalysts((catalyst) => {
+      this.handleMacroCatalystEvent(catalyst);
+    });
+
+    // 3. Subscribe to Round Freeze / Active Status
+    FirestoreSync.listenToRoundStatus(this.student.classCode, (status) => {
+      this.handleRoundStatusChange(status);
+    });
+  },
+
+  handleMacroCatalystEvent(catalyst) {
+    if (!catalyst) return;
+    const banner = document.getElementById('macro-catalyst-banner');
+    const title = document.getElementById('catalyst-banner-title');
+    const summary = document.getElementById('catalyst-banner-summary');
+    if (banner && title && summary) {
+      title.textContent = catalyst.title || 'Breaking Economic News:';
+      summary.textContent = catalyst.summary || '';
+      banner.style.display = 'block';
+    }
+    this.showToast(`🚨 BREAKING NEWS: ${catalyst.title}`, 'info');
+  },
+
+  handleRoundStatusChange(status) {
+    this.roundStatus = status;
+    const badge = document.getElementById('round-status-badge');
+    if (badge) {
+      if (status === 'FROZEN') {
+        badge.textContent = '🔒 TRADING FROZEN';
+        badge.style.background = 'rgba(239,68,68,0.2)';
+        badge.style.color = '#f87171';
+      } else {
+        badge.textContent = '🟢 TRADING OPEN';
+        badge.style.background = 'rgba(16,185,129,0.2)';
+        badge.style.color = '#34d399';
+      }
+    }
+  },
+
+  /**
+   * Auth Guard & SDK Initialization (Unified SSO)
    */
   checkAuth() {
-    const studentName = sessionStorage.getItem('studentName');
-    const classCode = sessionStorage.getItem('classCode');
+    // 1. DataTrends Platform Authentication Session (Single Sign-On)
+    if (typeof DataTrendsAuth !== 'undefined') {
+      try {
+        DataTrendsAuth.init();
+        const portalUser = DataTrendsAuth.getUser();
+        if (portalUser && portalUser.name) {
+          this.student = {
+            name: portalUser.name,
+            classCode: portalUser.classCode || CONFIG.DEFAULT_CLASS_CODE || '10COMM1'
+          };
+          sessionStorage.setItem('studentName', this.student.name);
+          sessionStorage.setItem('classCode', this.student.classCode);
+          return;
+        }
+      } catch (e) {
+        console.warn('DataTrendsAuth SSO check:', e);
+      }
+    }
 
-    if (!studentName) {
-      window.location.href = 'index.html';
+    // 2. DataTrends Universal SDK Integration
+    if (window.DataTrendsSDK) {
+      try {
+        this.dtSdk = new window.DataTrendsSDK({
+          appId: 'sharemarket',
+          appName: 'Global Share Market Arena',
+          portalUrl: (typeof DataTrendsAuth !== 'undefined') ? '../../launchpad.html' : 'index.html'
+        });
+        this.dtSdk.init();
+        const u = this.dtSdk.getUser();
+        if (u) {
+          this.student = {
+            name: u.name,
+            classCode: (u.classes && u.classes.length > 0) ? u.classes[0] : (CONFIG.DEFAULT_CLASS_CODE || '10COMM1')
+          };
+          return;
+        }
+      } catch (e) {
+        console.warn('DataTrendsSDK initialization fallback', e);
+      }
+    }
+
+    // 3. Direct URL parameters (?student=...&class=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramStudent = urlParams.get('student');
+    const paramClass = urlParams.get('class');
+    if (paramStudent) {
+      this.student = {
+        name: paramStudent,
+        classCode: paramClass || CONFIG.DEFAULT_CLASS_CODE || '10COMM1'
+      };
+      sessionStorage.setItem('studentName', paramStudent);
+      sessionStorage.setItem('classCode', this.student.classCode);
       return;
     }
 
+    // 4. Fallback to existing sessionStorage or Guest Trader
+    const studentName = sessionStorage.getItem('studentName');
+    const classCode = sessionStorage.getItem('classCode');
+
     this.student = {
-      name: studentName,
-      classCode: classCode || CONFIG.CLASS_CODE
+      name: studentName || 'Guest Trader',
+      classCode: classCode || CONFIG.DEFAULT_CLASS_CODE || '10COMM1'
     };
   },
 
@@ -110,6 +220,16 @@ const GameApp = {
     localStorage.setItem(storageKey, JSON.stringify(this.portfolio));
 
     this._updateClassRoster();
+
+    // Cloud Firestore Live Classroom Sync
+    if (typeof FirestoreSync !== 'undefined') {
+      FirestoreSync.saveStudentPortfolio(this.student.name, this.student.classCode, this.portfolio);
+    }
+
+    // DataTrends Universal SDK Cloud Sync
+    if (this.dtSdk) {
+      this.dtSdk.saveData(this.portfolio).catch(() => {});
+    }
 
     // Sync with Google Apps Script if URL provided
     if (CONFIG.SCRIPT_URL && CONFIG.SCRIPT_URL.trim() !== '') {
@@ -233,8 +353,45 @@ const GameApp = {
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
         this.searchStockGrid(e.target.value);
+        this.showSearchDropdown('stock-search-input', 'explorer-search-results', e.target.value);
+      });
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.handleSearchEnter('stock-search-input', 'explorer-search-results');
+        }
       });
     }
+
+    const dashSearch = document.getElementById('dashboard-stock-search');
+    if (dashSearch) {
+      dashSearch.addEventListener('input', (e) => {
+        this.showSearchDropdown('dashboard-stock-search', 'dashboard-search-results', e.target.value);
+      });
+      dashSearch.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.handleQuickSearch();
+        }
+      });
+    }
+
+    const btnDashSearch = document.getElementById('btn-dashboard-search');
+    if (btnDashSearch) {
+      btnDashSearch.addEventListener('click', () => {
+        this.handleQuickSearch();
+      });
+    }
+
+    // Close search dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.search-input-wrap')) {
+        const d1 = document.getElementById('dashboard-search-results');
+        const d2 = document.getElementById('explorer-search-results');
+        if (d1) d1.style.display = 'none';
+        if (d2) d2.style.display = 'none';
+      }
+    });
 
     const modalClose = document.getElementById('modal-close-btn');
     if (modalClose) {
@@ -258,6 +415,11 @@ const GameApp = {
     const sharesInput = document.getElementById('order-shares-input');
     if (sharesInput) {
       sharesInput.addEventListener('input', () => this.updateOrderCalculations());
+    }
+
+    const rationaleInput = document.getElementById('order-justification-input');
+    if (rationaleInput) {
+      rationaleInput.addEventListener('input', () => this.updateOrderCalculations());
     }
 
     const btnMaxShares = document.getElementById('btn-max-shares');
@@ -300,7 +462,11 @@ const GameApp = {
       btnLogout.addEventListener('click', () => {
         sessionStorage.removeItem('studentName');
         sessionStorage.removeItem('classCode');
-        window.location.href = 'index.html?logout=true';
+        if (this.dtSdk) {
+          window.location.href = (typeof DataTrendsAuth !== 'undefined' && DataTrendsAuth.getUser()) ? '../../launchpad.html' : 'index.html?logout=true';
+        } else {
+          window.location.href = 'index.html?logout=true';
+        }
       });
     }
   },
@@ -685,7 +851,7 @@ const GameApp = {
       const audPrice = MarketService.toAUD(q.price, s.currency);
 
       html += `
-        <div class="stock-card" data-symbol="${s.symbol}" data-sector="${s.sector}" data-exchange="${s.exchange}" onclick="GameApp.openStockModal('${s.symbol}')">
+        <div class="stock-card" data-symbol="${s.symbol}" data-name="${s.name.toLowerCase().replace(/"/g, '')}" data-sector="${s.sector}" data-exchange="${s.exchange}" onclick="GameApp.openStockModal('${s.symbol}')">
           <div class="stock-card-top">
             <div>
               <div style="display:flex;align-items:center;gap:0.4rem;">
@@ -730,22 +896,216 @@ const GameApp = {
       } else if (filter === 'tech') {
         card.style.display = (sector.includes('Tech') || sector.includes('Semiconductors')) ? 'flex' : 'none';
       } else if (filter === 'mining') {
-        card.style.display = sector.includes('Mining') ? 'flex' : 'none';
+        card.style.display = (sector.includes('Mining') || sector.includes('Materials')) ? 'flex' : 'none';
       } else if (filter === 'banks') {
         card.style.display = sector.includes('Financial') ? 'flex' : 'none';
+      } else if (filter === 'energy') {
+        card.style.display = (sector.includes('Energy') || sector.includes('Oil')) ? 'flex' : 'none';
+      } else if (filter === 'travel') {
+        card.style.display = (sector.includes('Consumer') || sector.includes('Travel') || sector.includes('Aviation') || sector.includes('Retail')) ? 'flex' : 'none';
       }
     });
   },
 
   searchStockGrid(query) {
-    const q = query.toLowerCase().trim();
+    const q = (query || '').toLowerCase().trim();
+    const grid = document.getElementById('market-stocks-grid');
     const cards = document.querySelectorAll('.stock-card');
+    let matchCount = 0;
+    const aliasedTicker = (CONFIG.COMPANY_ALIASES && CONFIG.COMPANY_ALIASES[q]) ? CONFIG.COMPANY_ALIASES[q].toLowerCase() : null;
+
     cards.forEach(card => {
-      const sym = card.getAttribute('data-symbol').toLowerCase();
-      const sec = card.getAttribute('data-sector').toLowerCase();
-      const isMatch = sym.includes(q) || sec.includes(q);
+      const sym = (card.getAttribute('data-symbol') || '').toLowerCase();
+      const name = (card.getAttribute('data-name') || '').toLowerCase();
+      const sec = (card.getAttribute('data-sector') || '').toLowerCase();
+      const exch = (card.getAttribute('data-exchange') || '').toLowerCase();
+      const baseSym = sym.replace('.ax', '');
+
+      const isMatch = !q || sym.includes(q) || baseSym.includes(q) || name.includes(q) || sec.includes(q) || exch.includes(q) || (aliasedTicker && (sym === aliasedTicker || baseSym === aliasedTicker.replace('.ax', '')));
       card.style.display = isMatch ? 'flex' : 'none';
+      if (isMatch) matchCount++;
     });
+
+    // If no preloaded blue-chip matches, display live market search button
+    let emptyCard = document.getElementById('search-live-lookup-card');
+    if (q && matchCount === 0) {
+      if (!emptyCard && grid) {
+        emptyCard = document.createElement('div');
+        emptyCard.id = 'search-live-lookup-card';
+        emptyCard.className = 'section-card';
+        emptyCard.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 2.5rem 1.5rem; background: var(--bg-card2); border: 1px dashed var(--border-light); border-radius: 16px; margin: 1rem 0;';
+        grid.appendChild(emptyCard);
+      }
+      if (emptyCard) {
+        const cleanTicker = q.toUpperCase();
+        emptyCard.style.display = 'block';
+        emptyCard.innerHTML = `
+          <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🔍</div>
+          <h3 style="font-family: var(--font-head); font-size: 1.2rem; color: #fff; margin-bottom: 0.35rem;">
+            Search Global Market for "${cleanTicker}"
+          </h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem; max-width: 480px; margin: 0 auto 1.5rem;">
+            No preloaded blue-chip matches "<strong>${query}</strong>". You can fetch live market quotes and trade <strong>any</strong> ASX or US stock directly!
+          </p>
+          <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+            <button class="btn-primary" style="padding: 0.65rem 1.5rem; font-size: 0.9rem;" onclick="GameApp.searchAndOpenCustomStock('${cleanTicker}')">
+              ⚡ Quote &amp; Trade "${cleanTicker}" ➔
+            </button>
+            ${!cleanTicker.includes('.') ? `
+            <button class="btn-secondary" style="padding: 0.65rem 1.25rem; font-size: 0.9rem;" onclick="GameApp.searchAndOpenCustomStock('${cleanTicker}.AX')">
+              🇦🇺 Trade as ASX (${cleanTicker}.AX)
+            </button>` : ''}
+          </div>
+        `;
+      }
+    } else if (emptyCard) {
+      emptyCard.style.display = 'none';
+    }
+  },
+
+  handleSearchEnter(inputId, dropdownId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const q = input.value.trim();
+    if (!q) return;
+
+    const dropdown = document.getElementById(dropdownId);
+    if (dropdown) dropdown.style.display = 'none';
+
+    // If in explorer, check visible cards
+    const visibleCards = Array.from(document.querySelectorAll('.stock-card')).filter(c => c.style.display !== 'none');
+    if (visibleCards.length === 1) {
+      const sym = visibleCards[0].getAttribute('data-symbol');
+      this.openStockModal(sym);
+    } else {
+      this.searchAndOpenCustomStock(q);
+    }
+  },
+
+  handleQuickSearch() {
+    const input = document.getElementById('dashboard-stock-search');
+    if (!input) return;
+    const q = input.value.trim();
+    if (!q) return;
+
+    const dropdown = document.getElementById('dashboard-search-results');
+    if (dropdown) dropdown.style.display = 'none';
+
+    this.searchAndOpenCustomStock(q);
+  },
+
+  showSearchDropdown(inputId, dropdownId, query) {
+    const dropdown = document.getElementById(dropdownId);
+    if (!dropdown) return;
+    const q = (query || '').toLowerCase().trim();
+    if (!q) {
+      dropdown.style.display = 'none';
+      dropdown.innerHTML = '';
+      return;
+    }
+
+    const aliasedTicker = (CONFIG.COMPANY_ALIASES && CONFIG.COMPANY_ALIASES[q]) ? CONFIG.COMPANY_ALIASES[q].toUpperCase() : null;
+
+    const matches = CONFIG.FEATURED_STOCKS.filter(s => {
+      const sym = s.symbol.toLowerCase();
+      const baseSym = sym.replace('.ax', '');
+      const name = s.name.toLowerCase();
+      const sec = s.sector.toLowerCase();
+      const isAliasMatch = aliasedTicker && (s.symbol.toUpperCase() === aliasedTicker);
+      return isAliasMatch || sym.includes(q) || baseSym.includes(q) || name.includes(q) || sec.includes(q);
+    }).sort((a, b) => {
+      if (aliasedTicker) {
+        if (a.symbol.toUpperCase() === aliasedTicker) return -1;
+        if (b.symbol.toUpperCase() === aliasedTicker) return 1;
+      }
+      return 0;
+    }).slice(0, 6);
+
+    let html = '';
+    if (matches.length > 0) {
+      html += matches.map(s => {
+        const flag = s.exchange === 'ASX' ? '🇦🇺' : '🇺🇸';
+        const qData = MarketService.quoteCache[s.symbol.toUpperCase()]?.data;
+        const priceStr = qData ? `${s.currency === 'USD' ? 'US$' : '$'}${qData.price.toFixed(2)}` : '';
+        return `
+          <div class="search-result-item" onclick="GameApp.selectSearchResult('${s.symbol}', '${dropdownId}')">
+            <div class="search-result-left">
+              <span>${flag}</span>
+              <div>
+                <div class="search-result-sym">${s.symbol}</div>
+                <div class="search-result-name">${s.name}</div>
+              </div>
+            </div>
+            <div class="search-result-right">
+              <span class="search-result-price">${priceStr}</span>
+              <span class="btn-action-sm btn-buy-sm" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Trade ➔</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    const upperQ = q.toUpperCase();
+    html += `
+      <div class="search-result-item" style="background: rgba(6, 182, 212, 0.08); border-top: 1px solid var(--border);" onclick="GameApp.selectSearchResult('${aliasedTicker || upperQ}', '${dropdownId}')">
+        <div class="search-result-left">
+          <span style="font-size: 1.1rem;">⚡</span>
+          <div>
+            <div class="search-result-sym" style="color: var(--asx-blue);">Search global market for "${upperQ}"</div>
+            <div class="search-result-name">Fetch live price &amp; trade ticker directly</div>
+          </div>
+        </div>
+        <div class="search-result-right">
+          <span class="btn-action-sm btn-buy-sm" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; background: var(--asx-blue); color: #070b14;">Quote ➔</span>
+        </div>
+      </div>
+    `;
+
+    dropdown.innerHTML = html;
+    dropdown.style.display = 'block';
+  },
+
+  selectSearchResult(symbol, dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    if (dropdown) dropdown.style.display = 'none';
+    this.searchAndOpenCustomStock(symbol);
+  },
+
+  async searchAndOpenCustomStock(query) {
+    const raw = (query || '').trim().toUpperCase();
+    if (!raw) return;
+
+    const lower = query.toLowerCase().trim();
+    // 1. Check direct company aliases first (e.g. 'santos' -> 'STO.AX', 'woodside' -> 'WDS.AX')
+    let targetSymbol = (CONFIG.COMPANY_ALIASES && CONFIG.COMPANY_ALIASES[lower]) ? CONFIG.COMPANY_ALIASES[lower] : null;
+
+    // 2. Check if query matches any featured stock symbol or company name
+    if (!targetSymbol) {
+      const matchedFeatured = CONFIG.FEATURED_STOCKS.find(s => {
+        return s.symbol.toLowerCase() === lower ||
+               s.symbol.replace('.ax', '').toLowerCase() === lower ||
+               s.name.toLowerCase().includes(lower);
+      });
+      targetSymbol = matchedFeatured ? matchedFeatured.symbol : raw;
+    }
+
+    this.showToast(`Fetching quote for ${targetSymbol}...`, 'info');
+
+    try {
+      let quote = await MarketService.fetchQuote(targetSymbol);
+      if ((!quote || !quote.price) && !targetSymbol.includes('.')) {
+        quote = await MarketService.fetchQuote(targetSymbol + '.AX');
+      }
+
+      if (quote && quote.price) {
+        this.openStockModal(quote.symbol, 'BUY');
+        this.showToast(`Loaded ${quote.symbol} (${quote.name}): $${quote.price.toFixed(2)}`, 'success');
+      } else {
+        this.showToast(`Could not find symbol "${raw}". Try with .AX for ASX stocks.`, 'loss');
+      }
+    } catch (err) {
+      this.showToast(`Error finding ${raw}: ${err.message}`, 'loss');
+    }
   },
 
   /**
@@ -902,7 +1262,16 @@ const GameApp = {
     this.setOrderType(defaultOrder);
     modal.classList.add('open');
 
-    await this.loadStockChart(symbol, this.selectedRange);
+    const currentRange = this.selectedRange || '1mo';
+    document.querySelectorAll('#stock-timeline-pills .time-pill').forEach(p => {
+      if (p.getAttribute('data-range') === currentRange) {
+        p.classList.add('active');
+      } else {
+        p.classList.remove('active');
+      }
+    });
+
+    await this.loadStockChart(symbol, currentRange);
   },
 
   async loadStockChart(symbol, range) {
@@ -962,15 +1331,40 @@ const GameApp = {
     // Total portfolio valuation
     const totalPortfolioVal = this.portfolio.equityHistory[this.portfolio.equityHistory.length - 1]?.totalValue || this.portfolio.cash;
 
+    // Update rationale character counter
+    const rationaleInput = document.getElementById('order-justification-input');
+    const rationaleCounter = document.getElementById('rationale-char-counter');
+    const minChars = CONFIG.MANDATORY_RATIONALE_MIN_CHARS || 15;
+    const rationaleLen = (rationaleInput?.value || '').trim().length;
+    if (rationaleCounter) {
+      rationaleCounter.textContent = `${rationaleLen} / ${minChars} min`;
+      rationaleCounter.style.color = (this.orderType === 'BUY' && rationaleLen < minChars) ? '#f87171' : '#34d399';
+    }
+
+    if (this.roundStatus === 'FROZEN') {
+      btnExec.disabled = true;
+      warning.textContent = '🔒 Trading is currently frozen by your teacher for competition marking.';
+      warning.style.display = 'block';
+      return;
+    }
+
     if (this.orderType === 'BUY') {
       const totalCostAUD = subtotalAUD + brokerage;
       document.getElementById('calc-total').textContent = `$${totalCostAUD.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} AUD`;
 
-      // Diversification Cap Check (e.g. max 25%)
+      // Diversification Cap Check (enforce max 25%)
       const existingHolding = this.portfolio.holdings.find(h => h.symbol === quote.symbol);
       const existingVal = existingHolding ? (existingHolding.currentValueAUD || existingHolding.shares * existingHolding.avgPriceAUD) : 0;
       const resultingVal = existingVal + subtotalAUD;
       const maxAllowed = totalPortfolioVal * (CONFIG.MAX_POSITION_PERCENT / 100);
+
+      // Update projected position size pill
+      const positionPct = totalPortfolioVal > 0 ? (resultingVal / totalPortfolioVal) * 100 : 0;
+      const posPill = document.getElementById('modal-position-pct');
+      if (posPill) {
+        posPill.textContent = `${positionPct.toFixed(1)}% / ${CONFIG.MAX_POSITION_PERCENT}% Max`;
+        posPill.style.color = (positionPct > CONFIG.MAX_POSITION_PERCENT + 0.1) ? '#f87171' : 'var(--asx-blue)';
+      }
 
       if (shares <= 0) {
         btnExec.disabled = true;
@@ -979,10 +1373,10 @@ const GameApp = {
         btnExec.disabled = true;
         warning.textContent = `Insufficient cash ($${this.portfolio.cash.toFixed(2)} AUD available).`;
         warning.style.display = 'block';
-      } else if (CONFIG.DIVERSIFICATION_CAP_ENABLED && resultingVal > maxAllowed && totalPortfolioVal >= CONFIG.INITIAL_CASH * 0.7) {
+      } else if (CONFIG.DIVERSIFICATION_CAP_ENABLED && resultingVal > (maxAllowed + 0.5) && totalPortfolioVal >= CONFIG.INITIAL_CASH * 0.7) {
         // Enforce 25% cap
         btnExec.disabled = true;
-        warning.textContent = `Diversification Rule: Single stock cannot exceed ${CONFIG.MAX_POSITION_PERCENT}% ($${maxAllowed.toFixed(2)} AUD) of total portfolio.`;
+        warning.textContent = `Diversification Rule: Single company cannot exceed ${CONFIG.MAX_POSITION_PERCENT}% ($${maxAllowed.toFixed(2)} AUD) of total portfolio.`;
         warning.style.display = 'block';
       } else {
         btnExec.disabled = false;
@@ -992,6 +1386,12 @@ const GameApp = {
       // SELL
       const netProceedsAUD = Math.max(0, subtotalAUD - brokerage);
       document.getElementById('calc-total').textContent = `$${netProceedsAUD.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} AUD`;
+
+      const posPill = document.getElementById('modal-position-pct');
+      if (posPill) {
+        posPill.textContent = 'Closing / Trimming Position';
+        posPill.style.color = '#34d399';
+      }
 
       const holding = this.portfolio.holdings.find(h => h.symbol === quote.symbol);
       const owned = holding ? holding.shares : 0;
@@ -1042,6 +1442,11 @@ const GameApp = {
   submitOrder() {
     if (!this.selectedStock) return;
 
+    if (this.roundStatus === 'FROZEN') {
+      this.showToast('Trading is currently frozen by your teacher for competition assessment.', 'error');
+      return;
+    }
+
     const sharesInput = document.getElementById('order-shares-input');
     const shares = parseInt(sharesInput.value) || 0;
     if (shares <= 0) return;
@@ -1052,8 +1457,27 @@ const GameApp = {
     const brokerage = CONFIG.BROKERAGE_FEE;
     const now = Date.now();
     const rationale = (document.getElementById('order-justification-input')?.value || '').trim();
+    const totalPortfolioVal = this.portfolio.equityHistory[this.portfolio.equityHistory.length - 1]?.totalValue || this.portfolio.cash;
 
     if (this.orderType === 'BUY') {
+      const minChars = CONFIG.MANDATORY_RATIONALE_MIN_CHARS || 15;
+      if (rationale.length < minChars) {
+        this.showToast(`Please write an investment thesis (min ${minChars} characters) explaining why you are buying this security for teacher assessment.`, 'error');
+        document.getElementById('order-justification-input')?.focus();
+        return;
+      }
+
+      // Check Diversification Cap
+      const existingHolding = this.portfolio.holdings.find(h => h.symbol === quote.symbol);
+      const existingVal = existingHolding ? (existingHolding.currentValueAUD || existingHolding.shares * existingHolding.avgPriceAUD) : 0;
+      const resultingVal = existingVal + subtotalAUD;
+      const maxAllowed = totalPortfolioVal * (CONFIG.MAX_POSITION_PERCENT / 100);
+
+      if (CONFIG.DIVERSIFICATION_CAP_ENABLED && resultingVal > (maxAllowed + 0.5) && totalPortfolioVal >= CONFIG.INITIAL_CASH * 0.7) {
+        this.showToast(`Diversification Rule: Single company cannot exceed ${CONFIG.MAX_POSITION_PERCENT}% ($${maxAllowed.toFixed(2)} AUD) of total portfolio.`, 'error');
+        return;
+      }
+
       const totalCostAUD = subtotalAUD + brokerage;
       if (totalCostAUD > this.portfolio.cash) {
         this.showToast('Order failed: Insufficient funds.', 'error');
@@ -1215,41 +1639,50 @@ const GameApp = {
     if (!tbody) return;
 
     let roster = [];
-    try {
-      roster = JSON.parse(localStorage.getItem('class_leaderboard_all_students') || '[]');
-    } catch (e) {}
-
-    if (roster.length < 5) {
-      const simulatedClassmates = [
-        { name: 'Liam Zhang', classCode: CONFIG.CLASS_CODE, totalValue: 54320.50, cash: 12400.00, tradesCount: 9 },
-        { name: 'Chloe Davies', classCode: CONFIG.CLASS_CODE, totalValue: 53150.00, cash: 8500.00, tradesCount: 14 },
-        { name: 'Marcus Wong', classCode: CONFIG.CLASS_CODE, totalValue: 51890.20, cash: 18900.00, tradesCount: 6 },
-        { name: 'Sophie Miller', classCode: CONFIG.CLASS_CODE, totalValue: 49450.00, cash: 24000.00, tradesCount: 8 },
-        { name: 'Ethan Brown', classCode: CONFIG.CLASS_CODE, totalValue: 47800.00, cash: 3100.00, tradesCount: 18 }
-      ];
-
-      simulatedClassmates.forEach(s => {
-        if (!roster.some(r => r.name === s.name)) {
-          roster.push(s);
-        }
-      });
+    if (this.remoteClassmates && this.remoteClassmates.length > 0) {
+      roster = this.remoteClassmates.map(s => ({
+        name: s.studentName || s.name,
+        classCode: s.classCode || CONFIG.DEFAULT_CLASS_CODE,
+        totalValue: s.totalValue || s.cash || CONFIG.INITIAL_CASH,
+        cash: s.cash || 0,
+        tradesCount: s.tradesCount || 0,
+        holdingsCount: s.holdingsCount || (s.holdings ? s.holdings.length : 0),
+        holdings: s.holdings || [],
+        trades: s.trades || [],
+        journal: s.journal || {}
+      }));
+    } else {
+      try {
+        roster = JSON.parse(localStorage.getItem('class_leaderboard_all_students') || '[]');
+      } catch (e) {}
     }
 
-    const currentTotalVal = this.portfolio.equityHistory[this.portfolio.equityHistory.length - 1]?.totalValue || this.portfolio.cash;
-    const currentStudentObj = {
-      name: this.student.name,
-      classCode: this.student.classCode,
-      totalValue: currentTotalVal,
-      cash: this.portfolio.cash,
-      tradesCount: this.portfolio.trades.length,
-      isUser: true
-    };
+    // Purge any legacy simulated demo classmates
+    const demoNames = ['liam zhang', 'chloe davies', 'marcus wong', 'sophie miller', 'ethan brown'];
+    roster = roster.filter(s => !demoNames.includes((s.name || '').trim().toLowerCase()));
 
-    const userIdx = roster.findIndex(s => s.name.toLowerCase() === this.student.name.toLowerCase());
-    if (userIdx >= 0) {
-      roster[userIdx] = currentStudentObj;
-    } else {
-      roster.push(currentStudentObj);
+    // Include current student only if they have placed at least 1 trade or registered
+    const userTradeCount = (this.portfolio && this.portfolio.trades) ? this.portfolio.trades.length : 0;
+    if (userTradeCount > 0) {
+      const currentTotalVal = this.portfolio.equityHistory[this.portfolio.equityHistory.length - 1]?.totalValue || this.portfolio.cash;
+      const currentStudentObj = {
+        name: this.student.name,
+        classCode: this.student.classCode,
+        totalValue: currentTotalVal,
+        cash: this.portfolio.cash,
+        tradesCount: userTradeCount,
+        holdingsCount: (this.portfolio.holdings || []).length,
+        holdings: this.portfolio.holdings || [],
+        trades: this.portfolio.trades || [],
+        isUser: true
+      };
+
+      const userIdx = roster.findIndex(s => s.name.toLowerCase() === this.student.name.toLowerCase());
+      if (userIdx >= 0) {
+        roster[userIdx] = currentStudentObj;
+      } else {
+        roster.push(currentStudentObj);
+      }
     }
 
     // Populate class filter dropdown
@@ -1264,10 +1697,28 @@ const GameApp = {
       ? roster
       : roster.filter(s => (s.classCode || CONFIG.DEFAULT_CLASS_CODE) === selectedClass || s.name.toLowerCase() === this.student.name.toLowerCase());
 
-    filteredRoster.sort((a, b) => b.totalValue - a.totalValue);
+    // Filter to active traders only (with at least 1 trade)
+    const activeTraders = filteredRoster.filter(s => (s.tradesCount || 0) > 0);
+    activeTraders.sort((a, b) => b.totalValue - a.totalValue);
+
+    if (activeTraders.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align:center;padding:3.5rem 1.5rem;color:var(--text-dim);">
+            <div style="font-size:2.4rem;margin-bottom:0.75rem;">📈</div>
+            <strong style="color:var(--text-main);font-size:1.1rem;">The Trading Floor Is Open!</strong><br>
+            <p style="margin-top:0.5rem;font-size:0.88rem;color:var(--text-muted);max-width:480px;margin-left:auto;margin-right:auto;line-height:1.6;">
+              No trades have been executed yet in this class cohort.<br>
+              Research equities on the <strong style="color:var(--asx-blue);">Trading Floor</strong> and place your first buy order to take #1 on the leaderboard!
+            </p>
+          </td>
+        </tr>
+      `;
+      return;
+    }
 
     let rows = '';
-    filteredRoster.forEach((s, idx) => {
+    activeTraders.forEach((s, idx) => {
       const rank = idx + 1;
       const rankBadge = rank === 1 ? '🥇 1' : rank === 2 ? '🥈 2' : rank === 3 ? '🥉 3' : `#${rank}`;
       const roi = ((s.totalValue - CONFIG.INITIAL_CASH) / CONFIG.INITIAL_CASH) * 100;
@@ -1276,14 +1727,29 @@ const GameApp = {
       const isCurrentUser = s.name.toLowerCase() === this.student.name.toLowerCase();
       const displayName = isCurrentUser ? this.student.name : this.formatStudentName(s.name, true);
 
+      // Compute Syllabus Badges
+      const badges = [];
+      if (roi > ((CONFIG.BENCHMARK_ANNUAL_RETURN || 0.082) * 100)) {
+        badges.push('<span class="tab-badge" style="background:rgba(52,211,153,0.15);color:#34d399;" title="Beating ASX 200 Benchmark">🏛️ Beat Market</span>');
+      }
+      const hCount = s.holdingsCount || (s.holdings ? s.holdings.length : 0);
+      if (hCount >= 3) {
+        badges.push('<span class="tab-badge" style="background:rgba(96,165,250,0.15);color:#60a5fa;" title="Well Diversified (3+ Holdings)">🧺 Diversified</span>');
+      }
+      if ((s.tradesCount || 0) >= 1) {
+        badges.push('<span class="tab-badge" style="background:rgba(192,132,252,0.15);color:#c084fc;" title="Investment Thesis Documented">📔 Journal</span>');
+      }
+      const badgeHtml = badges.length > 0 ? badges.join(' ') : '<span style="color:var(--text-dim);font-size:0.75rem;">-</span>';
+
       rows += `
         <tr style="${isCurrentUser ? 'background:rgba(6,182,212,0.1);font-weight:600;' : ''}">
-          <td style="font-family:var(--font-mono);">${rankBadge}</td>
+          <td style="font-family:var(--font-mono);font-weight:700;">${rankBadge}</td>
           <td>
             ${displayName} ${isCurrentUser ? '<span class="tab-badge" style="background:var(--asx-blue);color:#070b14;margin-left:0.4rem;">YOU</span>' : ''}
           </td>
           <td class="num-cell" style="font-weight:700;">$${s.totalValue.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} AUD</td>
           <td class="num-cell ${isProfit ? 'val-up' : 'val-down'}">${sign}${roi.toFixed(2)}%</td>
+          <td style="white-space:nowrap;">${badgeHtml}</td>
           <td class="num-cell">$${s.cash.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
           <td class="num-cell">${s.tradesCount || 0}</td>
         </tr>
