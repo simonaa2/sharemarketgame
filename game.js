@@ -43,6 +43,22 @@ const GameApp = {
 
     FirestoreSync.init();
 
+    // Immediately push active student portfolio on login so teacher dashboard sees student right away
+    FirestoreSync.saveStudentPortfolio(this.student.name, this.student.classCode, this.portfolio);
+
+    // Also check if Cloud Firestore has richer remote data (e.g., teacher grade or cross-device state)
+    FirestoreSync.loadStudentPortfolio(this.student.name, this.student.classCode).then(remote => {
+      if (remote) {
+        if (remote.grades && Object.keys(remote.grades).length > 0) {
+          this.portfolio.grades = remote.grades;
+        }
+        if (remote.missions && Object.keys(remote.missions).length > Object.keys(this.portfolio.missions || {}).length) {
+          this.portfolio.missions = { ...remote.missions, ...(this.portfolio.missions || {}) };
+          this.renderMissions();
+        }
+      }
+    }).catch(() => {});
+
     // 1. Subscribe to Live Class Leaderboard (Cross-laptop real-time sync)
     FirestoreSync.listenToClassLeaderboard(this.student.classCode, (remoteStudents) => {
       if (remoteStudents && remoteStudents.length > 0) {
@@ -184,6 +200,7 @@ const GameApp = {
         holdings: [],
         trades: [],
         journal: {}, // symbol -> { thesis, riskFactors, priceTarget, updated }
+        missions: {}, // moduleId -> { response, completed, updated }
         watchlist: ['BHP.AX', 'NVDA', 'CBA.AX'], // default starter watchlist
         lastDividendTimestamp: now,
         equityHistory: [
@@ -206,6 +223,7 @@ const GameApp = {
       this.savePortfolio();
     } else {
       if (!this.portfolio.journal) this.portfolio.journal = {};
+      if (!this.portfolio.missions) this.portfolio.missions = {};
       if (!this.portfolio.lastDividendTimestamp) this.portfolio.lastDividendTimestamp = Date.now();
       if (!this.portfolio.watchlist) this.portfolio.watchlist = ['BHP.AX', 'NVDA', 'CBA.AX'];
     }
@@ -487,6 +505,9 @@ const GameApp = {
     if (tabId === 'tab-portfolio') {
       ChartManager.renderPortfolioChart('portfolio-chart-canvas', this.portfolio.equityHistory, this.selectedPortfolioRange);
       ChartManager.renderAllocationChart('allocation-chart-canvas', this.portfolio.holdings, this.portfolio.cash);
+    } else if (tabId === 'tab-missions') {
+      this.renderMissions();
+      this.calculateIndependence();
     } else if (tabId === 'tab-journal') {
       this.renderJournal();
     } else if (tabId === 'tab-leaderboard') {
@@ -550,6 +571,8 @@ const GameApp = {
 
     await this.renderMarketExplorer();
     this.renderTradeLedger();
+    this.renderMissions();
+    this.calculateIndependence();
     await this.renderTickerTape();
 
     this.savePortfolio();
@@ -1204,6 +1227,229 @@ const GameApp = {
       this.savePortfolio();
       if (badge) badge.textContent = '✓ Autosaved';
     }, 800);
+  },
+
+  /**
+   * 3-Week Independent Student Program & Financial Independence Calculator
+   */
+  selectedMissionWeek: 0,
+
+  filterMissionWeek(weekNum, btnElem) {
+    this.selectedMissionWeek = weekNum;
+    document.querySelectorAll('#mission-week-tabs .filter-chip').forEach(b => b.classList.remove('active'));
+    if (btnElem) btnElem.classList.add('active');
+    this.renderMissions();
+  },
+
+  checkMissionAutoTask(autoCheckType) {
+    const holdings = this.portfolio.holdings || [];
+    const trades = this.portfolio.trades || [];
+    const journal = this.portfolio.journal || {};
+
+    if (autoCheckType === 'asx_holdings_2') {
+      const asxCount = holdings.filter(h => h.exchange === 'ASX' || (h.symbol && h.symbol.endsWith('.AX'))).length;
+      return { met: asxCount >= 2, statusText: `${asxCount}/2 ASX Stocks Owned`, actionTab: 'tab-explorer', actionLabel: 'Trade ASX ➔' };
+    }
+    if (autoCheckType === 'total_holdings_3') {
+      return { met: holdings.length >= 3, statusText: `${holdings.length}/3 Active Holdings`, actionTab: 'tab-explorer', actionLabel: 'Diversify ➔' };
+    }
+    if (autoCheckType === 'us_holdings_1') {
+      const usCount = holdings.filter(h => h.exchange === 'NASDAQ' || h.exchange === 'NYSE' || h.currency === 'USD').length;
+      const usTrades = trades.filter(t => t.exchange === 'NASDAQ' || t.exchange === 'NYSE' || t.currency === 'USD').length;
+      const count = Math.max(usCount, usTrades);
+      return { met: count >= 1, statusText: `${count}/1 US Equity Traded`, actionTab: 'tab-explorer', actionLabel: 'Trade US Market ➔' };
+    }
+    if (autoCheckType === 'journal_entries_3') {
+      const validEntries = Object.values(journal).filter(j => j && (j.thesis || '').trim().length >= 15 && ((j.riskFactors || '').trim().length > 0 || (j.priceTarget || '').trim().length > 0)).length;
+      return { met: validEntries >= 3, statusText: `${validEntries}/3 Full Stock Journals`, actionTab: 'tab-journal', actionLabel: 'Open Stock Journal ➔' };
+    }
+    if (autoCheckType === 'total_trades_4') {
+      return { met: trades.length >= 4, statusText: `${trades.length}/4 Total Orders Executed`, actionTab: 'tab-explorer', actionLabel: 'Rebalance Portfolio ➔' };
+    }
+    return { met: true, statusText: 'Written Reflection Task', actionTab: null, actionLabel: null };
+  },
+
+  renderMissions() {
+    const container = document.getElementById('missions-program-container');
+    if (!container || !CONFIG.LEARNING_PROGRAM) return;
+
+    if (!this.portfolio.missions) this.portfolio.missions = {};
+
+    let totalModules = 0;
+    let completedModules = 0;
+    let html = '';
+
+    CONFIG.LEARNING_PROGRAM.forEach(weekObj => {
+      const showWeek = this.selectedMissionWeek === 0 || this.selectedMissionWeek === weekObj.week;
+      let weekHtml = '';
+
+      weekObj.modules.forEach(mod => {
+        totalModules++;
+        const savedMod = this.portfolio.missions[mod.id] || { response: '' };
+        const responseText = savedMod.response || '';
+        const hasReflection = responseText.trim().length >= 25;
+        const taskCheck = this.checkMissionAutoTask(mod.autoCheckType);
+        const isComplete = hasReflection && taskCheck.met;
+
+        if (isComplete) completedModules++;
+
+        if (showWeek) {
+          weekHtml += `
+            <div class="section-card" style="background:var(--bg-card2);margin-bottom:1.15rem;border:1px solid ${isComplete ? 'rgba(16,185,129,0.4)' : 'var(--border)'};">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:0.85rem;">
+                <div>
+                  <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.3rem;">
+                    <span class="tab-badge" style="background:rgba(6,182,212,0.15);color:var(--asx-blue);font-weight:700;">${mod.lesson}</span>
+                    <span class="tab-badge" style="background:${taskCheck.met ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)'};color:${taskCheck.met ? '#34d399' : '#fcd34d'};">
+                      ${taskCheck.met ? '✓' : '⏳'} ${mod.taskTitle} (${taskCheck.statusText})
+                    </span>
+                  </div>
+                  <h4 style="font-family:var(--font-head);font-size:1.1rem;color:#fff;margin:0;">${mod.title}</h4>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                  ${taskCheck.actionTab ? `<button class="btn-secondary" style="font-size:0.76rem;padding:0.3rem 0.65rem;" onclick="GameApp.switchTab('${taskCheck.actionTab}')">${taskCheck.actionLabel}</button>` : ''}
+                  <span class="kpi-badge ${isComplete ? 'up' : ''}" id="mod-status-${mod.id}" style="${isComplete ? '' : 'background:rgba(255,255,255,0.06);color:var(--text-dim);'}">
+                    ${isComplete ? '✓ Module Complete' : 'In Progress'}
+                  </span>
+                </div>
+              </div>
+
+              <div style="background:rgba(3,7,18,0.45);border-left:3px solid var(--asx-blue);padding:0.75rem 1rem;border-radius:0 8px 8px 0;font-size:0.84rem;color:var(--text-muted);line-height:1.55;margin-bottom:1rem;">
+                <strong style="color:#fff;">📖 Core Concept:</strong> ${mod.reading}
+              </div>
+
+              <div>
+                <label style="display:block;font-size:0.76rem;color:#e2e8f0;font-weight:700;margin-bottom:0.4rem;">
+                  ✍️ Student Independence Workbook Prompt: <span style="color:var(--asx-blue);font-weight:500;">${mod.prompt}</span>
+                </label>
+                <textarea class="order-input" rows="3" style="width:100%;font-size:0.85rem;padding:0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;resize:vertical;"
+                  placeholder="Write your analysis and reflection here (min 25 characters to mark complete — automatically saved to your teacher's gradebook)..."
+                  oninput="GameApp.updateMissionResponse('${mod.id}', this.value)">${responseText}</textarea>
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      if (showWeek) {
+        html += `
+          <div style="margin-bottom:2rem;">
+            <div style="margin-bottom:0.9rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);">
+              <h3 style="font-family:var(--font-head);font-size:1.25rem;color:#fff;margin-bottom:0.2rem;">${weekObj.title}</h3>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin:0;">Focus: ${weekObj.theme}</p>
+            </div>
+            ${weekHtml}
+          </div>
+        `;
+      }
+    });
+
+    container.innerHTML = html;
+
+    const scoreEl = document.getElementById('missions-overall-score');
+    if (scoreEl) scoreEl.textContent = `${completedModules} / ${totalModules}`;
+    const navBadge = document.getElementById('missions-progress-badge');
+    if (navBadge) navBadge.textContent = `${completedModules}/${totalModules}`;
+  },
+
+  updateMissionResponse(modId, value) {
+    if (!this.portfolio.missions) this.portfolio.missions = {};
+    this.portfolio.missions[modId] = {
+      response: value,
+      updated: Date.now()
+    };
+
+    const statusEl = document.getElementById('missions-autosave-status');
+    if (statusEl) statusEl.textContent = 'Saving...';
+
+    // Update live badge for this module
+    const programMods = (CONFIG.LEARNING_PROGRAM || []).flatMap(w => w.modules);
+    const modDef = programMods.find(m => m.id === modId);
+    if (modDef) {
+      const hasReflection = (value || '').trim().length >= 25;
+      const taskCheck = this.checkMissionAutoTask(modDef.autoCheckType);
+      const isComplete = hasReflection && taskCheck.met;
+      const modBadge = document.getElementById(`mod-status-${modId}`);
+      if (modBadge) {
+        modBadge.className = `kpi-badge ${isComplete ? 'up' : ''}`;
+        modBadge.style.background = isComplete ? '' : 'rgba(255,255,255,0.06)';
+        modBadge.style.color = isComplete ? '' : 'var(--text-dim)';
+        modBadge.textContent = isComplete ? '✓ Module Complete' : 'In Progress';
+      }
+    }
+
+    // Update overall counter
+    let total = 0;
+    let done = 0;
+    programMods.forEach(m => {
+      total++;
+      const r = (this.portfolio.missions[m.id]?.response || '').trim().length >= 25;
+      const tc = this.checkMissionAutoTask(m.autoCheckType);
+      if (r && tc.met) done++;
+    });
+    const scoreEl = document.getElementById('missions-overall-score');
+    if (scoreEl) scoreEl.textContent = `${done} / ${total}`;
+    const navBadge = document.getElementById('missions-progress-badge');
+    if (navBadge) navBadge.textContent = `${done}/${total}`;
+
+    clearTimeout(this.journalSaveTimeout);
+    this.journalSaveTimeout = setTimeout(() => {
+      this.savePortfolio();
+      if (statusEl) statusEl.textContent = '✓ Synced with Teacher';
+    }, 800);
+  },
+
+  calculateIndependence() {
+    const startEl = document.getElementById('fi-start-capital');
+    if (!startEl) return;
+
+    const startCap = Math.max(0, parseFloat(startEl.value) || 0);
+    const monthly = Math.max(0, parseFloat(document.getElementById('fi-monthly-contrib')?.value) || 0);
+    const annualRate = Math.max(0.1, parseFloat(document.getElementById('fi-annual-return')?.value) || 8.2) / 100;
+    const targetIncome = Math.max(1000, parseFloat(document.getElementById('fi-target-income')?.value) || 45000);
+
+    const monthlyRate = annualRate / 12;
+
+    const calcBalance = (years) => {
+      const months = years * 12;
+      const compoundStart = startCap * Math.pow(1 + monthlyRate, months);
+      const compoundContrib = monthlyRate > 0
+        ? monthly * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate)
+        : monthly * months;
+      return compoundStart + compoundContrib;
+    };
+
+    const val10 = calcBalance(10);
+    const contrib10 = startCap + (monthly * 120);
+    const val20 = calcBalance(20);
+    const contrib20 = startCap + (monthly * 240);
+
+    // 4% Safe Withdrawal Rule -> 25x annual expenses
+    const fiTarget = targetIncome * 25;
+
+    // Estimate years to reach fiTarget
+    let yearsToFI = 0;
+    let bal = startCap;
+    while (bal < fiTarget && yearsToFI < 75) {
+      for (let m = 0; m < 12; m++) {
+        bal = bal * (1 + monthlyRate) + monthly;
+      }
+      yearsToFI++;
+    }
+
+    const el10 = document.getElementById('fi-res-10y');
+    const el10Sub = document.getElementById('fi-res-10y-sub');
+    const el20 = document.getElementById('fi-res-20y');
+    const el20Sub = document.getElementById('fi-res-20y-sub');
+    const elTarget = document.getElementById('fi-res-target');
+    const elYears = document.getElementById('fi-res-years');
+
+    if (el10) el10.textContent = `$${Math.round(val10).toLocaleString('en-AU')}`;
+    if (el10Sub) el10Sub.textContent = `$${Math.round(contrib10).toLocaleString('en-AU')} put in + $${Math.round(val10 - contrib10).toLocaleString('en-AU')} growth`;
+    if (el20) el20.textContent = `$${Math.round(val20).toLocaleString('en-AU')}`;
+    if (el20Sub) el20Sub.textContent = `$${Math.round(contrib20).toLocaleString('en-AU')} put in + $${Math.round(val20 - contrib20).toLocaleString('en-AU')} growth`;
+    if (elTarget) elTarget.textContent = `$${Math.round(fiTarget).toLocaleString('en-AU')}`;
+    if (elYears) elYears.textContent = yearsToFI >= 75 ? '50+ Years' : `~${yearsToFI} Years`;
   },
 
   async openStockModal(symbol, defaultOrder = 'BUY') {

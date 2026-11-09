@@ -89,7 +89,7 @@
 
       <div class="login-field">
         <label for="teacher-pw-input">Teacher Password</label>
-        <input type="password" id="teacher-pw-input" class="login-input" placeholder="Enter teacher password (default: market10)"/>
+        <input type="password" id="teacher-pw-input" class="login-input" placeholder="Enter teacher password (e.g. market10 or hscsando1603)" onkeydown="if(event.key==='Enter') TeacherApp.attemptLogin()"/>
       </div>
 
       <button class="login-btn" style="background:linear-gradient(135deg,var(--gold),#d97706);" onclick="TeacherApp.attemptLogin()">
@@ -97,7 +97,7 @@
       </button>
 
       <div class="login-error" id="teacher-pw-error">
-        <span>⚠️</span> Incorrect password. Check <code>config.js</code>.
+        <span>⚠️</span> Incorrect password. Accepted passwords: <code>market10</code> or <code>hscsando1603</code>.
       </div>
 
       <div style="text-align:center;margin-top:1.5rem;">
@@ -120,6 +120,12 @@
           </div>
 
           <div class="user-controls">
+            <button class="btn-secondary" style="border-color:rgba(16,185,129,0.4);color:#34d399;" onclick="TeacherApp.toggleUnitPlan()">
+              <span>📅 3-Week Unit Plan</span>
+            </button>
+            <button class="btn-secondary" onclick="TeacherApp.seedSampleData(true)">
+              <span>⚡ Populate Demo Class</span>
+            </button>
             <button class="btn-secondary" onclick="TeacherApp.exportClassCSV()">
               <span>📥 Export Class CSV</span>
             </button>
@@ -193,6 +199,80 @@
         </div>
       </div>
 
+      <!-- 3-Week Unit Plan & Teacher Pacing Guide (Collapsible) -->
+      <div class="section-card" id="teacher-unit-plan-card" style="margin-bottom:2rem;border:1px solid rgba(16,185,129,0.35);background:linear-gradient(135deg, rgba(14,21,38,0.98), rgba(17,24,39,0.98));">
+        <div class="section-header" style="border-bottom:1px solid var(--border);padding-bottom:1rem;margin-bottom:1.25rem;">
+          <div>
+            <div style="display:inline-flex;align-items:center;gap:0.4rem;background:rgba(16,185,129,0.15);color:#34d399;padding:0.2rem 0.7rem;border-radius:100px;font-size:0.72rem;font-weight:700;text-transform:uppercase;margin-bottom:0.4rem;">
+              <span>📚</span> Stage 5 Commerce / Stage 6 Economics Teaching Sequence
+            </div>
+            <div class="section-title" style="font-size:1.25rem;">
+              <span>📅</span> 3-Week Student Self-Directed Program: Investing &amp; Financial Independence
+            </div>
+            <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.2rem;">
+              Students complete this 9-lesson program inside their <strong>"🎯 3-Week Missions &amp; Independence"</strong> tab. Their practical trades and written reflections sync live to your Student Inspector below.
+            </p>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn-secondary" onclick="window.print()" style="font-size:0.78rem;">🖨️ Print Guide</button>
+            <button class="btn-secondary" onclick="TeacherApp.toggleUnitPlan()" style="font-size:0.78rem;">Hide Guide ▲</button>
+          </div>
+        </div>
+
+        <div id="teacher-unit-plan-body" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:1.25rem;">
+          <!-- Week 1 -->
+          <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:14px;padding:1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">
+              <span class="tab-badge" style="background:rgba(6,182,212,0.15);color:var(--asx-blue);font-weight:700;">WEEK 1 (Lessons 1–3)</span>
+              <span style="font-size:0.75rem;color:var(--text-dim);">Foundations &amp; ASX</span>
+            </div>
+            <h4 style="font-family:var(--font-head);color:#fff;font-size:1.05rem;margin-bottom:0.5rem;">Wealth Foundations, Risk &amp; Core ASX Portfolio</h4>
+            <ul style="color:var(--text-muted);font-size:0.82rem;line-height:1.6;padding-left:1.1rem;margin-bottom:0.85rem;">
+              <li><strong>Lesson 1 (Why Invest &amp; Independence):</strong> Inflation (~3% p.a.) vs compound growth &amp; the "4% Financial Independence Rule" (25× annual expenses). Students model goals in the FI Calculator.</li>
+              <li><strong>Lesson 2 (ASX Blue Chips &amp; Sectors):</strong> Defensive (CBA, WOW, CSL, TLS) vs Cyclical (BHP, FMG, QAN, FLT) shares &amp; franked dividends. <em>Task: Buy 2+ ASX stocks.</em></li>
+              <li><strong>Lesson 3 (25% Cap &amp; Brokerage):</strong> Unsystematic risk, $10 brokerage drag on small trades, and position sizing. <em>Task: Hold 3+ diversified stocks.</em></li>
+            </ul>
+            <div style="background:rgba(6,182,212,0.08);padding:0.6rem 0.75rem;border-radius:8px;font-size:0.76rem;color:#e2e8f0;">
+              <strong>👨‍🏫 Teacher Action:</strong> Have students log in with class code <code>10COMM1</code> and complete Week 1 in the <strong>🎯 3-Week Missions</strong> tab.
+            </div>
+          </div>
+
+          <!-- Week 2 -->
+          <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:14px;padding:1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">
+              <span class="tab-badge" style="background:rgba(167,139,250,0.15);color:#c084fc;font-weight:700;">WEEK 2 (Lessons 4–6)</span>
+              <span style="font-size:0.75rem;color:var(--text-dim);">Global &amp; Macro</span>
+            </div>
+            <h4 style="font-family:var(--font-head);color:#fff;font-size:1.05rem;margin-bottom:0.5rem;">Wall Street (NYSE/NASDAQ), FX Risk &amp; Macro Shocks</h4>
+            <ul style="color:var(--text-muted);font-size:0.82rem;line-height:1.6;padding-left:1.1rem;margin-bottom:0.85rem;">
+              <li><strong>Lesson 4 (Global Markets &amp; AUD/USD):</strong> Why invest beyond Australia (&lt;2% of global market) into US tech/global leaders, and how AUD/USD currency movements impact returns. <em>Task: Execute 1+ US trade.</em></li>
+              <li><strong>Lesson 5 (Valuation Metrics):</strong> P/E ratios, Market Cap, and 52-week ranges (Growth vs Value). <em>Task: Complete 3+ Stock Journal entries with target prices.</em></li>
+              <li><strong>Lesson 6 (Macro Catalysts):</strong> RBA interest rate hikes, inflation, and sector rotation. <em>Task: Written catalyst impact reflection.</em></li>
+            </ul>
+            <div style="background:rgba(167,139,250,0.1);padding:0.6rem 0.75rem;border-radius:8px;font-size:0.76rem;color:#e2e8f0;">
+              <strong>👨‍🏫 Teacher Action:</strong> Mid-Week 2, use the <strong>⚡ Trigger Macro Catalyst</strong> bar above to broadcast <em>"🏦 RBA Hikes Cash Rate (+25 bps)"</em> or <em>"📉 Tech Valuation Pullback"</em>.
+            </div>
+          </div>
+
+          <!-- Week 3 -->
+          <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:14px;padding:1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">
+              <span class="tab-badge" style="background:rgba(16,185,129,0.15);color:#34d399;font-weight:700;">WEEK 3 (Lessons 7–9)</span>
+              <span style="font-size:0.75rem;color:var(--text-dim);">Alpha &amp; Independence</span>
+            </div>
+            <h4 style="font-family:var(--font-head);color:#fff;font-size:1.05rem;margin-bottom:0.5rem;">Passive ETFs vs Active Alpha, Rebalancing &amp; Final Audit</h4>
+            <ul style="color:var(--text-muted);font-size:0.82rem;line-height:1.6;padding-left:1.1rem;margin-bottom:0.85rem;">
+              <li><strong>Lesson 7 (Active vs Passive Index):</strong> Evaluating portfolio "Alpha" against the S&amp;P/ASX 200 (8.2% p.a.) and why low-cost Index ETFs suit long-term independence.</li>
+              <li><strong>Lesson 8 (Rebalancing &amp; Psychology):</strong> Avoiding FOMO &amp; panic selling, reinvesting dividends, and trimming/rebalancing. <em>Task: 4+ total trades executed.</em></li>
+              <li><strong>Lesson 9 (Personal Independence Blueprint):</strong> Dollar-Cost Averaging, Superannuation, and post-school wealth plan + CSV Ledger export.</li>
+            </ul>
+            <div style="background:rgba(16,185,129,0.1);padding:0.6rem 0.75rem;border-radius:8px;font-size:0.76rem;color:#e2e8f0;">
+              <strong>👨‍🏫 Teacher Action:</strong> Broadcast <em>"💰 ASX Semi-Annual Dividend (2%)"</em>, then click <strong>🔍 Inspect</strong> on each student below to grade out of 20 and export CSV.
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Class Roster & Leaderboard Table -->
       <div class="section-card">
         <div class="section-header">
@@ -200,6 +280,7 @@
             <span>📊</span> Student Portfolio Standings
           </div>
           <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+            <button class="btn-secondary" style="font-size:0.78rem;padding:0.4rem 0.75rem;" onclick="TeacherApp.refreshRoster()">🔄 Refresh Roster</button>
             <select id="teacher-class-filter" class="search-input" style="max-width:220px;cursor:pointer;" onchange="TeacherApp.renderDashboard()"></select>
             <div class="search-input-wrap">
               <span class="search-icon">🔍</span>
@@ -214,10 +295,13 @@
               <tr>
                 <th>Rank</th>
                 <th>Student Name</th>
+                <th>Class</th>
                 <th>Portfolio Value (AUD)</th>
-                <th>Total Return (%)</th>
+                <th>Return (%)</th>
                 <th>Available Cash</th>
-                <th>Total Trades</th>
+                <th>Trades</th>
+                <th>3-Wk Missions</th>
+                <th>Grade (/20)</th>
                 <th>Last Active</th>
                 <th>Actions</th>
               </tr>
@@ -265,6 +349,17 @@
               <!-- Injected via teacher.js -->
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- Student 3-Week Missions & Independence Workbook -->
+      <div style="margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+          <h4 style="font-family:var(--font-head);color:#fff;margin:0;">🎯 3-Week Missions &amp; Financial Independence Workbook</h4>
+          <span id="insp-missions-badge" class="tab-badge" style="background:rgba(16,185,129,0.15);color:#34d399;font-weight:700;">0 / 9 Completed</span>
+        </div>
+        <div id="insp-missions-wrap" style="background:var(--bg-card2);border-radius:12px;padding:1rem;border:1px solid var(--border);font-size:0.85rem;max-height:280px;overflow-y:auto;">
+          <!-- Injected via teacher.js -->
         </div>
       </div>
 

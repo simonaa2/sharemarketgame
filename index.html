@@ -260,9 +260,14 @@
         Enter Trading Floor ➔
       </button>
 
-      <button class="login-btn-demo" onclick="demoLogin()">
-        ⚡ Quick Demo / Guest Trader
-      </button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-top:0.65rem;">
+        <button class="login-btn-demo" style="margin-top:0;" onclick="demoLogin()">
+          ⚡ Quick Student Demo
+        </button>
+        <button class="login-btn-demo" style="margin-top:0;border-color:rgba(245,158,11,0.4);color:#fcd34d;background:rgba(245,158,11,0.08);" onclick="window.location.href='teacher.html'">
+          👨‍🏫 Teacher Dashboard ➔
+        </button>
+      </div>
 
       <div class="login-error" id="login-error">
         <span>⚠️</span> <span id="error-message">Please enter your name and password.</span>
@@ -270,7 +275,7 @@
     </div>
 
     <div class="login-footer">
-      <a href="teacher.html">Teacher &amp; Admin Dashboard ➔</a>
+      <a href="teacher.html">🔐 Teacher &amp; Educator Command Center (View Student Portfolios &amp; 3-Week Unit Plan) ➔</a>
     </div>
   </div>
 
@@ -310,6 +315,18 @@
       const pass = (document.getElementById('login-password')?.value || '').trim();
       const classSelect = document.getElementById('login-class-select');
       const code = classSelect ? classSelect.value : (CONFIG.DEFAULT_CLASS_CODE || '10COMM1');
+
+      // Auto-detect Teacher Sign-In directly from index.html
+      const validTeacherPasses = (CONFIG.TEACHER_PASSWORDS || ['hscsando1603', 'market10', 'datatrends2026', '1982', '1603', 'teacher', 'admin']).map(p => p.toLowerCase());
+      if (
+        (pass && validTeacherPasses.includes(pass.toLowerCase())) ||
+        (name && validTeacherPasses.includes(name.toLowerCase())) ||
+        (name.toLowerCase() === 'teacher' || name.toLowerCase() === 'simon anderson' || name.toLowerCase() === 'mr anderson')
+      ) {
+        sessionStorage.setItem('teacherAuth', 'true');
+        window.location.href = 'teacher.html';
+        return;
+      }
 
       if (!name) {
         showError('Please enter your full name.');

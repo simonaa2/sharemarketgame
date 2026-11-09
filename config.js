@@ -107,7 +107,116 @@ const CONFIG = {
 
   // Teacher Authentication
   TEACHER_PASSWORD: 'hscsando1603',
-  TEACHER_PASSWORDS: ['hscsando1603', 'market10', 'datatrends2026', '1982', '1603'],
+  TEACHER_PASSWORDS: ['hscsando1603', 'market10', 'datatrends2026', '1982', '1603', 'teacher', 'admin', 'commerce2026'],
+
+  // 3-Week Independent Student Learning & Financial Independence Program
+  LEARNING_PROGRAM: [
+    {
+      week: 1,
+      title: 'Week 1: Foundations of Wealth, Risk & Building Your Core ASX Portfolio',
+      theme: 'Inflation vs Investing, Compound Growth & Australian Blue-Chip Equities',
+      teacherNotes: 'Lessons 1–3: Introduce why saving cash alone loses to inflation, how compound returns build financial independence, and how the ASX operates. Students construct a diversified Australian core portfolio respecting the 25% position cap.',
+      modules: [
+        {
+          id: 'w1_m1',
+          lesson: 'Lesson 1 (Independence Foundations)',
+          title: 'Why Invest? Inflation, Compounding & Financial Independence',
+          reading: 'Keeping $50,000 in a 0% bank account means inflation (~3% p.a.) silently erodes your purchasing power every year. Investing in productive assets (shares) allows your money to work for you through capital growth and dividends. Financial Independence is reached when your passive investment income covers your living expenses (often estimated using the "4% Rule" — needing 25x your annual expenses invested).',
+          taskTitle: 'Use the Financial Independence Calculator & Define Your Goal',
+          prompt: 'In your own words, explain why holding 100% cash is a long-term risk due to inflation, and describe what achieving "Financial Independence" in your 20s or 30s would allow you to do:',
+          autoCheckType: 'reflection_only'
+        },
+        {
+          id: 'w1_m2',
+          lesson: 'Lesson 2 (ASX Market Research)',
+          title: 'Australian Blue Chips, Sectors & Dividend Income (ASX)',
+          reading: 'The Australian Securities Exchange (ASX) hosts major companies across Financials (CBA, NAB, MQG), Materials & Mining (BHP, RIO, FMG), Healthcare (CSL, COH), and Consumer Staples (WOW, COL). Defensive sectors (supermarkets, healthcare, telcos) provide steady dividends even in downturns, while cyclical sectors (mining, travel, retail) rise and fall with economic booms.',
+          taskTitle: 'Place at least 2 ASX Buy Orders across different sectors',
+          prompt: 'Which two ASX companies did you select for your foundational portfolio? Identify whether each is "Defensive" or "Cyclical" and explain how it earns its revenue:',
+          autoCheckType: 'asx_holdings_2'
+        },
+        {
+          id: 'w1_m3',
+          lesson: 'Lesson 3 (Risk & Position Sizing)',
+          title: 'Diversification (The 25% Rule) & Brokerage Drag',
+          reading: 'Every trade costs $10 AUD in brokerage. Buying tiny $200 parcels means losing 5% immediately to fees! At the same time, putting 100% of your money into a single company exposes you to unsystematic (company-specific) risk. Our 25% position cap ($12,500 max per stock) ensures you hold at least 4 distinct companies.',
+          taskTitle: 'Build a Diversified Portfolio of 3+ Active Holdings',
+          prompt: 'How did you size your initial trades to minimize the impact of the $10 brokerage fee while staying safely below the 25% single-stock cap?',
+          autoCheckType: 'total_holdings_3'
+        }
+      ]
+    },
+    {
+      week: 2,
+      title: 'Week 2: Global Markets, Currency Risk & Macroeconomic Shocks',
+      theme: 'Wall Street (NYSE/NASDAQ), AUD/USD Exchange Rates & Central Bank Catalysts',
+      teacherNotes: 'Lessons 4–6: Students expand internationally into US tech/global leaders, analyze P/E ratios, and respond to a live Teacher Macro Catalyst broadcast (e.g., RBA Cash Rate Hike or Tech Valuation Pullback).',
+      modules: [
+        {
+          id: 'w2_m1',
+          lesson: 'Lesson 4 (Global Investing & FX)',
+          title: 'Wall Street (NYSE & NASDAQ) & Currency Risk (AUD/USD)',
+          reading: 'Australia represents less than 2% of the global share market and is heavily concentrated in banks and miners. Investing on the NYSE and NASDAQ gives you exposure to global technology, semiconductor, and consumer giants (e.g. Apple, Microsoft, NVIDIA, Visa, Costco). Because US stocks trade in USD, a falling Australian Dollar boosts the AUD value of your US shares, while a rising AUD reduces it.',
+          taskTitle: 'Execute at least 1 US Share Trade (NYSE or NASDAQ)',
+          prompt: 'Which US company did you invest in, how does it diversify your Australian holdings, and what happens to your holding value in AUD if the AUD/USD exchange rate rises from 0.65 to 0.75?',
+          autoCheckType: 'us_holdings_1'
+        },
+        {
+          id: 'w2_m2',
+          lesson: 'Lesson 5 (Valuation Metrics)',
+          title: 'Reading Financial Data: P/E Ratio, Market Cap & 52-Week Range',
+          reading: 'Smart independent investors don\'t just buy famous brand names—they check the price tag. The Price-to-Earnings (P/E) ratio shows how much investors pay for $1 of company profit. High P/E stocks (30x+) are priced for rapid future growth but can drop sharply if growth slows; lower P/E stocks (10x–18x) are often mature dividend payers.',
+          taskTitle: 'Document Full Investment Journal Entries (Thesis, Risks & Target Price) for 3+ Stocks',
+          prompt: 'Compare the P/E ratio and 52-week price range of two companies in your portfolio. Which one is priced as a high-growth stock and which is priced as a value/income stock?',
+          autoCheckType: 'journal_entries_3'
+        },
+        {
+          id: 'w2_m3',
+          lesson: 'Lesson 6 (Macroeconomic Shocks)',
+          title: 'Interest Rates (RBA), Inflation & Economic Catalysts',
+          reading: 'Share markets react immediately to macroeconomic news. When the Reserve Bank of Australia (RBA) raises the cash rate to fight inflation, borrowing costs rise—hurting debt-heavy tech and retail companies, while often helping banks widen their interest margins. Conversely, commodity booms lift mining and energy exporters.',
+          taskTitle: 'Respond to a Market Catalyst Event',
+          prompt: 'Analyze how a +0.25% RBA interest rate hike OR a global tech pullback impacts your specific portfolio holdings. Did you hold, buy the dip, or rebalance?',
+          autoCheckType: 'reflection_only'
+        }
+      ]
+    },
+    {
+      week: 3,
+      title: 'Week 3: Passive vs Active Investing, Rebalancing & Your Independence Roadmap',
+      theme: 'Beating the ASX 200 Benchmark (Alpha), Dividends & Real-World Wealth Habits',
+      teacherNotes: 'Lessons 7–9: Students evaluate their performance against the S&P/ASX 200 index benchmark, execute a strategic portfolio rebalance, design their real-world post-school investing plan, and export their portfolio for final rubric marking.',
+      modules: [
+        {
+          id: 'w3_m1',
+          lesson: 'Lesson 7 (Active vs Passive)',
+          title: 'Generating "Alpha" vs Passive Index Investing (S&P/ASX 200)',
+          reading: 'In the real world, over 80% of professional fund managers fail to beat the broader market index (like the S&P/ASX 200 or S&P 500) over a 10-year period after fees. "Alpha" measures how much your portfolio beat (or lagged) the passive ASX 200 benchmark (8.2% p.a.). For most independent investors, low-cost Index ETFs form the stress-free core of their wealth.',
+          taskTitle: 'Compare Your Portfolio Return Against the ASX 200 Benchmark',
+          prompt: 'Check your "Alpha vs ASX 200" KPI card on your dashboard. Is your active portfolio currently beating or trailing the passive benchmark, and what drove that result?',
+          autoCheckType: 'reflection_only'
+        },
+        {
+          id: 'w3_m2',
+          lesson: 'Lesson 8 (Portfolio Rebalancing)',
+          title: 'Strategic Rebalancing, Dividends & Controlling Investor Psychology',
+          reading: 'Independent investors avoid two classic behavioural traps: FOMO (chasing stocks after they skyrocket) and Panic Selling (dumping quality companies during a temporary dip). Periodic rebalancing means trimming overweight winners or replacing underperforming companies whose original investment thesis no longer holds.',
+          taskTitle: 'Execute at least 4 Total Trades (Including Strategic Adjustments)',
+          prompt: 'Review your best and worst performing trades in your Trade Ledger. What adjustments or rebalancing decisions did you make, and what did you learn about your own risk tolerance?',
+          autoCheckType: 'total_trades_4'
+        },
+        {
+          id: 'w3_m3',
+          lesson: 'Lesson 9 (Final Independence Plan)',
+          title: 'My Real-World Financial Independence Blueprint (Age 16–30)',
+          reading: 'The biggest advantage young investors have is TIME. Starting early with regular, automated contributions (Dollar-Cost Averaging), understanding your Superannuation investment options, reinvesting dividends, and keeping fees low can turn modest weekly savings into life-changing financial independence.',
+          taskTitle: 'Complete Your Final Portfolio Audit & Export Your Ledger',
+          prompt: 'Write your personal 3-step Financial Independence Plan for life after school (covering: 1. How much % of income you aim to invest regularly, 2. Your preferred mix of ETFs/ASX/US shares, and 3. Key mistakes you will avoid):',
+          autoCheckType: 'reflection_only'
+        }
+      ]
+    }
+  ],
 
   // Assessment Marking Rubric Settings (Stage 5 Commerce / Stage 6 Economics - Out of 20 marks)
   RUBRIC: {

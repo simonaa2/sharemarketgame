@@ -76,6 +76,10 @@ const FirestoreSync = {
           holdings: portfolio.holdings || [],
           trades: portfolio.trades || [],
           journal: portfolio.journal || {},
+          missions: portfolio.missions || {},
+          grades: portfolio.grades || {},
+          equityHistory: (portfolio.equityHistory || []).slice(-60),
+          updatedAtMs: Date.now(),
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         };
 
