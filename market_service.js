@@ -200,18 +200,22 @@ const MarketService = {
     proxies.push(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
     proxies.push(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`);
 
-    for (const url of proxies) {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 1200);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 800);
+
+    try {
+      const promises = proxies.map(async (url) => {
         const resp = await fetch(url, { signal: controller.signal });
-        clearTimeout(timeout);
-        if (resp.ok) {
-          return await resp.json();
-        }
-      } catch (e) {}
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        return await resp.json();
+      });
+      const data = await Promise.any(promises);
+      clearTimeout(timeout);
+      return data;
+    } catch (e) {
+      clearTimeout(timeout);
+      throw new Error('All CORS proxies failed or timed out');
     }
-    throw new Error('All CORS proxies failed or timed out');
   },
 
   _getCompanyName(symbol) {
@@ -262,6 +266,17 @@ const MarketService = {
     'SHL.AX': { price: 27.40, name: 'Sonic Healthcare Ltd', exchange: 'ASX', currency: 'AUD', pe: 19.2, mktCap: '$13.0B', range52: [24.50, 31.00] },
     'NST.AX': { price: 17.80, name: 'Northern Star Resources Ltd', exchange: 'ASX', currency: 'AUD', pe: 20.5, mktCap: '$20.4B', range52: [11.80, 18.90] },
     'EVN.AX': { price: 5.10, name: 'Evolution Mining Ltd', exchange: 'ASX', currency: 'AUD', pe: 18.0, mktCap: '$10.2B', range52: [3.10, 5.40] },
+    'DMP.AX': { price: 34.50, name: 'Domino\'s Pizza Enterprises', exchange: 'ASX', currency: 'AUD', pe: 26.5, mktCap: '$3.1B', range52: [29.80, 58.20] },
+    'PMV.AX': { price: 31.80, name: 'Premier Investments Ltd', exchange: 'ASX', currency: 'AUD', pe: 17.5, mktCap: '$5.1B', range52: [23.50, 34.20] },
+    'LOV.AX': { price: 33.20, name: 'Lovisa Holdings Ltd', exchange: 'ASX', currency: 'AUD', pe: 36.0, mktCap: '$3.6B', range52: [17.50, 35.80] },
+    'SCG.AX': { price: 3.45, name: 'Scentre Group (Westfield)', exchange: 'ASX', currency: 'AUD', pe: 14.8, mktCap: '$17.8B', range52: [2.80, 3.75] },
+    'AMP.AX': { price: 1.55, name: 'AMP Limited', exchange: 'ASX', currency: 'AUD', pe: 16.0, mktCap: '$4.1B', range52: [0.88, 1.62] },
+    'TLC.AX': { price: 5.20, name: 'The Lottery Corporation', exchange: 'ASX', currency: 'AUD', pe: 28.0, mktCap: '$11.6B', range52: [4.60, 5.45] },
+    'SEK.AX': { price: 24.60, name: 'SEEK Limited', exchange: 'ASX', currency: 'AUD', pe: 32.0, mktCap: '$8.8B', range52: [20.50, 27.50] },
+    'CAR.AX': { price: 39.80, name: 'CAR Group Ltd (carsales)', exchange: 'ASX', currency: 'AUD', pe: 38.5, mktCap: '$15.0B', range52: [27.00, 41.20] },
+    'BRG.AX': { price: 32.10, name: 'Breville Group Ltd', exchange: 'ASX', currency: 'AUD', pe: 31.0, mktCap: '$4.6B', range52: [22.50, 34.00] },
+    'A2M.AX': { price: 6.20, name: 'The a2 Milk Company Ltd', exchange: 'ASX', currency: 'AUD', pe: 24.5, mktCap: '$4.5B', range52: [3.90, 7.80] },
+    'CWY.AX': { price: 3.05, name: 'Cleanaway Waste Management', exchange: 'ASX', currency: 'AUD', pe: 35.0, mktCap: '$6.8B', range52: [2.40, 3.25] },
 
     // US Tech & Leaders
     'AAPL': { price: 228.50, name: 'Apple Inc.', exchange: 'NASDAQ', currency: 'USD', pe: 34.1, mktCap: '$3.48T', range52: [164.00, 237.23] },
