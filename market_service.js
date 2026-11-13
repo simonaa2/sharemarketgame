@@ -281,7 +281,7 @@ const MarketService = {
     // US Tech & Leaders
     'AAPL': { price: 228.50, name: 'Apple Inc.', exchange: 'NASDAQ', currency: 'USD', pe: 34.1, mktCap: '$3.48T', range52: [164.00, 237.23] },
     'MSFT': { price: 425.80, name: 'Microsoft Corporation', exchange: 'NASDAQ', currency: 'USD', pe: 35.8, mktCap: '$3.16T', range52: [309.45, 468.35] },
-    'NVDA': { price: 118.20, name: 'NVIDIA Corporation', exchange: 'NASDAQ', currency: 'USD', pe: 54.0, mktCap: '$2.91T', range52: [40.20, 140.76] },
+    'NVDA': { price: 142.50, name: 'NVIDIA Corporation', exchange: 'NASDAQ', currency: 'USD', pe: 62.0, mktCap: '$3.50T', range52: [46.50, 149.77] },
     'GOOGL': { price: 162.40, name: 'Alphabet Inc.', exchange: 'NASDAQ', currency: 'USD', pe: 23.5, mktCap: '$2.02T', range52: [120.20, 191.75] },
     'AMZN': { price: 186.90, name: 'Amazon.com Inc.', exchange: 'NASDAQ', currency: 'USD', pe: 42.0, mktCap: '$1.95T', range52: [118.35, 201.20] },
     'TSLA': { price: 230.10, name: 'Tesla, Inc.', exchange: 'NASDAQ', currency: 'USD', pe: 65.4, mktCap: '$734B', range52: [138.80, 271.00] },
