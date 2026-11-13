@@ -650,17 +650,46 @@ const TeacherApp = {
       }
     }
 
-    // 3. Render Student Investment Journal
+    // 3. Render Student Investment Journal (Macro reflection + stock theses)
     const journalWrap = document.getElementById('insp-journal-wrap');
     if (journalWrap) {
-      const journalKeys = Object.keys(p.journal || {});
+      let macroHtml = '';
+      const macroRef = p.macroReflection || (p.journal && p.journal._macroReflection);
+      if (macroRef) {
+        macroHtml = `
+          <div style="background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.35);border-radius:10px;padding:0.85rem;margin-bottom:1rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.35rem;">
+              <strong style="color:#c084fc;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.04em;">
+                ⚡ Macroeconomic &amp; Market Reflection
+              </strong>
+              <span class="tab-badge" style="background:rgba(192,132,252,0.2);color:#c084fc;">Criterion 3 (/5 Marks)</span>
+            </div>
+            <div style="color:#f1f5f9;font-size:0.88rem;line-height:1.5;white-space:pre-wrap;">${macroRef}</div>
+          </div>
+        `;
+      } else {
+        macroHtml = `
+          <div style="background:var(--bg-input);border:1px dashed var(--border);border-radius:8px;padding:0.6rem 0.8rem;margin-bottom:1rem;color:var(--text-dim);font-size:0.8rem;">
+            ⚡ Macroeconomic reflection: <em>No reflection submitted yet.</em>
+          </div>
+        `;
+      }
+
+      const journalKeys = Object.keys(p.journal || {}).filter(k => !k.startsWith('_'));
+      let stocksHtml = '';
       if (journalKeys.length > 0) {
-        journalWrap.innerHTML = journalKeys.map(sym => {
+        stocksHtml = journalKeys.map(sym => {
           const entry = p.journal[sym];
+          const isHeld = (p.holdings || []).some(h => h.symbol === sym);
           return `
             <div style="border-bottom:1px solid var(--border);padding-bottom:0.75rem;margin-bottom:0.75rem;">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem;">
-                <strong style="color:#fff;font-family:var(--font-mono);font-size:0.95rem;">${sym}</strong>
+                <div style="display:flex;align-items:center;gap:0.4rem;">
+                  <strong style="color:#fff;font-family:var(--font-mono);font-size:0.95rem;">${sym}</strong>
+                  <span class="tab-badge" style="font-size:0.7rem;background:${isHeld ? 'rgba(52,211,153,0.15)' : 'rgba(148,163,184,0.15)'};color:${isHeld ? '#34d399' : 'var(--text-dim)'};">
+                    ${isHeld ? '🟢 Active Holding' : 'Research / Traded'}
+                  </span>
+                </div>
                 <span style="color:var(--text-dim);font-size:0.75rem;">Target: <strong style="color:var(--asx-blue);">${entry.priceTarget || 'N/A'}</strong></span>
               </div>
               <div style="color:var(--text);margin-bottom:0.35rem;line-height:1.4;">
@@ -672,8 +701,10 @@ const TeacherApp = {
           `;
         }).join('');
       } else {
-        journalWrap.innerHTML = '<span style="color:var(--text-dim);">No journal rationale recorded yet for this student.</span>';
+        stocksHtml = '<span style="color:var(--text-dim);">No stock thesis rationale recorded yet for this student.</span>';
       }
+
+      journalWrap.innerHTML = macroHtml + stocksHtml;
     }
 
     // 4. Render Full Trade Ledger

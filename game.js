@@ -80,6 +80,7 @@ const GameApp = {
 
   handleMacroCatalystEvent(catalyst) {
     if (!catalyst) return;
+    this.currentMacroCatalyst = catalyst;
     const banner = document.getElementById('macro-catalyst-banner');
     const title = document.getElementById('catalyst-banner-title');
     const summary = document.getElementById('catalyst-banner-summary');
@@ -89,6 +90,10 @@ const GameApp = {
       banner.style.display = 'block';
     }
     this.showToast(`🚨 BREAKING NEWS: ${catalyst.title}`, 'info');
+
+    if (this.activeTab === 'tab-journal') {
+      this.renderJournal();
+    }
   },
 
   handleRoundStatusChange(status) {
@@ -1154,52 +1159,171 @@ const GameApp = {
   /**
    * Render Investment Journal Tab
    */
+  /**
+   * Render Investment Journal Tab (Syllabus Assessment & Pre-Trade Research)
+   */
   renderJournal() {
     const wrap = document.getElementById('journal-cards-wrap');
     if (!wrap) return;
 
-    if (!this.portfolio.holdings || this.portfolio.holdings.length === 0) {
-      wrap.innerHTML = `
-        <div style="text-align:center;padding:3rem 1rem;">
-          <div style="font-size:2rem;margin-bottom:0.5rem;">📖</div>
-          <h4 style="font-family:var(--font-head);color:#fff;">No Active Holdings to Document</h4>
-          <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1rem;">Buy your first shares in the Market Explorer, and their investment analysis cards will appear here automatically.</p>
-          <button class="btn-secondary" onclick="GameApp.switchTab('tab-explorer')">Explore Market ➔</button>
+    if (!this.portfolio.journal) this.portfolio.journal = {};
+
+    // 1. Current Active Macro Catalyst / Economic Context
+    const activeCatalyst = this.currentMacroCatalyst || (CONFIG.MACRO_CATALYSTS && CONFIG.MACRO_CATALYSTS[0]);
+    const macroSaved = this.portfolio.macroReflection || (this.portfolio.journal && this.portfolio.journal._macroReflection) || '';
+
+    let macroHtml = `
+      <div class="section-card" style="background:linear-gradient(135deg, rgba(30, 27, 75, 0.75), rgba(49, 46, 129, 0.55)); border:1px solid rgba(167, 139, 250, 0.4); margin-bottom:1.5rem; border-radius:12px; padding:1.25rem;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span style="font-size:1.3rem;">⚡</span>
+            <div>
+              <strong style="color:#fef08a; font-family:var(--font-head); font-size:1.05rem;">Macroeconomic &amp; Market Reflection</strong>
+              <div style="font-size:0.78rem; color:#c7d2fe;">Teacher Assessment Criterion 3 (/5 Marks)</div>
+            </div>
+          </div>
+          <span class="kpi-badge up" id="macro-autosave-badge" style="background:rgba(16,185,129,0.2);color:#34d399;">✓ Autosaved to Teacher Console</span>
         </div>
-      `;
-      return;
+
+        <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:0.75rem 1rem; margin-bottom:0.85rem; border:1px solid rgba(167, 139, 250, 0.2);">
+          <div style="font-size:0.85rem; font-weight:700; color:#fde047; margin-bottom:0.25rem;">
+            ${activeCatalyst ? activeCatalyst.title : '🏦 Central Bank, Inflation & Macro Volatility'}
+          </div>
+          <p style="font-size:0.82rem; color:#e0e7ff; margin:0; line-height:1.4;">
+            ${activeCatalyst ? activeCatalyst.summary : 'Macroeconomic conditions dictate cost of capital and consumer demand. Rising cash rates tighten credit and compress multiples, whereas commodity cycles boost miners.'}
+          </p>
+          <div style="margin-top:0.4rem; font-size:0.78rem; color:#a5b4fc; font-style:italic;">
+            💬 <strong>Reflection Prompt:</strong> ${activeCatalyst ? (activeCatalyst.prompt || 'How do macroeconomic shifts, interest rates, or currency fluctuations impact your holdings?') : 'How do economic cycles influence your portfolio allocation?'}
+          </div>
+        </div>
+
+        <label style="display:block; font-size:0.75rem; text-transform:uppercase; color:#c7d2fe; font-weight:700; margin-bottom:0.4rem;">
+          Your Economic Reflection &amp; Portfolio Strategy Response:
+        </label>
+        <textarea id="macro-reflection-textarea" class="order-input" rows="3" style="width:100%; font-size:0.88rem; padding:0.75rem; background:var(--bg-input); border:1px solid rgba(167,139,250,0.3); border-radius:8px; resize:vertical; color:#fff;"
+          placeholder="Analyze how cash rates, inflation, commodity export demand, or currency exchange rates affect your portfolio. (e.g. Rate hikes pressure tech but benefit banks; falling AUD increases value of US holdings)..."
+          oninput="GameApp.updateMacroReflection(this.value)">${macroSaved}</textarea>
+      </div>
+    `;
+
+    // 2. Stock Investment Theses (Pre-trade research, active holdings, and closed trades)
+    const symbolsSet = new Set();
+
+    // A) Active holdings first
+    (this.portfolio.holdings || []).forEach(h => symbolsSet.add(h.symbol));
+
+    // B) Symbols already in journal
+    Object.keys(this.portfolio.journal || {}).forEach(s => {
+      if (!s.startsWith('_')) symbolsSet.add(s);
+    });
+
+    // C) Watchlist starter stocks if user has nothing documented yet
+    if (symbolsSet.size === 0) {
+      (this.portfolio.watchlist || ['BHP.AX', 'CBA.AX', 'NVDA']).forEach(s => symbolsSet.add(s));
     }
 
-    let html = '';
-    this.portfolio.holdings.forEach(h => {
-      const j = (this.portfolio.journal && this.portfolio.journal[h.symbol]) || {
+    const symbols = Array.from(symbolsSet);
+
+    // Header bar with "+ Add Stock to Research"
+    let stockHeaderHtml = `
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:0.75rem;">
+        <div>
+          <h4 style="font-family:var(--font-head); color:#fff; font-size:1.05rem; margin:0;">
+            📊 Security Investment Theses &amp; Risk Guardrails
+          </h4>
+          <span style="font-size:0.8rem; color:var(--text-dim);">
+            Formulate thesis before or after trade execution. Autosaves directly into your teacher's grading console.
+          </span>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <input type="text" id="journal-add-ticker-input" placeholder="e.g. QBE.AX, CSL.AX, AAPL" list="journal-common-tickers" style="padding:0.45rem 0.65rem; font-size:0.82rem; background:var(--bg-input); border:1px solid var(--border); border-radius:6px; color:#fff; width:170px; text-transform:uppercase;"/>
+          <datalist id="journal-common-tickers">
+            <option value="BHP.AX">BHP Group (Mining)</option>
+            <option value="CBA.AX">Commonwealth Bank (Banking)</option>
+            <option value="CSL.AX">CSL Limited (Biotech)</option>
+            <option value="WES.AX">Wesfarmers (Retail/Bunnings)</option>
+            <option value="WOW.AX">Woolworths (Consumer Staples)</option>
+            <option value="MQG.AX">Macquarie Group (Investment Bank)</option>
+            <option value="QBE.AX">QBE Insurance (Financials)</option>
+            <option value="TLS.AX">Telstra Group (Telecom)</option>
+            <option value="FMG.AX">Fortescue (Iron Ore)</option>
+            <option value="NVDA">NVIDIA Corp (Semiconductors)</option>
+            <option value="AAPL">Apple Inc (Consumer Tech)</option>
+            <option value="MSFT">Microsoft Corp (Software & Cloud)</option>
+            <option value="TSLA">Tesla Inc (EV & Tech)</option>
+            <option value="AMZN">Amazon.com (E-Commerce/Cloud)</option>
+            <option value="GOOGL">Alphabet Google (Internet/AI)</option>
+          </datalist>
+          <button class="btn-secondary" onclick="GameApp.addJournalStockFromInput()" style="background:var(--asx-blue); color:#070b14; font-weight:700; padding:0.45rem 0.85rem; font-size:0.82rem;">
+            + Add Stock Rationale
+          </button>
+        </div>
+      </div>
+    `;
+
+    let cardsHtml = '';
+    symbols.forEach(sym => {
+      const holding = (this.portfolio.holdings || []).find(h => h.symbol === sym);
+      const isHeld = !!holding;
+      const hadTrades = (this.portfolio.trades || []).some(t => t.symbol === sym);
+
+      const j = (this.portfolio.journal && this.portfolio.journal[sym]) || {
         thesis: '',
         riskFactors: '',
         priceTarget: ''
       };
-      const flag = h.exchange === 'ASX' ? '🇦🇺' : '🇺🇸';
 
-      html += `
-        <div class="section-card" style="background:var(--bg-card2);margin-bottom:1.5rem;">
+      const isAsx = sym.endsWith('.AX') || (holding && holding.exchange === 'ASX');
+      const flag = isAsx ? '🇦🇺' : '🇺🇸';
+      const safeId = sym.replace(/[^a-zA-Z0-9]/g, '_');
+
+      // Status pill
+      let statusBadge = '';
+      if (isHeld) {
+        const val = holding.currentValueAUD || (holding.shares * holding.avgPriceAUD);
+        statusBadge = `<span class="tab-badge" style="background:rgba(52,211,153,0.15);color:#34d399;font-weight:600;">🟢 Active Holding (${holding.shares} shares • $${val.toFixed(2)} AUD)</span>`;
+      } else if (hadTrades) {
+        statusBadge = `<span class="tab-badge" style="background:rgba(148,163,184,0.15);color:#94a3b8;font-weight:600;">⚪ Closed Position (Traded)</span>`;
+      } else {
+        statusBadge = `<span class="tab-badge" style="background:rgba(250,204,21,0.15);color:#facc15;font-weight:600;">🟡 Pre-Trade Research (Watchlist)</span>`;
+      }
+
+      const thesisLen = (j.thesis || '').trim().length;
+      const counterText = thesisLen >= 15
+        ? `<span style="color:#34d399;">✓ Meets 15-char assessment minimum (${thesisLen} chars)</span>`
+        : `<span style="color:var(--text-dim);">${thesisLen} / 15 chars min for assessment</span>`;
+
+      cardsHtml += `
+        <div class="section-card" style="background:var(--bg-card2);margin-bottom:1.5rem;border:1px solid var(--border);border-radius:12px;padding:1.25rem;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
-            <div>
-              <span style="font-size:1.1rem;margin-right:0.3rem;">${flag}</span>
-              <strong style="font-family:var(--font-mono);font-size:1.15rem;color:#fff;">${h.symbol}</strong>
-              <span style="color:var(--text-muted);font-size:0.85rem;margin-left:0.4rem;">${h.name}</span>
+            <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+              <span style="font-size:1.15rem;">${flag}</span>
+              <strong style="font-family:var(--font-mono);font-size:1.2rem;color:#fff;">${sym}</strong>
+              ${statusBadge}
             </div>
-            <div style="font-size:0.8rem;color:var(--text-dim);">
-              Position: <strong>${h.shares} shares</strong> ($${(h.currentValueAUD || h.shares * h.avgPriceAUD).toFixed(2)} AUD)
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <button class="btn-secondary" onclick="GameApp.openStockModal('${sym}', 'BUY')" style="padding:0.3rem 0.65rem;font-size:0.78rem;background:rgba(6,182,212,0.15);color:var(--asx-blue);border-color:rgba(6,182,212,0.3);">
+                ⚡ Quick Trade ➔
+              </button>
+              ${!isHeld ? `
+                <button class="btn-secondary" onclick="GameApp.removeJournalStock('${sym}')" style="padding:0.3rem 0.5rem;font-size:0.75rem;color:var(--text-dim);" title="Remove pre-trade card">
+                  ✕
+                </button>
+              ` : ''}
             </div>
           </div>
 
           <div style="display:grid;grid-template-columns:1.8fr 1fr;gap:1.25rem;">
             <div>
-              <label style="display:block;font-size:0.75rem;text-transform:uppercase;color:var(--text-dim);font-weight:700;margin-bottom:0.4rem;">
-                Investment Thesis &amp; Research Rationale
-              </label>
-              <textarea class="order-input" rows="3" style="width:100%;font-size:0.85rem;padding:0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;resize:vertical;"
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+                <label style="font-size:0.75rem;text-transform:uppercase;color:var(--text-dim);font-weight:700;">
+                  Investment Thesis &amp; Research Rationale
+                </label>
+                <div id="thesis-counter-${safeId}" style="font-size:0.72rem;">${counterText}</div>
+              </div>
+              <textarea id="journal-thesis-${safeId}" class="order-input" rows="3" style="width:100%;font-size:0.85rem;padding:0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;resize:vertical;"
                 placeholder="Why did you invest in this company? (Earnings outlook, competitive moat, ESG factors, macroeconomic tailwinds)..."
-                oninput="GameApp.updateJournalField('${h.symbol}', 'thesis', this.value)">${j.thesis || ''}</textarea>
+                oninput="GameApp.updateJournalField('${sym}', 'thesis', this.value)">${j.thesis || ''}</textarea>
             </div>
 
             <div>
@@ -1210,7 +1334,7 @@ const GameApp = {
                 <input type="text" class="order-input" style="width:100%;font-size:0.85rem;padding:0.6rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;"
                   placeholder="e.g. Commodity price fall, interest rates, currency risk"
                   value="${j.riskFactors || ''}"
-                  oninput="GameApp.updateJournalField('${h.symbol}', 'riskFactors', this.value)"/>
+                  oninput="GameApp.updateJournalField('${sym}', 'riskFactors', this.value)"/>
               </div>
 
               <div>
@@ -1220,7 +1344,7 @@ const GameApp = {
                 <input type="text" class="order-input" style="width:100%;font-size:0.85rem;padding:0.6rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;"
                   placeholder="e.g. $52.00 AUD"
                   value="${j.priceTarget || ''}"
-                  oninput="GameApp.updateJournalField('${h.symbol}', 'priceTarget', this.value)"/>
+                  oninput="GameApp.updateJournalField('${sym}', 'priceTarget', this.value)"/>
               </div>
             </div>
           </div>
@@ -1228,7 +1352,69 @@ const GameApp = {
       `;
     });
 
-    wrap.innerHTML = html;
+    wrap.innerHTML = macroHtml + stockHeaderHtml + cardsHtml;
+  },
+
+  addJournalStockFromInput() {
+    const input = document.getElementById('journal-add-ticker-input');
+    if (!input) return;
+    const ticker = input.value.trim().toUpperCase();
+    if (!ticker) return;
+    this.addJournalStock(ticker);
+    input.value = '';
+  },
+
+  addJournalStock(symbol) {
+    if (!symbol) return;
+    symbol = symbol.trim().toUpperCase();
+    if (!symbol) return;
+
+    if (!this.portfolio.journal) this.portfolio.journal = {};
+    if (!this.portfolio.journal[symbol]) {
+      this.portfolio.journal[symbol] = {
+        thesis: '',
+        riskFactors: '',
+        priceTarget: '',
+        updated: Date.now()
+      };
+      this.savePortfolio();
+    }
+    this.renderJournal();
+    setTimeout(() => {
+      const safeId = symbol.replace(/[^a-zA-Z0-9]/g, '_');
+      const el = document.getElementById(`journal-thesis-${safeId}`);
+      if (el) el.focus();
+    }, 80);
+    this.showToast(`Added ${symbol} to your Investment Journal.`, 'info');
+  },
+
+  removeJournalStock(symbol) {
+    if (!this.portfolio.journal || !this.portfolio.journal[symbol]) return;
+    const isHeld = (this.portfolio.holdings || []).some(h => h.symbol === symbol);
+    if (isHeld) {
+      this.showToast(`Cannot remove ${symbol} while you still hold active shares.`, 'warning');
+      return;
+    }
+    delete this.portfolio.journal[symbol];
+    this.savePortfolio();
+    this.renderJournal();
+    this.showToast(`Removed ${symbol} research card from journal.`, 'info');
+  },
+
+  updateMacroReflection(value) {
+    if (!this.portfolio.journal) this.portfolio.journal = {};
+    this.portfolio.macroReflection = value;
+    this.portfolio.journal._macroReflection = value;
+    this.portfolio.lastUpdated = Date.now();
+
+    const badge = document.getElementById('macro-autosave-badge') || document.getElementById('journal-autosave-badge');
+    if (badge) badge.textContent = 'Saving...';
+
+    clearTimeout(this.journalSaveTimeout);
+    this.journalSaveTimeout = setTimeout(() => {
+      this.savePortfolio();
+      if (badge) badge.textContent = '✓ Autosaved to Teacher Console';
+    }, 800);
   },
 
   updateJournalField(symbol, field, value) {
@@ -1239,6 +1425,19 @@ const GameApp = {
     this.portfolio.journal[symbol][field] = value;
     this.portfolio.journal[symbol].updated = Date.now();
 
+    if (field === 'thesis') {
+      const safeId = symbol.replace(/[^a-zA-Z0-9]/g, '_');
+      const counter = document.getElementById(`thesis-counter-${safeId}`);
+      if (counter) {
+        const len = value.trim().length;
+        if (len >= 15) {
+          counter.innerHTML = `<span style="color:#34d399;">✓ Meets 15-char assessment minimum (${len} chars)</span>`;
+        } else {
+          counter.innerHTML = `<span style="color:var(--text-dim);">${len} / 15 chars min for assessment</span>`;
+        }
+      }
+    }
+
     const badge = document.getElementById('journal-autosave-badge');
     if (badge) badge.textContent = 'Saving...';
 
@@ -1247,229 +1446,6 @@ const GameApp = {
       this.savePortfolio();
       if (badge) badge.textContent = '✓ Autosaved';
     }, 800);
-  },
-
-  /**
-   * 3-Week Independent Student Program & Financial Independence Calculator
-   */
-  selectedMissionWeek: 0,
-
-  filterMissionWeek(weekNum, btnElem) {
-    this.selectedMissionWeek = weekNum;
-    document.querySelectorAll('#mission-week-tabs .filter-chip').forEach(b => b.classList.remove('active'));
-    if (btnElem) btnElem.classList.add('active');
-    this.renderMissions();
-  },
-
-  checkMissionAutoTask(autoCheckType) {
-    const holdings = this.portfolio.holdings || [];
-    const trades = this.portfolio.trades || [];
-    const journal = this.portfolio.journal || {};
-
-    if (autoCheckType === 'asx_holdings_2') {
-      const asxCount = holdings.filter(h => h.exchange === 'ASX' || (h.symbol && h.symbol.endsWith('.AX'))).length;
-      return { met: asxCount >= 2, statusText: `${asxCount}/2 ASX Stocks Owned`, actionTab: 'tab-explorer', actionLabel: 'Trade ASX ➔' };
-    }
-    if (autoCheckType === 'total_holdings_3') {
-      return { met: holdings.length >= 3, statusText: `${holdings.length}/3 Active Holdings`, actionTab: 'tab-explorer', actionLabel: 'Diversify ➔' };
-    }
-    if (autoCheckType === 'us_holdings_1') {
-      const usCount = holdings.filter(h => h.exchange === 'NASDAQ' || h.exchange === 'NYSE' || h.currency === 'USD').length;
-      const usTrades = trades.filter(t => t.exchange === 'NASDAQ' || t.exchange === 'NYSE' || t.currency === 'USD').length;
-      const count = Math.max(usCount, usTrades);
-      return { met: count >= 1, statusText: `${count}/1 US Equity Traded`, actionTab: 'tab-explorer', actionLabel: 'Trade US Market ➔' };
-    }
-    if (autoCheckType === 'journal_entries_3') {
-      const validEntries = Object.values(journal).filter(j => j && (j.thesis || '').trim().length >= 15 && ((j.riskFactors || '').trim().length > 0 || (j.priceTarget || '').trim().length > 0)).length;
-      return { met: validEntries >= 3, statusText: `${validEntries}/3 Full Stock Journals`, actionTab: 'tab-journal', actionLabel: 'Open Stock Journal ➔' };
-    }
-    if (autoCheckType === 'total_trades_4') {
-      return { met: trades.length >= 4, statusText: `${trades.length}/4 Total Orders Executed`, actionTab: 'tab-explorer', actionLabel: 'Rebalance Portfolio ➔' };
-    }
-    return { met: true, statusText: 'Written Reflection Task', actionTab: null, actionLabel: null };
-  },
-
-  renderMissions() {
-    const container = document.getElementById('missions-program-container');
-    if (!container || !CONFIG.LEARNING_PROGRAM) return;
-
-    if (!this.portfolio.missions) this.portfolio.missions = {};
-
-    let totalModules = 0;
-    let completedModules = 0;
-    let html = '';
-
-    CONFIG.LEARNING_PROGRAM.forEach(weekObj => {
-      const showWeek = this.selectedMissionWeek === 0 || this.selectedMissionWeek === weekObj.week;
-      let weekHtml = '';
-
-      weekObj.modules.forEach(mod => {
-        totalModules++;
-        const savedMod = this.portfolio.missions[mod.id] || { response: '' };
-        const responseText = savedMod.response || '';
-        const hasReflection = responseText.trim().length >= 25;
-        const taskCheck = this.checkMissionAutoTask(mod.autoCheckType);
-        const isComplete = hasReflection && taskCheck.met;
-
-        if (isComplete) completedModules++;
-
-        if (showWeek) {
-          weekHtml += `
-            <div class="section-card" style="background:var(--bg-card2);margin-bottom:1.15rem;border:1px solid ${isComplete ? 'rgba(16,185,129,0.4)' : 'var(--border)'};">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:0.85rem;">
-                <div>
-                  <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.3rem;">
-                    <span class="tab-badge" style="background:rgba(6,182,212,0.15);color:var(--asx-blue);font-weight:700;">${mod.lesson}</span>
-                    <span class="tab-badge" style="background:${taskCheck.met ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)'};color:${taskCheck.met ? '#34d399' : '#fcd34d'};">
-                      ${taskCheck.met ? '✓' : '⏳'} ${mod.taskTitle} (${taskCheck.statusText})
-                    </span>
-                  </div>
-                  <h4 style="font-family:var(--font-head);font-size:1.1rem;color:#fff;margin:0;">${mod.title}</h4>
-                </div>
-                <div style="display:flex;align-items:center;gap:0.5rem;">
-                  ${taskCheck.actionTab ? `<button class="btn-secondary" style="font-size:0.76rem;padding:0.3rem 0.65rem;" onclick="GameApp.switchTab('${taskCheck.actionTab}')">${taskCheck.actionLabel}</button>` : ''}
-                  <span class="kpi-badge ${isComplete ? 'up' : ''}" id="mod-status-${mod.id}" style="${isComplete ? '' : 'background:rgba(255,255,255,0.06);color:var(--text-dim);'}">
-                    ${isComplete ? '✓ Module Complete' : 'In Progress'}
-                  </span>
-                </div>
-              </div>
-
-              <div style="background:rgba(3,7,18,0.45);border-left:3px solid var(--asx-blue);padding:0.75rem 1rem;border-radius:0 8px 8px 0;font-size:0.84rem;color:var(--text-muted);line-height:1.55;margin-bottom:1rem;">
-                <strong style="color:#fff;">📖 Core Concept:</strong> ${mod.reading}
-              </div>
-
-              <div>
-                <label style="display:block;font-size:0.76rem;color:#e2e8f0;font-weight:700;margin-bottom:0.4rem;">
-                  ✍️ Student Independence Workbook Prompt: <span style="color:var(--asx-blue);font-weight:500;">${mod.prompt}</span>
-                </label>
-                <textarea class="order-input" rows="3" style="width:100%;font-size:0.85rem;padding:0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;resize:vertical;"
-                  placeholder="Write your analysis and reflection here (min 25 characters to mark complete — automatically saved to your teacher's gradebook)..."
-                  oninput="GameApp.updateMissionResponse('${mod.id}', this.value)">${responseText}</textarea>
-              </div>
-            </div>
-          `;
-        }
-      });
-
-      if (showWeek) {
-        html += `
-          <div style="margin-bottom:2rem;">
-            <div style="margin-bottom:0.9rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);">
-              <h3 style="font-family:var(--font-head);font-size:1.25rem;color:#fff;margin-bottom:0.2rem;">${weekObj.title}</h3>
-              <p style="color:var(--text-dim);font-size:0.82rem;margin:0;">Focus: ${weekObj.theme}</p>
-            </div>
-            ${weekHtml}
-          </div>
-        `;
-      }
-    });
-
-    container.innerHTML = html;
-
-    const scoreEl = document.getElementById('missions-overall-score');
-    if (scoreEl) scoreEl.textContent = `${completedModules} / ${totalModules}`;
-    const navBadge = document.getElementById('missions-progress-badge');
-    if (navBadge) navBadge.textContent = `${completedModules}/${totalModules}`;
-  },
-
-  updateMissionResponse(modId, value) {
-    if (!this.portfolio.missions) this.portfolio.missions = {};
-    this.portfolio.missions[modId] = {
-      response: value,
-      updated: Date.now()
-    };
-
-    const statusEl = document.getElementById('missions-autosave-status');
-    if (statusEl) statusEl.textContent = 'Saving...';
-
-    // Update live badge for this module
-    const programMods = (CONFIG.LEARNING_PROGRAM || []).flatMap(w => w.modules);
-    const modDef = programMods.find(m => m.id === modId);
-    if (modDef) {
-      const hasReflection = (value || '').trim().length >= 25;
-      const taskCheck = this.checkMissionAutoTask(modDef.autoCheckType);
-      const isComplete = hasReflection && taskCheck.met;
-      const modBadge = document.getElementById(`mod-status-${modId}`);
-      if (modBadge) {
-        modBadge.className = `kpi-badge ${isComplete ? 'up' : ''}`;
-        modBadge.style.background = isComplete ? '' : 'rgba(255,255,255,0.06)';
-        modBadge.style.color = isComplete ? '' : 'var(--text-dim)';
-        modBadge.textContent = isComplete ? '✓ Module Complete' : 'In Progress';
-      }
-    }
-
-    // Update overall counter
-    let total = 0;
-    let done = 0;
-    programMods.forEach(m => {
-      total++;
-      const r = (this.portfolio.missions[m.id]?.response || '').trim().length >= 25;
-      const tc = this.checkMissionAutoTask(m.autoCheckType);
-      if (r && tc.met) done++;
-    });
-    const scoreEl = document.getElementById('missions-overall-score');
-    if (scoreEl) scoreEl.textContent = `${done} / ${total}`;
-    const navBadge = document.getElementById('missions-progress-badge');
-    if (navBadge) navBadge.textContent = `${done}/${total}`;
-
-    clearTimeout(this.journalSaveTimeout);
-    this.journalSaveTimeout = setTimeout(() => {
-      this.savePortfolio();
-      if (statusEl) statusEl.textContent = '✓ Synced with Teacher';
-    }, 800);
-  },
-
-  calculateIndependence() {
-    const startEl = document.getElementById('fi-start-capital');
-    if (!startEl) return;
-
-    const startCap = Math.max(0, parseFloat(startEl.value) || 0);
-    const monthly = Math.max(0, parseFloat(document.getElementById('fi-monthly-contrib')?.value) || 0);
-    const annualRate = Math.max(0.1, parseFloat(document.getElementById('fi-annual-return')?.value) || 8.2) / 100;
-    const targetIncome = Math.max(1000, parseFloat(document.getElementById('fi-target-income')?.value) || 45000);
-
-    const monthlyRate = annualRate / 12;
-
-    const calcBalance = (years) => {
-      const months = years * 12;
-      const compoundStart = startCap * Math.pow(1 + monthlyRate, months);
-      const compoundContrib = monthlyRate > 0
-        ? monthly * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate)
-        : monthly * months;
-      return compoundStart + compoundContrib;
-    };
-
-    const val10 = calcBalance(10);
-    const contrib10 = startCap + (monthly * 120);
-    const val20 = calcBalance(20);
-    const contrib20 = startCap + (monthly * 240);
-
-    // 4% Safe Withdrawal Rule -> 25x annual expenses
-    const fiTarget = targetIncome * 25;
-
-    // Estimate years to reach fiTarget
-    let yearsToFI = 0;
-    let bal = startCap;
-    while (bal < fiTarget && yearsToFI < 75) {
-      for (let m = 0; m < 12; m++) {
-        bal = bal * (1 + monthlyRate) + monthly;
-      }
-      yearsToFI++;
-    }
-
-    const el10 = document.getElementById('fi-res-10y');
-    const el10Sub = document.getElementById('fi-res-10y-sub');
-    const el20 = document.getElementById('fi-res-20y');
-    const el20Sub = document.getElementById('fi-res-20y-sub');
-    const elTarget = document.getElementById('fi-res-target');
-    const elYears = document.getElementById('fi-res-years');
-
-    if (el10) el10.textContent = `$${Math.round(val10).toLocaleString('en-AU')}`;
-    if (el10Sub) el10Sub.textContent = `$${Math.round(contrib10).toLocaleString('en-AU')} put in + $${Math.round(val10 - contrib10).toLocaleString('en-AU')} growth`;
-    if (el20) el20.textContent = `$${Math.round(val20).toLocaleString('en-AU')}`;
-    if (el20Sub) el20Sub.textContent = `$${Math.round(contrib20).toLocaleString('en-AU')} put in + $${Math.round(val20 - contrib20).toLocaleString('en-AU')} growth`;
-    if (elTarget) elTarget.textContent = `$${Math.round(fiTarget).toLocaleString('en-AU')}`;
-    if (elYears) elYears.textContent = yearsToFI >= 75 ? '50+ Years' : `~${yearsToFI} Years`;
   },
 
   async openStockModal(symbol, defaultOrder = 'BUY') {

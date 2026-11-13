@@ -76,6 +76,7 @@ const FirestoreSync = {
           holdings: portfolio.holdings || [],
           trades: portfolio.trades || [],
           journal: portfolio.journal || {},
+          macroReflection: portfolio.macroReflection || (portfolio.journal && portfolio.journal._macroReflection) || '',
           missions: portfolio.missions || {},
           grades: portfolio.grades || {},
           equityHistory: (portfolio.equityHistory || []).slice(-60),
