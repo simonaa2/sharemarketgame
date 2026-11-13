@@ -287,6 +287,36 @@ const TeacherApp = {
       });
     }
 
+        // 4. Merge pre-defined roster from CONFIG.STUDENTS so all students appear
+    if (Array.isArray(CONFIG.STUDENTS) && CONFIG.STUDENTS.length > 0) {
+      CONFIG.STUDENTS.forEach(rosterStudent => {
+        const classCode = (rosterStudent.classCode || CONFIG.DEFAULT_CLASS_CODE || '10COMM1').trim();
+        const studentKey = `${classCode.toLowerCase()}_${rosterStudent.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+        if (!studentMap.has(studentKey)) {
+          studentMap.set(studentKey, {
+            studentKey,
+            name: rosterStudent.name,
+            classCode,
+            totalValue: CONFIG.INITIAL_CASH,
+            cash: CONFIG.INITIAL_CASH,
+            tradesCount: 0,
+            lastUpdated: null,
+            portfolioRef: {
+              studentName: rosterStudent.name,
+              classCode,
+              cash: CONFIG.INITIAL_CASH,
+              totalValue: CONFIG.INITIAL_CASH,
+              holdings: [],
+              trades: [],
+              journal: {},
+              missions: {},
+              grades: {}
+            }
+          });
+        }
+      });
+    }
+
     this.students = Array.from(studentMap.values());
     this.renderDashboard();
   },

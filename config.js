@@ -232,9 +232,25 @@ const CONFIG = {
   // Google Apps Script Web App URL (leave empty to use local/fallback mode)
   SCRIPT_URL: '',
 
-  // Optional: Pre-defined Student Roster
+  // Pre-defined Student Roster (DLSC Caringbah Year 10 Commerce - 10COMM1)
   STUDENTS: [
-    // { name: 'Alex Taylor', classCode: '10COMM1', password: 'alex' }
+    { name: 'Joshua Duffey', classCode: '10COMM1', password: 'joshua5192' },
+    { name: 'Tobias Filipek', classCode: '10COMM1', password: 'tobias8374' },
+    { name: 'Jasper Ghodosi', classCode: '10COMM1', password: 'jasper6201' },
+    { name: 'Charlie Jurd-Smith', classCode: '10COMM1', password: 'charlie4093' },
+    { name: 'Anthony Lattouf', classCode: '10COMM1', password: 'anthony7182' },
+    { name: 'Jacob Lattouf', classCode: '10COMM1', password: 'jacob3510' },
+    { name: 'Oliver Martin', classCode: '10COMM1', password: 'oliver9024' },
+    { name: 'Max Mirabello', classCode: '10COMM1', password: 'max4831' },
+    { name: 'Dominic Mobberley-Barreto', classCode: '10COMM1', password: 'dominic5729' },
+    { name: 'Noah Ntzeremes', classCode: '10COMM1', password: 'noah8214' },
+    { name: 'Patrick O\'Connor', classCode: '10COMM1', password: 'patrick6392' },
+    { name: 'Jacob Salem', classCode: '10COMM1', password: 'jacob5183' },
+    { name: 'Luca Toffolo', classCode: '10COMM1', password: 'luca4920' },
+    { name: 'James Tzirtzilakis', classCode: '10COMM1', password: 'james6304' },
+    { name: 'William Tzirtzilakis', classCode: '10COMM1', password: 'william1759' },
+    { name: 'Kaiden Walker', classCode: '10COMM1', password: 'kaiden3810' },
+    { name: 'Jesper Whippy', classCode: '10COMM1', password: 'jesper9240' }
   ],
 
   // Supported Exchanges
