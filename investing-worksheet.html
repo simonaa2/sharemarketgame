@@ -133,19 +133,18 @@
       color: #0f172a;
     }
     .write-line {
-      border-bottom: 1px dashed #64748b;
+      border-bottom: 1px dashed #94a3b8;
       min-height: 22px;
-      margin: 6px 0;
+      margin: 4px 0;
     }
     .write-box {
       border: 1px solid #cbd5e1;
-      background: #f8fafc;
+      background: #ffffff;
       border-radius: 6px;
-      min-height: 48px;
+      min-height: 52px;
       padding: 8px 10px;
       margin: 6px 0 10px 0;
-      color: #475569;
-      font-style: italic;
+      color: #0f172a;
     }
     .two-col {
       display: grid;
@@ -223,10 +222,6 @@
         Students: Log in with full name &bull; Class: <code>10COMA</code> &bull; Initial Capital: <strong>$50,000 AUD</strong>
       </div>
     </div>
-      <div style="font-size:11px; color:#1e40af; font-weight:600;">
-        Log in with your full name &bull; Class: <code>10COMA</code> &bull; Initial Capital: <strong>$50,000 AUD</strong>
-      </div>
-    </div>
 
     <div class="student-info">
       <div>Student Name: _____________________________________</div>
@@ -246,8 +241,9 @@
         <p style="font-size:12px; margin:2px 0 6px 0;">
           Distinguish between depositing savings into an authorised bank account versus buying shares in a public company (e.g. BHP, CBA, Apple).
         </p>
-        <div class="write-box">
-          A share represents partial equity ownership in a corporation. Unlike bank deposits with guaranteed interest, shares fluctuate in price and provide returns via capital growth and dividends...
+        <div class="write-box" style="min-height:56px;">
+          <div class="write-line"></div>
+          <div class="write-line"></div>
         </div>
       </div>
       <div>
@@ -255,9 +251,11 @@
         <p style="font-size:12px; margin:2px 0 6px 0;">
           Define <strong>Capital Growth</strong> (capital gain/loss) and <strong>Dividends</strong>. How do investors realize each return?
         </p>
-        <div class="write-box">
-          Capital Growth: Selling shares for a higher price than purchased.<br>
-          Dividends: Cash distribution of corporate profits paid directly to shareholders per share owned...
+        <div class="write-box" style="min-height:56px;">
+          <div style="font-size:11px; font-weight:700; color:#1e293b;">• Capital Growth: <span style="font-weight:400; color:#64748b;">(Define how it is earned)</span></div>
+          <div class="write-line"></div>
+          <div style="font-size:11px; font-weight:700; color:#1e293b; margin-top:4px;">• Dividends: <span style="font-weight:400; color:#64748b;">(Define how it is earned)</span></div>
+          <div class="write-line"></div>
         </div>
       </div>
     </div>
@@ -287,8 +285,9 @@
         <p style="font-size:12px; margin:2px 0 6px 0;">
           In our simulator, each trade incurs a flat <strong>$10.00 AUD transaction fee</strong>. If you make 20 tiny trades worth $100 each, what percentage of your investment has vanished to fees alone?
         </p>
-        <div class="write-line">Calculation: 20 trades &times; $10 = $200 total brokerage. Total capital traded: $2,000.</div>
-        <div class="write-line">Percentage lost to fees: (______ / ______) &times; 100 = <strong>______% fee drag!</strong></div>
+        <div class="write-line">Total Brokerage Paid: 20 trades &times; $10.00 = $_________________</div>
+        <div class="write-line">Total Value Traded: 20 trades &times; $100 = $_________________</div>
+        <div class="write-line">Percentage Lost to Fees: ( $__________ / $__________ ) &times; 100 = <strong>__________% fee drag</strong></div>
       </div>
     </div>
 
@@ -356,8 +355,9 @@
         <p style="font-size:12px; margin:2px 0 4px 0;">
           Explain what happens to your US holdings (e.g. Apple) if the Australian Dollar <strong>depreciates</strong> against the US Dollar (e.g. from US$0.70 to US$0.60):
         </p>
-        <div class="write-box">
-          A lower AUD means each US Dollar of value converts into MORE Australian Dollars, creating an exchange rate gain in AUD terms...
+        <div class="write-box" style="min-height:56px;">
+          <div class="write-line"></div>
+          <div class="write-line"></div>
         </div>
       </div>
       <div>
@@ -365,8 +365,9 @@
         <p style="font-size:12px; margin:2px 0 4px 0;">
           Our simulator strictly blocks any single share from exceeding <strong>25% of your total portfolio</strong> ($12,500 max from an initial $50,000 cash balance). Why is this rule enforced?
         </p>
-        <div class="write-box">
-          Diversification cushions your portfolio against company-specific catastrophe or industry collapse. "Never put all your eggs in one basket."
+        <div class="write-box" style="min-height:56px;">
+          <div class="write-line"></div>
+          <div class="write-line"></div>
         </div>
       </div>
     </div>
@@ -430,8 +431,11 @@
     <p style="font-size:12px; margin:2px 0 6px 0;">
       In the simulator, orders require a <strong>minimum 15-character rationale</strong> before execution. Write out your rationale for one of your chosen companies:
     </p>
-    <div class="write-box" style="min-height:56px;">
-      "Company: [ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] — Investment Thesis: I am allocating capital to this company because of sustained global demand, strong quarterly earnings, and defensiveness against interest rate hikes..."
+    <div class="write-box" style="min-height:64px;">
+      <div style="font-size:11px; font-weight:700; color:#1e293b; margin-bottom:4px;">Selected Company &amp; Ticker: __________________________________________________</div>
+      <div style="font-size:11px; font-weight:700; color:#1e293b; margin-bottom:2px;">Investment Thesis / Rationale:</div>
+      <div class="write-line"></div>
+      <div class="write-line"></div>
     </div>
 
     <!-- PART 4 -->
@@ -443,8 +447,9 @@
         <p style="font-size:12px; margin:2px 0 6px 0;">
           Switch between timeline intervals on your portfolio valuation chart (<strong>1W, 1M, 3M, 6M, 1Y, ALL</strong>). Explain the purpose of comparing your portfolio against the yellow <strong>S&amp;P/ASX 200 Benchmark</strong> line:
         </p>
-        <div class="write-box">
-          The benchmark represents the broader market's average return. Generating "Alpha" means your stock selection outperformed the passive market average...
+        <div class="write-box" style="min-height:56px;">
+          <div class="write-line"></div>
+          <div class="write-line"></div>
         </div>
       </div>
       <div>
@@ -452,8 +457,10 @@
         <p style="font-size:12px; margin:2px 0 6px 0;">
           When Mr Anderson broadcasts a market shock from the Teacher Console (e.g. <em>"RBA Hikes Cash Rate (+25 bps)"</em> or <em>"Global Resources Super-Cycle"</em>), which of your stocks benefited and which suffered?
         </p>
-        <div class="write-box">
-          Rate hikes tend to widen net interest margins for major banks (CBA) while compressing valuation multiples for high-growth tech firms...
+        <div class="write-box" style="min-height:56px;">
+          <div style="font-size:11px; font-weight:700; color:#1e293b; margin-bottom:2px;">Catalyst Broadcasted: _____________________________________________</div>
+          <div class="write-line">Benefited: _______________________ &bull; Suffered: _______________________</div>
+          <div class="write-line">Reason: </div>
         </div>
       </div>
     </div>
@@ -465,15 +472,18 @@
     <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
       <div style="background:#fef3c7; border:1px solid #fcd34d; border-radius:6px; padding:8px 10px;">
         <strong style="color:#92400e;">🏛️ Beat Market</strong><br>
-        <span style="font-size:11px; color:#78350f;">Deliver a total portfolio ROI exceeding the 8.2% annual S&amp;P/ASX 200 baseline.</span>
+        <span style="font-size:11px; color:#78350f;">Exceed the 8.2% S&amp;P/ASX 200 baseline return.</span>
+        <div style="margin-top:6px; font-size:11px; font-weight:700; color:#92400e;">[ &nbsp; ] Unlocked &bull; My ROI: ______%</div>
       </div>
       <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:6px; padding:8px 10px;">
         <strong style="color:#065f46;">🧺 Diversified</strong><br>
-        <span style="font-size:11px; color:#064e3b;">Hold at least 3 active equities across distinct market sectors within the 25% cap.</span>
+        <span style="font-size:11px; color:#064e3b;">Hold 3+ active equities across distinct sectors (25% cap).</span>
+        <div style="margin-top:6px; font-size:11px; font-weight:700; color:#065f46;">[ &nbsp; ] Unlocked &bull; Sectors: _________</div>
       </div>
       <div style="background:#ede9fe; border:1px solid #ddd6fe; border-radius:6px; padding:8px 10px;">
         <strong style="color:#5b21b6;">📔 Journal</strong><br>
-        <span style="font-size:11px; color:#4c1d95;">Write and document analytical investment theses for all executed buy orders.</span>
+        <span style="font-size:11px; color:#4c1d95;">Document analytical investment theses for all orders.</span>
+        <div style="margin-top:6px; font-size:11px; font-weight:700; color:#5b21b6;">[ &nbsp; ] Unlocked &bull; Journal completed</div>
       </div>
     </div>
 
@@ -484,14 +494,17 @@
       <em>"Evaluate the importance of portfolio diversification and risk management for a young retail investor entering the share market. In your answer, refer to specific mechanisms and findings from your share market simulation experience."</em>
     </p>
 
-    <div class="write-box" style="min-height:160px; line-height:1.7;">
-      [Band 6 Scaffold: 1. Thesis &amp; Definition &rarr; 2. Diversification &amp; 25% Rule &rarr; 3. Brokerage &amp; Over-trading Impact &rarr; 4. Currency Risk &rarr; 5. Evaluative Judgement]<br><br>
-      ____________________________________________________________________________________________________________________________________________________<br>
-      ____________________________________________________________________________________________________________________________________________________<br>
-      ____________________________________________________________________________________________________________________________________________________<br>
-      ____________________________________________________________________________________________________________________________________________________<br>
-      ____________________________________________________________________________________________________________________________________________________<br>
-      ____________________________________________________________________________________________________________________________________________________
+    <div class="write-box" style="min-height:170px;">
+      <div style="font-size:11px; font-weight:700; color:#475569; margin-bottom:8px;">
+        Scaffold: 1. Thesis &amp; Definition &rarr; 2. Diversification &amp; 25% Rule &rarr; 3. Brokerage &amp; Over-trading Impact &rarr; 4. Currency Risk &rarr; 5. Evaluative Judgement
+      </div>
+      <div class="write-line"></div>
+      <div class="write-line"></div>
+      <div class="write-line"></div>
+      <div class="write-line"></div>
+      <div class="write-line"></div>
+      <div class="write-line"></div>
+      <div class="write-line"></div>
     </div>
 
     <div style="margin-top:14px; padding-top:8px; border-top:1px solid #cbd5e1; display:flex; justify-content:space-between; font-size:11px; color:#64748b;">
