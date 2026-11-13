@@ -187,6 +187,7 @@ const MarketService = {
       fiftyTwoWeekLow: chart.fiftyTwoWeekLow || chart.regularMarketPrice * 0.75,
       volume: 1250000,
       peRatio: 22.4,
+      beta: 1.15,
       marketCap: '$45.2B'
     };
   },
@@ -338,6 +339,7 @@ const MarketService = {
       fiftyTwoWeekLow: base.range52[0],
       volume: Math.floor(1000000 + (seed % 4000000)),
       peRatio: base.pe,
+      beta: base.beta || (symbol.endsWith('.AX') ? 0.95 : 1.25),
       marketCap: base.mktCap
     };
   },

@@ -1477,6 +1477,12 @@ const GameApp = {
     document.getElementById('modal-meta-range52').textContent = `$${quote.fiftyTwoWeekLow.toFixed(2)} - $${quote.fiftyTwoWeekHigh.toFixed(2)}`;
     document.getElementById('modal-meta-mktcap').textContent = quote.marketCap;
     document.getElementById('modal-meta-pe').textContent = quote.peRatio;
+    const betaElem = document.getElementById('modal-meta-beta');
+    if (betaElem) {
+      const b = (quote.beta !== undefined) ? quote.beta : 1.0;
+      const bTag = b > 1.25 ? 'High Volatility' : (b < 0.85 ? 'Defensive' : 'Market In-Line');
+      betaElem.innerHTML = `${b.toFixed(2)} <small style="font-size:0.68rem;color:var(--text-dim);">(${bTag})</small>`;
+    }
 
     // Catalyst and Watchlist state
     const catalystElem = document.getElementById('modal-stock-catalyst');
