@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Year 10 Commerce — Share Market &amp; Investing Fundamentals Simulation Lab Worksheet | DataTrends</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 12mm;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+      color: #0f172a;
+      background: #f8fafc;
+      margin: 0;
+      padding: 24px;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+    .page-container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 28px 32px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    }
+    .no-print-bar {
+      max-width: 860px;
+      margin: 0 auto 16px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 10px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12px;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary { background: #2563eb; color: #ffffff; }
+    .btn-secondary { background: #334155; color: #f8fafc; }
+    .header-banner {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    h1 {
+      margin: 0 0 4px 0;
+      font-size: 20px;
+      color: #0f172a;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: #1e3a8a;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .url-box {
+      background: #eff6ff;
+      border: 2px solid #2563eb;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .url-box a {
+      color: #1d4ed8;
+      font-weight: 800;
+      font-size: 14px;
+      font-family: ui-monospace, Consolas, monospace;
+      text-decoration: underline;
+    }
+    .student-info {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+      background: #f1f5f9;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    h2 {
+      font-size: 13.5px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      margin: 18px 0 10px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    h3 {
+      font-size: 13px;
+      color: #1d4ed8;
+      margin: 10px 0 6px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0 12px 0;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid #94a3b8;
+      padding: 7px 9px;
+      text-align: left;
+    }
+    th {
+      background: #e2e8f0;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .write-line {
+      border-bottom: 1px dashed #64748b;
+      min-height: 22px;
+      margin: 6px 0;
+    }
+    .write-box {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      border-radius: 6px;
+      min-height: 48px;
+      padding: 8px 10px;
+      margin: 6px 0 10px 0;
+      color: #475569;
+      font-style: italic;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .pill {
+      display: inline-block;
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #7dd3fc;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 11px;
+    }
+    .badge-chip {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-right: 4px;
+    }
+    .badge-market { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+    .badge-div { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .badge-journal { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
+    .page-break {
+      page-break-before: always;
+    }
+    @media print {
+      body { background: #ffffff; padding: 0; }
+      .page-container { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+      .no-print-bar { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="no-print-bar">
+    <div>
+      <strong>📄 Year 10 Commerce — Share Market &amp; Investing Fundamentals Student Worksheet</strong>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <a href="game" class="btn btn-secondary">&larr; Launch Trading Floor</a>
+      <button onclick="window.print()" class="btn btn-primary">🖨️ Print / Save as PDF</button>
+    </div>
+  </div>
+
+  <div class="page-container">
+    <div class="header-banner">
+      <div>
+        <div class="subtitle">NSW Stage 5 Commerce &bull; Topic 1: Consumer &amp; Financial Decisions</div>
+        <h1>Investing Basics &amp; Share Market Simulation — Student Lab Guide</h1>
+        <div style="font-size:12px; color:#475569;">De La Salle Catholic College Caringbah &bull; Virtual Trading Floor, Portfolio Diversification &amp; Financial Risk</div>
+      </div>
+      <div style="text-align:right; font-size:11px; color:#475569; shrink:0;">
+        <strong>DataTrends Education</strong><br>
+        Syllabus: COM5-1, COM5-2, COM5-4
+      </div>
+    </div>
+
+    <div class="url-box">
+      <div>
+        <strong>🌐 Trading Floor URL:</strong>
+        <a href="https://www.datatrends.com.au/apps/sharemarket/game" target="_blank">https://www.datatrends.com.au/apps/sharemarket/game</a>
+      </div>
+      <div style="font-size:11px; color:#1e40af; font-weight:600;">
+        Log in with your full name &bull; Class: <code>10COMA</code> &bull; Initial Capital: <strong>$50,000 AUD</strong>
+      </div>
+    </div>
+
+    <div class="student-info">
+      <div>Student Name: _____________________________________</div>
+      <div>Class: <strong>10COMA</strong></div>
+      <div>Date: <strong>13 Nov 2026</strong></div>
+    </div>
+
+    <!-- PART 1 -->
+    <h2>Part 1: The Core Fundamentals of Investing ("Before You Trade")</h2>
+    <p style="margin:4px 0 8px 0;">
+      Answer the questions below to establish your investment knowledge before deploying capital into the live market.
+    </p>
+
+    <div class="two-col">
+      <div>
+        <h3>1. What is a Share?</h3>
+        <p style="font-size:12px; margin:2px 0 6px 0;">
+          Distinguish between depositing savings into an authorised bank account versus buying shares in a public company (e.g. BHP, CBA, Apple).
+        </p>
+        <div class="write-box">
+          A share represents partial equity ownership in a corporation. Unlike bank deposits with guaranteed interest, shares fluctuate in price and provide returns via capital growth and dividends...
+        </div>
+      </div>
+      <div>
+        <h3>2. Two Forms of Investment Return</h3>
+        <p style="font-size:12px; margin:2px 0 6px 0;">
+          Define <strong>Capital Growth</strong> (capital gain/loss) and <strong>Dividends</strong>. How do investors realize each return?
+        </p>
+        <div class="write-box">
+          Capital Growth: Selling shares for a higher price than purchased.<br>
+          Dividends: Cash distribution of corporate profits paid directly to shareholders per share owned...
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top:10px;">
+      <div>
+        <h3>3. The Risk vs. Return Trade-Off</h3>
+        <p style="font-size:12px; margin:2px 0 6px 0;">
+          Rank the following assets from <strong>Lowest Risk (1)</strong> to <strong>Highest Risk (4)</strong>:
+        </p>
+        <table style="margin:4px 0;">
+          <tr>
+            <td>[ &nbsp;&nbsp;&nbsp; ] Australian Government Bonds</td>
+            <td>[ &nbsp;&nbsp;&nbsp; ] Bank Cash Term Deposit</td>
+          </tr>
+          <tr>
+            <td>[ &nbsp;&nbsp;&nbsp; ] ASX Blue-Chip Shares (BHP / CBA)</td>
+            <td>[ &nbsp;&nbsp;&nbsp; ] High-Growth US Tech (NVDA / TSLA)</td>
+          </tr>
+        </table>
+        <div style="font-size:11px; color:#475569; margin-top:4px;">
+          <em>Rule of Thumb: Higher potential returns always require accepting higher potential volatility and downside risk.</em>
+        </div>
+      </div>
+      <div>
+        <h3>4. Brokerage Fees &amp; The Danger of "Churn"</h3>
+        <p style="font-size:12px; margin:2px 0 6px 0;">
+          In our simulator, each trade incurs a flat <strong>$10.00 AUD transaction fee</strong>. If you make 20 tiny trades worth $100 each, what percentage of your investment has vanished to fees alone?
+        </p>
+        <div class="write-line">Calculation: 20 trades &times; $10 = $200 total brokerage. Total capital traded: $2,000.</div>
+        <div class="write-line">Percentage lost to fees: (______ / ______) &times; 100 = <strong>______% fee drag!</strong></div>
+      </div>
+    </div>
+
+    <!-- PART 2 -->
+    <h2>Part 2: Pre-Trade Market Research &amp; Risk Guardrails (Market Explorer)</h2>
+    <p style="margin:4px 0 8px 0;">
+      Open the <strong>Market Explorer (Tab 2)</strong> in the simulator. Select and analyze <strong>two Australian ASX equities</strong> and <strong>two US international equities</strong>:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Company Name</th>
+          <th>Ticker &amp; Exchange</th>
+          <th>Sector</th>
+          <th>Share Price (Local)</th>
+          <th>Aud Converted Price</th>
+          <th>52-Week Range</th>
+          <th>P/E Ratio</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>BHP Group</strong></td>
+          <td><code>BHP.AX</code> (ASX)</td>
+          <td>Materials / Mining</td>
+          <td>$_____________</td>
+          <td>$_____________</td>
+          <td>$_______ - $_______</td>
+          <td>_________</td>
+        </tr>
+        <tr>
+          <td><strong>Commonwealth Bank</strong></td>
+          <td><code>CBA.AX</code> (ASX)</td>
+          <td>Financials / Banking</td>
+          <td>$_____________</td>
+          <td>$_____________</td>
+          <td>$_______ - $_______</td>
+          <td>_________</td>
+        </tr>
+        <tr>
+          <td><strong>Apple Inc.</strong></td>
+          <td><code>AAPL</code> (NASDAQ)</td>
+          <td>Technology</td>
+          <td>US$___________</td>
+          <td>≈ $___________ AUD</td>
+          <td>US$_____ - US$_____</td>
+          <td>_________</td>
+        </tr>
+        <tr>
+          <td><strong>Nvidia Corporation</strong></td>
+          <td><code>NVDA</code> (NASDAQ)</td>
+          <td>Semiconductors</td>
+          <td>US$___________</td>
+          <td>≈ $___________ AUD</td>
+          <td>US$_____ - US$_____</td>
+          <td>_________</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="two-col" style="margin-top:10px;">
+      <div>
+        <h3>Currency (FX) Risk in International Shares</h3>
+        <p style="font-size:12px; margin:2px 0 4px 0;">
+          Explain what happens to your US holdings (e.g. Apple) if the Australian Dollar <strong>depreciates</strong> against the US Dollar (e.g. from US$0.70 to US$0.60):
+        </p>
+        <div class="write-box">
+          A lower AUD means each US Dollar of value converts into MORE Australian Dollars, creating an exchange rate gain in AUD terms...
+        </div>
+      </div>
+      <div>
+        <h3>The 25% Portfolio Diversification Cap</h3>
+        <p style="font-size:12px; margin:2px 0 4px 0;">
+          Our simulator strictly blocks any single share from exceeding <strong>25% of your total portfolio</strong> ($12,500 max from an initial $50,000 cash balance). Why is this rule enforced?
+        </p>
+        <div class="write-box">
+          Diversification cushions your portfolio against company-specific catastrophe or industry collapse. "Never put all your eggs in one basket."
+        </div>
+      </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- PART 3 -->
+    <h2>Part 3: Trade Execution, Investment Journal &amp; Ledger Audit (Tab 1, 3 &amp; 4)</h2>
+    <p style="margin:4px 0 8px 0;">
+      Formulate your investment thesis, execute at least <strong>three diversified buy orders</strong> across different sectors, and audit them in your ledger:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date &amp; Time</th>
+          <th>Symbol</th>
+          <th>Order Type</th>
+          <th>Shares</th>
+          <th>Price Per Share (AUD)</th>
+          <th>Brokerage</th>
+          <th>Total Outlay ($)</th>
+          <th>Remaining Cash Balance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>13/11/2026</td>
+          <td>__________</td>
+          <td><strong>BUY</strong></td>
+          <td>__________</td>
+          <td>$_____________</td>
+          <td>$10.00</td>
+          <td>$_____________</td>
+          <td>$_____________</td>
+        </tr>
+        <tr>
+          <td>13/11/2026</td>
+          <td>__________</td>
+          <td><strong>BUY</strong></td>
+          <td>__________</td>
+          <td>$_____________</td>
+          <td>$10.00</td>
+          <td>$_____________</td>
+          <td>$_____________</td>
+        </tr>
+        <tr>
+          <td>13/11/2026</td>
+          <td>__________</td>
+          <td><strong>BUY</strong></td>
+          <td>__________</td>
+          <td>$_____________</td>
+          <td>$10.00</td>
+          <td>$_____________</td>
+          <td>$_____________</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Mandatory Investment Thesis (Your Investment Journal — Tab 3)</h3>
+    <p style="font-size:12px; margin:2px 0 6px 0;">
+      In the simulator, orders require a <strong>minimum 15-character rationale</strong> before execution. Write out your rationale for one of your chosen companies:
+    </p>
+    <div class="write-box" style="min-height:56px;">
+      "Company: [ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] — Investment Thesis: I am allocating capital to this company because of sustained global demand, strong quarterly earnings, and defensiveness against interest rate hikes..."
+    </div>
+
+    <!-- PART 4 -->
+    <h2>Part 4: Macroeconomic Catalysts, S&amp;P/ASX 200 Benchmark &amp; Badges</h2>
+
+    <div class="two-col">
+      <div>
+        <h3>Benchmarking Against the S&amp;P/ASX 200</h3>
+        <p style="font-size:12px; margin:2px 0 6px 0;">
+          Switch between timeline intervals on your portfolio valuation chart (<strong>1W, 1M, 3M, 6M, 1Y, ALL</strong>). Explain the purpose of comparing your portfolio against the yellow <strong>S&amp;P/ASX 200 Benchmark</strong> line:
+        </p>
+        <div class="write-box">
+          The benchmark represents the broader market's average return. Generating "Alpha" means your stock selection outperformed the passive market average...
+        </div>
+      </div>
+      <div>
+        <h3>Macroeconomic Catalyst Impact</h3>
+        <p style="font-size:12px; margin:2px 0 6px 0;">
+          When Mr Anderson broadcasts a market shock from the Teacher Console (e.g. <em>"RBA Hikes Cash Rate (+25 bps)"</em> or <em>"Global Resources Super-Cycle"</em>), which of your stocks benefited and which suffered?
+        </p>
+        <div class="write-box">
+          Rate hikes tend to widen net interest margins for major banks (CBA) while compressing valuation multiples for high-growth tech firms...
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:12px;">Classroom Leaderboard Syllabus Badges</h3>
+    <p style="font-size:12px; margin:2px 0 6px 0;">
+      Inspect the <strong>Class Leaderboard (Tab 5)</strong>. Identify how to unlock each of the three curriculum badges:
+    </p>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+      <div style="background:#fef3c7; border:1px solid #fcd34d; border-radius:6px; padding:8px 10px;">
+        <strong style="color:#92400e;">🏛️ Beat Market</strong><br>
+        <span style="font-size:11px; color:#78350f;">Deliver a total portfolio ROI exceeding the 8.2% annual S&amp;P/ASX 200 baseline.</span>
+      </div>
+      <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:6px; padding:8px 10px;">
+        <strong style="color:#065f46;">🧺 Diversified</strong><br>
+        <span style="font-size:11px; color:#064e3b;">Hold at least 3 active equities across distinct market sectors within the 25% cap.</span>
+      </div>
+      <div style="background:#ede9fe; border:1px solid #ddd6fe; border-radius:6px; padding:8px 10px;">
+        <strong style="color:#5b21b6;">📔 Journal</strong><br>
+        <span style="font-size:11px; color:#4c1d95;">Write and document analytical investment theses for all executed buy orders.</span>
+      </div>
+    </div>
+
+    <!-- PART 5 -->
+    <h2>Part 5: Analytical Extended Response &amp; Exam Practice (6 Marks)</h2>
+    <p style="margin:4px 0 8px 0;">
+      <strong>Commerce HSC-Style Examination Question:</strong>
+      <em>"Evaluate the importance of portfolio diversification and risk management for a young retail investor entering the share market. In your answer, refer to specific mechanisms and findings from your share market simulation experience."</em>
+    </p>
+
+    <div class="write-box" style="min-height:160px; line-height:1.7;">
+      [Band 6 Scaffold: 1. Thesis &amp; Definition &rarr; 2. Diversification &amp; 25% Rule &rarr; 3. Brokerage &amp; Over-trading Impact &rarr; 4. Currency Risk &rarr; 5. Evaluative Judgement]<br><br>
+      ____________________________________________________________________________________________________________________________________________________<br>
+      ____________________________________________________________________________________________________________________________________________________<br>
+      ____________________________________________________________________________________________________________________________________________________<br>
+      ____________________________________________________________________________________________________________________________________________________<br>
+      ____________________________________________________________________________________________________________________________________________________<br>
+      ____________________________________________________________________________________________________________________________________________________
+    </div>
+
+    <div style="margin-top:14px; padding-top:8px; border-top:1px solid #cbd5e1; display:flex; justify-content:space-between; font-size:11px; color:#64748b;">
+      <div>De La Salle Catholic College Caringbah &bull; Year 10 Commerce (10COMA)</div>
+      <div>Teacher: Mr Simon Anderson &bull; Term 4 2026</div>
+    </div>
+
+  </div>
+
+</body>
+</html>
