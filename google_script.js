@@ -50,7 +50,7 @@ function doPost(e) {
       const totalVal = p.equityHistory && p.equityHistory.length > 0
         ? p.equityHistory[p.equityHistory.length - 1].totalValue
         : p.cash;
-      const roi = ((totalVal - 50000) / 50000) * 100;
+      const roi = ((totalVal - 150000) / 150000) * 100;
       const holdingsSummary = (p.holdings || []).map(h => `${h.symbol} (${h.shares}x)`).join(', ');
 
       const data = pSheet.getDataRange().getValues();

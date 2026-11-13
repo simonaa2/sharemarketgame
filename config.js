@@ -19,14 +19,14 @@ const CONFIG = {
   },
 
   // Game Trading Parameters
-  INITIAL_CASH: 50000,          // Starting balance in AUD ($50,000)
+  INITIAL_CASH: 150000,         // Starting balance in AUD ($150,000)
   BROKERAGE_FEE: 10.00,         // Flat brokerage fee per trade in AUD ($10)
   DEFAULT_CURRENCY: 'AUD',      // Base currency for portfolios and leaderboard
   AUD_USD_RATE: 0.65,           // Fallback AUD to USD exchange rate (1 AUD = 0.65 USD; 1 USD = ~1.538 AUD)
 
   // Educational Guardrails & Diversification Rules (Syllabus Enforced)
   DIVERSIFICATION_CAP_ENABLED: true,  // Enforces 25% max allocation per company
-  MAX_POSITION_PERCENT: 25,           // Max 25% ($12,500 of $50k) per stock to teach risk management
+  MAX_POSITION_PERCENT: 25,           // Max 25% ($37,500 of $150k) per stock to teach risk management
   MANDATORY_RATIONALE_MIN_CHARS: 15,  // Requires investment thesis (min 15 chars) before execution
 
   // Competition Round & Lifecycle Settings
@@ -121,7 +121,7 @@ const CONFIG = {
           id: 'w1_m1',
           lesson: 'Lesson 1 (Independence Foundations)',
           title: 'Why Invest? Inflation, Compounding & Financial Independence',
-          reading: 'Keeping $50,000 in a 0% bank account means inflation (~3% p.a.) silently erodes your purchasing power every year. Investing in productive assets (shares) allows your money to work for you through capital growth and dividends. Financial Independence is reached when your passive investment income covers your living expenses (often estimated using the "4% Rule" — needing 25x your annual expenses invested).',
+          reading: 'Keeping $150,000 in a 0% bank account means inflation (~3% p.a.) silently erodes your purchasing power every year. Investing in productive assets (shares) allows your money to work for you through capital growth and dividends. Financial Independence is reached when your passive investment income covers your living expenses (often estimated using the "4% Rule" — needing 25x your annual expenses invested).',
           taskTitle: 'Use the Financial Independence Calculator & Define Your Goal',
           prompt: 'In your own words, explain why holding 100% cash is a long-term risk due to inflation, and describe what achieving "Financial Independence" in your 20s or 30s would allow you to do:',
           autoCheckType: 'reflection_only'
@@ -139,7 +139,7 @@ const CONFIG = {
           id: 'w1_m3',
           lesson: 'Lesson 3 (Risk & Position Sizing)',
           title: 'Diversification (The 25% Rule) & Brokerage Drag',
-          reading: 'Every trade costs $10 AUD in brokerage. Buying tiny $200 parcels means losing 5% immediately to fees! At the same time, putting 100% of your money into a single company exposes you to unsystematic (company-specific) risk. Our 25% position cap ($12,500 max per stock) ensures you hold at least 4 distinct companies.',
+          reading: 'Every trade costs $10 AUD in brokerage. Buying tiny $200 parcels means losing 5% immediately to fees! At the same time, putting 100% of your money into a single company exposes you to unsystematic (company-specific) risk. Our 25% position cap ($37,500 max per stock) ensures you hold at least 4 distinct companies.',
           taskTitle: 'Build a Diversified Portfolio of 3+ Active Holdings',
           prompt: 'How did you size your initial trades to minimize the impact of the $10 brokerage fee while staying safely below the 25% single-stock cap?',
           autoCheckType: 'total_holdings_3'

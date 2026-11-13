@@ -378,7 +378,7 @@ const TeacherApp = {
           'w2_m1': { response: 'Bought NVDA on NASDAQ for AI semiconductor exposure not available on the ASX. If AUD/USD rises from 0.65 to 0.75, my USD shares convert to fewer AUD.' }
         },
         equityHistory: [
-          { timestamp: Date.now() - 86400000 * 5, totalValue: 50000, cash: 50000, investedValue: 0 },
+          { timestamp: Date.now() - 86400000 * 5, totalValue: 150000, cash: 150000, investedValue: 0 },
           { timestamp: Date.now(), totalValue: 54320.50, cash: 12400, investedValue: 41920.50 }
         ]
       },
@@ -404,10 +404,10 @@ const TeacherApp = {
         missions: {
           'w1_m1': { response: 'Inflation erodes cash in the bank. Investing in quality dividend and growth shares compounds wealth over decades toward financial independence.' },
           'w1_m2': { response: 'Picked WOW.AX (Defensive Consumer Staples) and WES.AX (Consumer Discretionary/Retail) for strong domestic cash flows.' },
-          'w1_m3': { response: 'Allocated ~$11.5k per company across 3 sectors so no single stock exceeds the 25% ($12,500) risk limit.' }
+          'w1_m3': { response: 'Allocated ~$35k per company across 3 sectors so no single stock exceeds the 25% ($37,500) risk limit.' }
         },
         equityHistory: [
-          { timestamp: Date.now() - 86400000 * 5, totalValue: 50000, cash: 50000, investedValue: 0 },
+          { timestamp: Date.now() - 86400000 * 5, totalValue: 150000, cash: 150000, investedValue: 0 },
           { timestamp: Date.now(), totalValue: 52890.00, cash: 14500, investedValue: 38390.00 }
         ]
       },
@@ -431,7 +431,7 @@ const TeacherApp = {
           'w1_m1': { response: 'Compounding allows investment returns to generate their own returns, which is essential to beat inflation and achieve financial independence.' }
         },
         equityHistory: [
-          { timestamp: Date.now() - 86400000 * 5, totalValue: 50000, cash: 50000, investedValue: 0 },
+          { timestamp: Date.now() - 86400000 * 5, totalValue: 150000, cash: 150000, investedValue: 0 },
           { timestamp: Date.now(), totalValue: 51420.20, cash: 26100, investedValue: 25320.20 }
         ]
       }
@@ -758,13 +758,13 @@ const TeacherApp = {
   },
 
   /**
-   * Reset student portfolio to starting $50,000 cash
+   * Reset student portfolio to starting $150,000 cash
    */
   async resetSelectedStudent() {
     if (!this.selectedStudent) return;
     const name = this.selectedStudent.studentName || this.selectedStudent.name;
     const classCode = this.selectedStudent.classCode || CONFIG.DEFAULT_CLASS_CODE;
-    if (!confirm(`Are you sure you want to reset ${name}'s portfolio back to initial $50,000 AUD? This cannot be undone.`)) {
+    if (!confirm(`Are you sure you want to reset ${name}'s portfolio back to initial $150,000 AUD? This cannot be undone.`)) {
       return;
     }
 

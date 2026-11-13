@@ -174,7 +174,7 @@ const ChartManager = {
     const labels = filteredPoints.map(p => this._formatDate(p.timestamp, range));
     const totals = filteredPoints.map(p => p.totalValue);
 
-    // Compute ASX 200 benchmark series starting at $50,000 for relative comparison
+    // Compute ASX 200 benchmark series starting at $150,000 for relative comparison
     const benchmarkData = this._generateBenchmarkSeries(filteredPoints);
 
     this.portfolioChartInstance = new Chart(ctx, {
@@ -433,10 +433,10 @@ const ChartManager = {
 
     const inRange = points.filter(p => p.timestamp >= cutoff);
     const earliestRecorded = points[0];
-    const baseVal = (typeof CONFIG !== 'undefined' && CONFIG.INITIAL_CASH) ? CONFIG.INITIAL_CASH : 50000;
+    const baseVal = (typeof CONFIG !== 'undefined' && CONFIG.INITIAL_CASH) ? CONFIG.INITIAL_CASH : 150000;
 
     // If existing points do not span the requested range window (e.g. user selected 6M or 1Y, but only traded recently),
-    // generate historical baseline points starting from the window cutoff at initial capital ($50,000)
+    // generate historical baseline points starting from the window cutoff at initial capital ($150,000)
     // so the timeline spans the full requested duration and compares properly with the ASX 200 benchmark!
     if (!earliestRecorded || earliestRecorded.timestamp > cutoff + (2 * 86400000)) {
       const fullPoints = [];

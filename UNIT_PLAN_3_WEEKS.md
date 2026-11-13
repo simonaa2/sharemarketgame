@@ -8,7 +8,7 @@
 ---
 
 ## Unit Overview & Educational Philosophy
-This 3-week unit connects active share market simulation ($50,000 AUD virtual capital across the **ASX**, **NYSE**, and **NASDAQ**) with real-world **personal financial independence**. Students learn not only *how* to research and trade equities, but *why* long-term compounding, diversification, fee control, and passive index investing are essential life skills for financial autonomy.
+This 3-week unit connects active share market simulation ($150,000 AUD virtual capital across the **ASX**, **NYSE**, and **NASDAQ**) with real-world **personal financial independence**. Students learn not only *how* to research and trade equities, but *why* long-term compounding, diversification, fee control, and passive index investing are essential life skills for financial autonomy.
 
 All 9 lessons are built directly into the student app under the **`🎯 3-Week Missions & Independence`** tab. Student progress (`X/9` modules) and written reflections automatically sync to the **Teacher Command Center (`teacher.html`)**.
 
@@ -19,7 +19,7 @@ All 9 lessons are built directly into the student app under the **`🎯 3-Week M
 
 ### Lesson 1: Why Invest? Inflation, Compounding & Financial Independence (`w1_m1`)
 - **Key Concepts**:
-  - **Purchasing Power & Inflation**: Why $50,000 left in a 0% cash account loses ~3% of its real value each year.
+  - **Purchasing Power & Inflation**: Why $150,000 left in a 0% cash account loses ~3% of its real value each year.
   - **Compound Growth**: Earning returns on your past returns over 10–30 years.
   - **Financial Independence & The "4% Rule"**: Accumulating an investment portfolio equal to **25× your annual living expenses** so passive returns and dividends fund your lifestyle independently.
 - **Student Activity in Game**:
@@ -39,7 +39,7 @@ All 9 lessons are built directly into the student app under the **`🎯 3-Week M
 ### Lesson 3: Diversification (The 25% Rule) & Brokerage Drag (`w1_m3`)
 - **Key Concepts**:
   - **Unsystematic (Company) Risk vs Systematic (Market) Risk**.
-  - **The 25% Position Cap**: Why no single company can exceed $12,500 AUD (25% of $50,000) in the simulator.
+  - **The 25% Position Cap**: Why no single company can exceed $37,500 AUD (25% of $150,000) in the simulator.
   - **Brokerage Drag**: How a $10 AUD flat fee equals a 5% loss on a $200 trade, vs <0.1% on an $11,000 position.
 - **Student Activity in Game**:
   - **Practical Mission (Auto-Verified)**: Build a diversified portfolio of **3+ active share holdings** across distinct industries.

@@ -2,7 +2,7 @@
 
 An interactive, modern educational share market simulation game designed for secondary school **Commerce**, **Economics**, and **Business Studies** classrooms.
 
-Students manage a virtual portfolio starting with **$50,000 AUD**, research equities across Australian (**ASX**) and US (**NYSE**, **NASDAQ**) markets using live Yahoo/Google Finance data, analyze trends on interactive timeline charts, execute buy/sell orders with realistic brokerage fees, and track portfolio valuation over time while competing on a live class leaderboard.
+Students manage a virtual portfolio starting with **$150,000 AUD**, research equities across Australian (**ASX**) and US (**NYSE**, **NASDAQ**) markets using live Yahoo/Google Finance data, analyze trends on interactive timeline charts, execute buy/sell orders with realistic brokerage fees, and track portfolio valuation over time while competing on a live class leaderboard.
 
 ---
 
@@ -19,7 +19,7 @@ Students manage a virtual portfolio starting with **$50,000 AUD**, research equi
 - **Asset Allocation Donut Chart**: Visual breakdown of portfolio diversification between cash and individual share holdings.
 
 ### 3. Student Trading Engine
-- **Starting Cash**: $50,000 AUD per student.
+- **Starting Cash**: $150,000 AUD per student.
 - **Flat Brokerage**: $10.00 AUD per transaction to teach students the cost of over-trading.
 - **Real-Time Validation**: Prevents buying beyond available cash or selling more shares than currently owned.
 - **Detailed Trade Ledger**: Full chronological audit trail of all transactions with timestamps, prices, brokerage, and realized profit/loss calculations.

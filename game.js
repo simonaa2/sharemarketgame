@@ -226,6 +226,18 @@ const GameApp = {
       if (!this.portfolio.missions) this.portfolio.missions = {};
       if (!this.portfolio.lastDividendTimestamp) this.portfolio.lastDividendTimestamp = Date.now();
       if (!this.portfolio.watchlist) this.portfolio.watchlist = ['BHP.AX', 'NVDA', 'CBA.AX'];
+
+      // Upgrade starting cash for unstarted portfolios if previously initialized to 50k
+      if ((!this.portfolio.trades || this.portfolio.trades.length === 0) && (!this.portfolio.holdings || this.portfolio.holdings.length === 0) && this.portfolio.cash === 50000) {
+        this.portfolio.cash = CONFIG.INITIAL_CASH;
+        if (this.portfolio.equityHistory) {
+          this.portfolio.equityHistory.forEach(pt => {
+            if (pt.totalValue === 50000) pt.totalValue = CONFIG.INITIAL_CASH;
+            if (pt.cash === 50000) pt.cash = CONFIG.INITIAL_CASH;
+          });
+        }
+        this.savePortfolio();
+      }
     }
   },
 
