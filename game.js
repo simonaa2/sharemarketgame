@@ -1112,6 +1112,14 @@ const GameApp = {
       targetSymbol = matchedFeatured ? matchedFeatured.symbol : raw;
     }
 
+    // Auto-map 3-character ticker to ASX if not specified and matches ASX pattern
+    if (!targetSymbol.includes('.') && /^[A-Z]{3}$/.test(targetSymbol)) {
+      const asxSym = targetSymbol + '.AX';
+      if (CONFIG.FEATURED_STOCKS.some(s => s.symbol === asxSym) || (MarketService._basePrices && MarketService._basePrices[asxSym])) {
+        targetSymbol = asxSym;
+      }
+    }
+
     this.showToast(`Fetching quote for ${targetSymbol}...`, 'info');
 
     try {

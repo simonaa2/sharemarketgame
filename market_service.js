@@ -203,7 +203,7 @@ const MarketService = {
     for (const url of proxies) {
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 4000);
+        const timeout = setTimeout(() => controller.abort(), 1200);
         const resp = await fetch(url, { signal: controller.signal });
         clearTimeout(timeout);
         if (resp.ok) {
@@ -252,6 +252,16 @@ const MarketService = {
     'DRO.AX': { price: 1.15, name: 'DroneShield Ltd', exchange: 'ASX', currency: 'AUD', pe: 35.0, mktCap: '$950M', range52: [0.35, 2.60] },
     'ZIP.AX': { price: 2.65, name: 'Zip Co Limited', exchange: 'ASX', currency: 'AUD', pe: 25.0, mktCap: '$3.2B', range52: [0.30, 3.15] },
     'NXT.AX': { price: 16.80, name: 'NEXTDC Limited', exchange: 'ASX', currency: 'AUD', pe: 45.0, mktCap: '$9.8B', range52: [11.50, 18.20] },
+    'QBE.AX': { price: 26.70, name: 'QBE Insurance Group Ltd', exchange: 'ASX', currency: 'AUD', pe: 11.2, mktCap: '$39.8B', range52: [18.50, 27.20] },
+    'SUN.AX': { price: 18.25, name: 'Suncorp Group Ltd', exchange: 'ASX', currency: 'AUD', pe: 14.5, mktCap: '$23.1B', range52: [13.20, 18.80] },
+    'IAG.AX': { price: 7.65, name: 'Insurance Australia Group', exchange: 'ASX', currency: 'AUD', pe: 15.0, mktCap: '$18.4B', range52: [5.60, 7.95] },
+    'ALL.AX': { price: 65.50, name: 'Aristocrat Leisure Ltd', exchange: 'ASX', currency: 'AUD', pe: 24.2, mktCap: '$41.2B', range52: [40.00, 68.00] },
+    'GYG.AX': { price: 38.20, name: 'Guzman y Gomez Ltd', exchange: 'ASX', currency: 'AUD', pe: 65.0, mktCap: '$3.9B', range52: [28.00, 42.50] },
+    'HVN.AX': { price: 4.85, name: 'Harvey Norman Holdings Ltd', exchange: 'ASX', currency: 'AUD', pe: 13.8, mktCap: '$6.0B', range52: [3.80, 5.20] },
+    'EDV.AX': { price: 4.95, name: 'Endeavour Group Ltd', exchange: 'ASX', currency: 'AUD', pe: 16.5, mktCap: '$8.9B', range52: [4.60, 5.60] },
+    'SHL.AX': { price: 27.40, name: 'Sonic Healthcare Ltd', exchange: 'ASX', currency: 'AUD', pe: 19.2, mktCap: '$13.0B', range52: [24.50, 31.00] },
+    'NST.AX': { price: 17.80, name: 'Northern Star Resources Ltd', exchange: 'ASX', currency: 'AUD', pe: 20.5, mktCap: '$20.4B', range52: [11.80, 18.90] },
+    'EVN.AX': { price: 5.10, name: 'Evolution Mining Ltd', exchange: 'ASX', currency: 'AUD', pe: 18.0, mktCap: '$10.2B', range52: [3.10, 5.40] },
 
     // US Tech & Leaders
     'AAPL': { price: 228.50, name: 'Apple Inc.', exchange: 'NASDAQ', currency: 'USD', pe: 34.1, mktCap: '$3.48T', range52: [164.00, 237.23] },
