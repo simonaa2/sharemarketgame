@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Year 10 Commerce — Equity Research &amp; Financial Statistics Investigation | DataTrends</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 10mm 12mm;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+      color: #0f172a;
+      background: #f8fafc;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.4;
+      font-size: 12.5px;
+    }
+    .page-container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 24px 28px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    }
+    .no-print-bar {
+      max-width: 860px;
+      margin: 0 auto 16px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 10px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12px;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary { background: #2563eb; color: #ffffff; }
+    .btn-secondary { background: #334155; color: #f8fafc; }
+    .header-banner {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    h1 {
+      margin: 0 0 3px 0;
+      font-size: 19px;
+      color: #0f172a;
+    }
+    .subtitle {
+      font-size: 11.5px;
+      color: #1e3a8a;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .url-box {
+      background: #eff6ff;
+      border: 2px solid #2563eb;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .url-box a {
+      color: #1d4ed8;
+      font-weight: 800;
+      font-size: 13px;
+      font-family: ui-monospace, Consolas, monospace;
+      text-decoration: underline;
+    }
+    .student-info {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+      background: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    h2 {
+      font-size: 13px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 5px 10px;
+      border-radius: 5px;
+      margin: 14px 0 8px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    h3 {
+      font-size: 12.5px;
+      color: #1d4ed8;
+      margin: 8px 0 4px 0;
+    }
+    h4 {
+      font-size: 12px;
+      color: #0f172a;
+      margin: 6px 0 3px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 6px 0 10px 0;
+      font-size: 11.5px;
+    }
+    th, td {
+      border: 1px solid #94a3b8;
+      padding: 5px 7px;
+      text-align: left;
+    }
+    th {
+      background: #e2e8f0;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .write-line {
+      border-bottom: 1px dashed #94a3b8;
+      min-height: 20px;
+      margin: 3px 0;
+    }
+    .write-box {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      border-radius: 6px;
+      min-height: 48px;
+      padding: 6px 8px;
+      margin: 4px 0 8px 0;
+      color: #0f172a;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .pill {
+      display: inline-block;
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #7dd3fc;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 10.5px;
+    }
+    .page-break {
+      page-break-before: always;
+    }
+    .page-header-strip {
+      display: none;
+      font-size: 10px;
+      color: #64748b;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 3px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 600;
+    }
+    .stat-guide-box {
+      background: #eff6ff;
+      border: 1px solid #93c5fd;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      font-size: 11.5px;
+    }
+    @media print {
+      body { background: #ffffff; padding: 0; }
+      .page-container { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+      .no-print-bar { display: none !important; }
+      .page-break { page-break-before: always; }
+      .page-header-strip { display: flex; justify-content: space-between; }
+      h2 { page-break-after: avoid; }
+      table { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="no-print-bar">
+    <div>
+      <strong>📄 Year 10 Commerce — Equity Research &amp; Financial Statistics Investigation</strong>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <a href="game" class="btn btn-secondary">📈 Trading Floor</a>
+      <a href="investing-worksheet" class="btn btn-secondary">📋 Full Lab Booklet</a>
+      <button onclick="window.print()" class="btn btn-primary">🖨️ Print / Save as PDF</button>
+    </div>
+  </div>
+
+  <div class="page-container">
+
+    <!-- PAGE 1: EXTERNAL EQUITY DUE DILIGENCE (GOOGLE & YAHOO FINANCE) -->
+    <div class="header-banner">
+      <div>
+        <div class="subtitle">NSW Stage 5 Commerce &bull; Topic 1: Consumer &amp; Financial Decisions</div>
+        <h1>Equity Due Diligence &amp; Key Financial Statistics Investigation</h1>
+        <div style="font-size:11.5px; color:#475569;">Stage 5 Commerce & Financial Literacy &bull; Real-World Market Research on Google &amp; Yahoo Finance</div>
+      </div>
+      <div style="text-align:right; font-size:11px; color:#475569; shrink:0;">
+        <strong>DataTrends Education</strong><br>
+        Syllabus: COM5-1, COM5-2, COM5-4
+      </div>
+    </div>
+
+    <div class="url-box">
+      <div>
+        <strong>🌐 Live Trading Floor:</strong>
+        <a href="https://www.datatrends.com.au/apps/sharemarket/" target="_blank">https://www.datatrends.com.au/apps/sharemarket/</a>
+      </div>
+      <div>
+        <strong>🔍 Research Portals:</strong>
+        <a href="https://www.google.com/finance/" target="_blank">Google Finance</a> &bull;
+        <a href="https://au.finance.yahoo.com/" target="_blank">Yahoo Finance</a>
+      </div>
+      <div style="font-size:11px; color:#1e40af; font-weight:600; width:100%; margin-top:2px;">
+        Investigation Goal: Collect, compare, and critically interpret the key financial statistics of 1 ASX blue chip vs 1 US global leader.
+      </div>
+    </div>
+
+    <div class="student-info">
+      <div>Student Name: _____________________________________</div>
+      <div>Class: <strong>10COMA</strong></div>
+      <div>Date: <strong>19 Nov 2026</strong></div>
+    </div>
+
+    <h2>Part 1: Accessing Live Financial Intelligence</h2>
+    <p style="margin:2px 0 6px 0; font-size:12px;">
+      Before purchasing shares in the simulator or real life, professional investors analyze fundamental metrics to evaluate profitability, valuation, and volatility risk. Open your browser and navigate to either portal:
+    </p>
+
+    <div class="stat-guide-box">
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <div>
+          <strong>🔍 Portal 1: Google Finance</strong> &bull;
+          <a href="https://www.google.com/finance/" target="_blank" style="color:#1d4ed8; font-weight:700;">google.com/finance</a><br>
+          <span style="color:#475569;">Search syntax: <code>ASX:BHP</code> &bull; <code>ASX:CBA</code> &bull; <code>NASDAQ:NVDA</code> &bull; <code>NASDAQ:AAPL</code></span>
+        </div>
+        <div>
+          <strong>🔍 Portal 2: Yahoo Finance</strong> &bull;
+          <a href="https://au.finance.yahoo.com/" target="_blank" style="color:#1d4ed8; font-weight:700;">au.finance.yahoo.com</a><br>
+          <span style="color:#475569;">Search syntax: <code>BHP.AX</code> &bull; <code>CBA.AX</code> &bull; <code>NVDA</code> &bull; <code>AAPL</code></span>
+        </div>
+      </div>
+      <div style="margin-top:6px; font-size:11px; color:#1e40af; border-top:1px dashed #bfdbfe; padding-top:4px;">
+        <strong>Instructions:</strong> Select <strong>Company 1 (Australian ASX Blue Chip)</strong> (e.g. BHP, CBA, CSL, Woolworths, Telstra, Wesfarmers) and <strong>Company 2 (US International Leader)</strong> (e.g. Nvidia, Apple, Microsoft, Tesla, Alphabet). Fill in their live figures below:
+      </div>
+    </div>
+
+    <h2>Part 2: Key Financial Statistics Data Collection Table</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:23%;">Key Financial Statistic</th>
+          <th style="width:37%;">What It Tells the Investor (Stage 5 Commerce Definition)</th>
+          <th style="width:20%;">Company 1: ASX Equity<br><span style="font-weight:400; font-size:10.5px;">Name: ___________________<br>Ticker: [ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ]</span></th>
+          <th style="width:20%;">Company 2: US Equity<br><span style="font-weight:400; font-size:10.5px;">Name: ___________________<br>Ticker: [ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ]</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Current Share Price</strong><br><span style="font-size:10.5px; color:#64748b;">(Local Currency)</span></td>
+          <td>The latest price at which a buyer and seller executed a trade on the open market.</td>
+          <td>$_________________ AUD</td>
+          <td>US$_______________</td>
+        </tr>
+        <tr>
+          <td><strong>Market Capitalisation</strong><br><span style="font-size:10.5px; color:#64748b;">(Market Cap)</span></td>
+          <td><strong>Total company equity value</strong>: <code>Share Price &times; Shares Outstanding</code>.<br>Large-cap (&gt;$10B) vs Mid-cap ($2B-$10B) vs Small-cap (&lt;$2B).</td>
+          <td>$_________________</td>
+          <td>$_________________</td>
+        </tr>
+        <tr>
+          <td><strong>Price-to-Earnings Ratio</strong><br><span style="font-size:10.5px; color:#64748b;">(P/E Ratio)</span></td>
+          <td><strong>Valuation Multiple</strong>: How many dollars investors pay for $1 of current annual profit. Low P/E = Value/Mature; High P/E = High Growth/Speculative.</td>
+          <td>_________________</td>
+          <td>_________________</td>
+        </tr>
+        <tr>
+          <td><strong>Earnings Per Share</strong><br><span style="font-size:10.5px; color:#64748b;">(EPS)</span></td>
+          <td><strong>Profit engine</strong>: Total company net profit divided by shares outstanding. Measures net profit generated for every single share.</td>
+          <td>$_________________</td>
+          <td>$_________________</td>
+        </tr>
+        <tr>
+          <td><strong>Dividend Yield (%)</strong></td>
+          <td><strong>Passive Cash Flow</strong>: Annual dividend cash payout as a % of share price. High yield = cash income; Low/Zero yield = profit reinvested for growth.</td>
+          <td>_________________%</td>
+          <td>_________________%</td>
+        </tr>
+        <tr>
+          <td><strong>Beta (&beta;) Volatility</strong><br><span style="font-size:10.5px; color:#64748b;">(Systematic Market Risk)</span></td>
+          <td><strong>Volatility relative to market benchmark (&beta; = 1.0)</strong>:<br>&bull; &beta; &gt; 1.0 = High volatility / aggressive swings<br>&bull; &beta; &lt; 1.0 = Low volatility / defensive &amp; stable</td>
+          <td>&beta; = ______________</td>
+          <td>&beta; = ______________</td>
+        </tr>
+        <tr>
+          <td><strong>52-Week Range</strong><br><span style="font-size:10.5px; color:#64748b;">(Low &ndash; High)</span></td>
+          <td>The lowest and highest price the stock traded at over the past 365 days. Indicates whether the stock is near cyclical highs or historic lows.</td>
+          <td>$_______ - $_______</td>
+          <td>$_______ - $_______</td>
+        </tr>
+        <tr>
+          <td><strong>Day's Range &amp; Avg Volume</strong></td>
+          <td>Today's intraday low/high spread, and average daily shares traded (market liquidity).</td>
+          <td>Range: $____ - $____<br>Avg Vol: ____________</td>
+          <td>Range: $____ - $____<br>Avg Vol: ____________</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- PAGE BREAK TO PAGE 2 -->
+    <div class="page-break"></div>
+
+    <!-- PAGE 2: ANALYTICAL CONCEPT CHECKS & SYNTHESIS -->
+    <div class="page-header-strip">
+      <span>Stage 5 Commerce & Financial Literacy &bull; Year 10 Commerce (10COMA)</span>
+      <span>Part 3: Interpreting Key Financial Statistics &bull; Analytical Evaluation</span>
+    </div>
+
+    <h2>Part 3: Critical Analysis — Interpreting Key Financial Statistics</h2>
+
+    <div class="two-col">
+      <div>
+        <h4>1. Deconstructing Beta (&beta;) &amp; Systematic Volatility Risk</h4>
+        <p style="font-size:11px; margin:1px 0 3px 0;">
+          Compare the Beta (&beta;) of your two companies. What does a Beta of 1.0 signify? If a sudden market shock causes the ASX 200 / S&amp;P 500 to plummet by <strong>10%</strong>, which stock would you expect to drop further, and why?
+        </p>
+        <div class="write-box" style="min-height:56px;">
+          <div class="write-line"></div>
+          <div class="write-line"></div>
+        </div>
+      </div>
+      <div>
+        <h4>2. P/E Ratio: Value vs High Growth Expectations</h4>
+        <p style="font-size:11px; margin:1px 0 3px 0;">
+          Why are investors often willing to pay a high P/E ratio (e.g. 35+) for a US tech company like Nvidia, while paying a much lower P/E (e.g. 12-16) for a bank or miner? What happens to the high P/E stock if company earnings fall short of expectations?
+        </p>
+        <div class="write-box" style="min-height:56px;">
+          <div class="write-line"></div>
+          <div class="write-line"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top:6px;">
+      <div>
+        <h4>3. The "Share Price Fallacy" (Market Cap vs Share Price)</h4>
+        <p style="font-size:11px; margin:1px 0 3px 0;">
+          Company X trades at <strong>$120.00</strong> with 10 million shares. Company Y trades at <strong>$15.00</strong> with 500 million shares. Calculate each company's Market Cap. Explain why looking at share price alone does <em>not</em> indicate how big or valuable a company is.
+        </p>
+        <div class="write-box" style="min-height:56px;">
+          <div style="font-size:10.5px;">Mkt Cap X: $120 &times; 10M = $___________ &bull; Mkt Cap Y: $15 &times; 500M = $___________</div>
+          <div class="write-line">Analysis: </div>
+        </div>
+      </div>
+      <div>
+        <h4>4. Dividend Yield vs Capital Growth Strategy</h4>
+        <p style="font-size:11px; margin:1px 0 3px 0;">
+          Which company offers a higher dividend yield? Why do mature Australian blue chips typically pay higher dividend yields than rapidly expanding tech innovators? Which type would a retiree prefer versus an 18-year-old investor?
+        </p>
+        <div class="write-box" style="min-height:56px;">
+          <div class="write-line"></div>
+          <div class="write-line"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top:6px;">
+      <div>
+        <h4>5. 52-Week Range &amp; Price Cyclicality</h4>
+        <p style="font-size:11px; margin:1px 0 3px 0;">
+          Where does each company's current share price sit within its 52-week high and low? Is it closer to the bottom (undervalued or in distress?) or the peak (strong momentum or potentially expensive?)
+        </p>
+        <div class="write-box" style="min-height:56px;">
+          <div class="write-line"></div>
+          <div class="write-line"></div>
+        </div>
+      </div>
+      <div>
+        <h4>6. Investment Decision: Virtual Trading Floor Synthesis</h4>
+        <p style="font-size:11px; margin:1px 0 3px 0;">
+          Based on your statistical findings, would you buy Company 1, Company 2, or both in the share market game with your $150,000 cash balance? Justify your decision using Beta, P/E, and sector diversification:
+        </p>
+        <div class="write-box" style="min-height:56px;">
+          <div class="write-line"></div>
+          <div class="write-line"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Marking Criteria & Assessment Rubric -->
+    <h3 style="margin-top:10px;">NSW Commerce Stage 5 Assessment Rubric &amp; Teacher Feedback</h3>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:15%;">Marks</th>
+          <th style="width:85%;">Performance Band Criteria</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:700; color:#065f46; background:#ecfdf5;">5 &ndash; 6 Marks<br><span style="font-size:10px; font-weight:normal;">Outstanding</span></td>
+          <td>Accurately gathers all live data from Google/Yahoo Finance. Demonstrates sophisticated understanding of Beta, P/E, Market Cap, and Dividend Yield. Clearly evaluates volatility risk and justifies investment decisions using accurate Stage 5 Commerce terminology.</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700; color:#1e40af; background:#eff6ff;">3 &ndash; 4 Marks<br><span style="font-size:10px; font-weight:normal;">Sound</span></td>
+          <td>Gathers most statistics accurately. Explains the purpose of Beta and P/E ratios with sound reasoning. Reaches a logical investment conclusion with basic financial vocabulary.</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700; color:#92400e; background:#fef3c7;">1 &ndash; 2 Marks<br><span style="font-size:10px; font-weight:normal;">Basic</span></td>
+          <td>Incomplete data table. Demonstrates elementary or confused understanding of statistics (e.g. confuses share price with market cap). Minimal or descriptive evaluation.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="display:grid; grid-template-columns: 1fr 3fr; gap:10px; margin-top:8px;">
+      <div style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:8px 10px; text-align:center;">
+        <div style="font-size:11px; font-weight:700; color:#475569;">TEACHER MARK</div>
+        <div style="font-size:20px; font-weight:800; color:#0f172a; margin:4px 0;">[ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] / 6</div>
+        <div style="font-size:10.5px; color:#64748b;">Signature: _________</div>
+      </div>
+      <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:8px 10px;">
+        <div style="font-size:11px; font-weight:700; color:#475569;">Teacher Comments &amp; Feedback:</div>
+        <div class="write-line" style="margin-top:6px;"></div>
+        <div class="write-line"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px; padding-top:6px; border-top:1px solid #cbd5e1; display:flex; justify-content:space-between; font-size:10.5px; color:#64748b;">
+      <div>Stage 5 Commerce & Financial Literacy &bull; Year 10 Commerce (10COMA)</div>
+      <div>Teacher: Mr Simon Anderson &bull; Term 4 2026</div>
+    </div>
+
+  </div>
+
+</body>
+</html>

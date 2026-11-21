@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Share Market Arena — Student Trading Floor</title>
+  <meta name="description" content="Manage your $150,000 AUD portfolio, trade ASX, NYSE, and NASDAQ equities, and analyze market trends."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+
+  <!-- Chart.js for High Performance Financial & Portfolio Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+
+  <div class="app-wrapper">
+    <!-- Top Live Ticker Tape -->
+    <div class="ticker-tape-wrap">
+      <div class="ticker-tape-title">
+        <span class="live-dot"></span> LIVE TICKER
+      </div>
+      <div class="ticker-tape-track" id="ticker-tape-track">
+        <!-- Injected via GameApp.renderTickerTape() -->
+      </div>
+    </div>
+
+    <!-- Live Breaking Macro Catalyst Announcement Banner -->
+    <div id="macro-catalyst-banner" style="display:none;background:linear-gradient(90deg, #1e1b4b, #312e81);border-bottom:1px solid rgba(167,139,250,0.3);padding:0.6rem 1rem;">
+      <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <span style="font-size:1.1rem;">⚡</span>
+          <div>
+            <strong id="catalyst-banner-title" style="color:#fef08a;font-size:0.9rem;margin-right:0.5rem;">Macro Event:</strong>
+            <span id="catalyst-banner-summary" style="color:#e2e8f0;font-size:0.84rem;"></span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <button class="btn-secondary" onclick="GameApp.switchTab('tab-journal')" style="padding:0.25rem 0.65rem;font-size:0.75rem;background:rgba(167,139,250,0.2);color:#c084fc;border-color:rgba(167,139,250,0.4);">
+            Write Reflection In Journal ➔
+          </button>
+          <button class="btn-secondary" onclick="document.getElementById('macro-catalyst-banner').style.display='none'" style="padding:0.25rem 0.5rem;font-size:0.75rem;" title="Dismiss">
+            ✕
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="main-header">
+      <div class="container">
+        <div class="header-inner">
+          <div class="brand-group">
+            <div class="brand-logo">📈</div>
+            <div>
+              <div class="brand-title">Market <span class="accent">Arena</span></div>
+              <span class="class-tag" id="header-class-tag">ASX • NYSE • NASDAQ</span>
+            </div>
+          </div>
+
+          <div class="user-controls">
+            <div class="market-status-badge">
+              <span class="status-pill" id="status-asx">🇦🇺 ASX ...</span>
+              <span style="opacity:0.3;">|</span>
+              <span class="status-pill" id="status-us">🇺🇸 US ...</span>
+            </div>
+
+            <div class="user-profile-badge">
+              <div class="user-avatar" id="header-avatar">S</div>
+              <div class="user-info">
+                <span class="user-name" id="header-student-name">Student</span>
+                <span class="user-code" id="header-student-code">COMMERCE2026</span>
+              </div>
+            </div>
+
+            <div id="header-rank-badge" style="display:inline-flex;align-items:center;gap:5px;padding:0.35rem 0.75rem;border-radius:8px;font-family:var(--font-mono);font-size:0.78rem;font-weight:700;background:rgba(245,158,11,0.15);color:#fcd34d;border:1px solid rgba(245,158,11,0.35);cursor:pointer;" onclick="GameApp.switchTab('tab-leaderboard')" title="Click to view full Class Leaderboard">
+              <span id="header-rank-text">🏆 Rank: --</span>
+            </div>
+
+            <a href="investing-worksheet.html" target="_blank" class="btn-secondary" style="padding:0.35rem 0.75rem;font-size:0.75rem;background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.3);text-decoration:none;border-radius:6px;display:inline-flex;align-items:center;gap:4px;" title="Printable Student Lab Worksheet">
+              <span>📄</span> Worksheet
+            </a>
+
+            <button class="btn-secondary" id="btn-logout" title="Log out">
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="nav-tabs-wrapper">
+        <div class="container">
+          <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="tab-portfolio">
+              <span>💼</span> My Portfolio
+            </button>
+            <button class="tab-btn" data-tab="tab-explorer">
+              <span>🔍</span> Market Explorer <span class="tab-badge" id="stocks-count-badge">30+</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-missions">
+              <span>🎯</span> 3-Week Missions &amp; Independence <span class="tab-badge" id="missions-progress-badge" style="background:rgba(16,185,129,0.2);color:#34d399;">0/9</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-journal">
+              <span>📔</span> Investment Journal
+            </button>
+            <button class="tab-btn" data-tab="tab-ledger">
+              <span>📜</span> Trade Ledger
+            </button>
+            <button class="tab-btn" data-tab="tab-leaderboard">
+              <span>🏆</span> Class Leaderboard &amp; Learning
+            </button>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container">
+
+      <!-- Competition Round & Classroom Rules Bar -->
+      <div id="round-challenge-bar" style="background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.22);border-radius:12px;padding:0.75rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <span style="font-size:1.3rem;">🏁</span>
+          <div>
+            <strong id="round-challenge-name" style="color:#fff;font-size:0.95rem;">Term 1 Share Market Challenge</strong>
+            <span style="color:var(--text-dim);font-size:0.8rem;margin-left:0.5rem;">• Position Cap: <strong style="color:var(--asx-blue);">25% Max</strong> • Trade Rationale: <strong style="color:#a78bfa;">15 Chars Min</strong></span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <span class="tab-badge" id="round-status-badge" style="background:rgba(16,185,129,0.2);color:#34d399;font-weight:700;padding:0.3rem 0.75rem;">🟢 TRADING OPEN</span>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           TAB 1: MY PORTFOLIO DASHBOARD
+           ========================================== -->
+      <section id="tab-portfolio" class="tab-content active">
+        <!-- KPI Summary Cards Grid -->
+        <div class="kpi-grid">
+          <div class="kpi-card profit">
+            <div class="kpi-label">
+              <span>Total Portfolio Value</span>
+              <span title="Total value of cash balance plus all active share holdings in AUD">ℹ️</span>
+            </div>
+            <div class="kpi-value" id="kpi-total-val">$150,000.00</div>
+            <div class="kpi-sub">
+              <span class="kpi-badge up" id="kpi-return-badge">▲ +$0.00 (+0.00%)</span>
+              <span style="color:var(--text-dim);font-size:0.75rem;">from $50k base</span>
+            </div>
+          </div>
+
+          <div class="kpi-card cash">
+            <div class="kpi-label">
+              <span>Available Cash</span>
+              <span title="Liquid funds available to buy shares and pay brokerage">💵</span>
+            </div>
+            <div class="kpi-value" id="kpi-cash-val">$150,000.00</div>
+            <div class="kpi-sub">
+              <span style="color:var(--text-muted);font-size:0.75rem;">AUD purchasing power</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">
+              <span>Invested Equities</span>
+              <span title="Current market value of all held ASX and US stocks">📊</span>
+            </div>
+            <div class="kpi-value" id="kpi-invested-val">$0.00</div>
+            <div class="kpi-sub">
+              <span class="kpi-badge up" id="kpi-day-badge">▲ $0.00</span>
+              <span style="color:var(--text-dim);font-size:0.75rem;">today's movement</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">
+              <span>Alpha vs ASX 200</span>
+              <span title="Comparison against passive investment in the S&P/ASX 200 index">🏛️</span>
+            </div>
+            <div class="kpi-value" id="kpi-alpha-val">+0.00%</div>
+            <div class="kpi-sub">
+              <span id="kpi-alpha-sub" style="color:var(--text-dim);font-size:0.75rem;">Matching Market</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Grid: Portfolio Timeline + Asset Allocation Donut -->
+        <div class="dashboard-grid">
+          <!-- Whole Portfolio Timeline Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title-group">
+                <h3>Portfolio Valuation Over Time</h3>
+                <p>Track cumulative net worth in AUD vs S&amp;P/ASX 200 Benchmark</p>
+              </div>
+              <div class="timeline-pills" id="portfolio-timeline-pills">
+                <button class="time-pill" data-range="1w">1W</button>
+                <button class="time-pill active" data-range="1m">1M</button>
+                <button class="time-pill" data-range="3m">3M</button>
+                <button class="time-pill" data-range="6m">6M</button>
+                <button class="time-pill" data-range="1y">1Y</button>
+                <button class="time-pill" data-range="all">ALL</button>
+              </div>
+            </div>
+            <div class="chart-canvas-wrap">
+              <canvas id="portfolio-chart-canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- Asset Allocation Donut Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title-group">
+                <h3>Asset Allocation</h3>
+                <p>Distribution between Cash and individual share holdings</p>
+              </div>
+            </div>
+            <div class="chart-canvas-wrap" style="height: 250px;">
+              <canvas id="allocation-chart-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Watchlist Card -->
+        <div class="section-card" id="watchlist-card" style="margin-bottom:1.5rem;display:none;">
+          <div class="section-header">
+            <div class="section-title">
+              <span>⭐</span> My Stock Watchlist
+              <span class="tab-badge" id="watchlist-count-badge">0 watched</span>
+            </div>
+            <span style="font-size:0.75rem;color:var(--text-dim);">Click any stock in Market Explorer to add or remove</span>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Security</th>
+                  <th>Exchange</th>
+                  <th>Live Price</th>
+                  <th>Day Change</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="watchlist-table-body">
+                <!-- Injected via GameApp.renderWatchlist() -->
+              </tbody>
+            </table>
+          </div>
+        <!-- Quick Stock Search & Instant Trade Bar -->
+        <div class="section-card" style="background: linear-gradient(135deg, rgba(14, 21, 38, 0.95), rgba(20, 31, 54, 0.95)); border: 1px solid var(--border-light); margin-bottom: 1.5rem; padding: 1.25rem 1.5rem; border-radius: 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(6, 182, 212, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                🔍
+              </div>
+              <div>
+                <h3 style="font-family: var(--font-head); font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 0.15rem;">
+                  Quick Stock Search &amp; Instant Trade
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.82rem; margin: 0;">
+                  Search any ASX or US equity by company name or ticker (e.g. <strong>Santos</strong>, <strong>Woodside</strong>, <strong>CBA</strong>, <strong>BHP</strong>, <strong>Apple</strong>)
+                </p>
+              </div>
+            </div>
+
+            <div style="position: relative; min-width: 300px; flex: 1; max-width: 480px;">
+              <div class="search-input-wrap" style="width: 100%;">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="dashboard-stock-search" class="search-input" placeholder="Type stock name or ticker (e.g. Santos, Woodside, CBA, BHP)..." autocomplete="off" style="padding-right: 5.5rem;"/>
+                <button type="button" id="btn-dashboard-search" class="btn-primary" style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); padding: 0.4rem 0.85rem; font-size: 0.8rem; border-radius: 8px;">
+                  Trade ➔
+                </button>
+              </div>
+              <div id="dashboard-search-results" class="search-dropdown" style="display: none;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Holdings Table -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              <span>💼</span> Active Share Holdings
+              <span class="tab-badge" id="holdings-count-badge">0 stocks</span>
+            </div>
+            <button class="btn-secondary" onclick="GameApp.switchTab('tab-explorer')">
+              <span>+ Buy New Shares</span>
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Asset</th>
+                  <th>Exchange</th>
+                  <th>Shares Owned</th>
+                  <th>Avg Purchase Price</th>
+                  <th>Current Price</th>
+                  <th>Total Value (AUD)</th>
+                  <th>Total Unrealised P&amp;L</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="holdings-table-body">
+                <!-- Holdings injected via GameApp.renderHoldingsTable() -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="holdings-empty-state" style="text-align:center;padding:3rem 1rem;display:none;">
+            <div style="font-size:2.5rem;margin-bottom:0.5rem;">🧺</div>
+            <h4 style="font-family:var(--font-head);font-size:1.15rem;color:#fff;margin-bottom:0.3rem;">No Shares in Portfolio Yet</h4>
+            <p style="color:var(--text-dim);font-size:0.85rem;max-width:420px;margin:0 auto 1.25rem;">
+              You have $150,000 AUD ready to invest! Explore Australian (ASX) and US (NYSE/NASDAQ) markets to place your first trade.
+            </p>
+            <button class="btn-secondary" style="background:var(--asx-blue);color:#070b14;font-weight:700;" onclick="GameApp.switchTab('tab-explorer')">
+              Open Market Explorer ➔
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 2: MARKET EXPLORER & RESEARCH
+           ========================================== -->
+      <section id="tab-explorer" class="tab-content">
+        <!-- Breaking Economic & Financial News -->
+        <div class="section-card" style="background:var(--bg-card2);padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+            <div style="font-family:var(--font-head);font-size:1.05rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:0.5rem;">
+              <span class="live-dot"></span> Market Catalysts &amp; Macro Economic News
+            </div>
+            <span style="font-size:0.75rem;color:var(--text-dim);">Live RBA, Fed &amp; Sector Intelligence</span>
+          </div>
+          <div id="market-news-list" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:0.9rem;">
+            <!-- Injected via GameApp.renderMarketNews() -->
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="filter-chips">
+            <button class="filter-chip active" data-filter="all">🌐 All Equities</button>
+            <button class="filter-chip" data-filter="asx">🇦🇺 ASX Blue Chips</button>
+            <button class="filter-chip" data-filter="nasdaq">🇺🇸 NASDAQ Tech</button>
+            <button class="filter-chip" data-filter="nyse">🇺🇸 NYSE Leaders</button>
+            <button class="filter-chip" data-filter="tech">💻 Technology &amp; AI</button>
+            <button class="filter-chip" data-filter="mining">⛏️ Resources &amp; Mining</button>
+            <button class="filter-chip" data-filter="banks">🏦 Banking &amp; Finance</button>
+            <button class="filter-chip" data-filter="energy">⚡ Energy &amp; Oil</button>
+            <button class="filter-chip" data-filter="travel">✈️ Consumer &amp; Travel</button>
+          </div>
+
+          <div class="search-input-wrap" style="position: relative;">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="stock-search-input" class="search-input" placeholder="Search ticker, company, or sector (e.g. Santos, Woodside, CBA, Apple)..." autocomplete="off"/>
+            <div id="explorer-search-results" class="search-dropdown" style="display: none;"></div>
+          </div>
+        </div>
+
+        <!-- Grid of Available Stocks -->
+        <div class="stock-grid" id="market-stocks-grid">
+          <!-- Injected via GameApp.renderMarketExplorer() -->
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 2.5: 3-WEEK MISSIONS & FINANCIAL INDEPENDENCE
+           ========================================== -->
+      <section id="tab-missions" class="tab-content">
+        <!-- Program Overview & Progress Banner -->
+        <div class="section-card" style="background:linear-gradient(135deg, rgba(6,182,212,0.12), rgba(124,58,237,0.12));border:1px solid rgba(6,182,212,0.3);margin-bottom:1.5rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+            <div>
+              <div style="display:inline-flex;align-items:center;gap:0.4rem;background:rgba(16,185,129,0.15);color:#34d399;padding:0.25rem 0.75rem;border-radius:100px;font-size:0.75rem;font-weight:700;text-transform:uppercase;margin-bottom:0.5rem;">
+                <span>🎯</span> Self-Directed Student Program (Weeks 1–3)
+              </div>
+              <h2 style="font-family:var(--font-head);font-size:1.45rem;color:#fff;margin-bottom:0.3rem;">
+                Investing &amp; Pathway to Financial Independence
+              </h2>
+              <p style="color:var(--text-muted);font-size:0.86rem;max-width:740px;line-height:1.5;">
+                Work independently through 3 weeks of structured investment missions (9 lessons). Complete the practical portfolio challenges and write your financial independence reflections below—everything autosaves directly to your teacher's gradebook.
+              </p>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1rem 1.35rem;min-width:220px;text-align:center;">
+              <div style="font-size:0.74rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;margin-bottom:0.25rem;">Workbook Progress</div>
+              <div id="missions-overall-score" style="font-family:var(--font-mono);font-size:1.65rem;font-weight:800;color:var(--asx-blue);">0 / 9</div>
+              <div id="missions-autosave-status" style="font-size:0.75rem;color:#34d399;margin-top:0.2rem;">✓ Synced with Teacher</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Compound Interest & Financial Independence Calculator -->
+        <div class="section-card" style="margin-bottom:1.5rem;background:var(--bg-card2);">
+          <div class="section-header" style="margin-bottom:1rem;">
+            <div>
+              <div class="section-title">
+                <span>🧮</span> Interactive Financial Independence &amp; Compound Growth Simulator
+              </div>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.2rem;">
+                Model how regular investing and compound returns build long-term financial independence (the "4% Safe Withdrawal Rule").
+              </p>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;margin-bottom:1.25rem;">
+            <div>
+              <label style="display:block;font-size:0.74rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;margin-bottom:0.35rem;">Starting Capital ($ AUD)</label>
+              <input type="number" id="fi-start-capital" class="order-input" value="5000" min="0" step="500" style="width:100%;padding:0.6rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;" oninput="GameApp.calculateIndependence()"/>
+            </div>
+            <div>
+              <label style="display:block;font-size:0.74rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;margin-bottom:0.35rem;">Monthly Contribution ($ AUD)</label>
+              <input type="number" id="fi-monthly-contrib" class="order-input" value="400" min="0" step="50" style="width:100%;padding:0.6rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;" oninput="GameApp.calculateIndependence()"/>
+            </div>
+            <div>
+              <label style="display:block;font-size:0.74rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;margin-bottom:0.35rem;">Expected Return (% p.a. — ASX avg 8.2%)</label>
+              <input type="number" id="fi-annual-return" class="order-input" value="8.2" min="1" max="20" step="0.2" style="width:100%;padding:0.6rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;" oninput="GameApp.calculateIndependence()"/>
+            </div>
+            <div>
+              <label style="display:block;font-size:0.74rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;margin-bottom:0.35rem;">Target Passive Income ($ / Year)</label>
+              <input type="number" id="fi-target-income" class="order-input" value="45000" min="10000" step="5000" style="width:100%;padding:0.6rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;" oninput="GameApp.calculateIndependence()"/>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));gap:1rem;background:rgba(3,7,18,0.5);padding:1rem;border-radius:12px;border:1px solid var(--border);">
+            <div>
+              <span style="font-size:0.75rem;color:var(--text-dim);display:block;">10-Year Projected Portfolio</span>
+              <strong id="fi-res-10y" style="font-family:var(--font-mono);font-size:1.25rem;color:#fff;">$69,420</strong>
+              <small id="fi-res-10y-sub" style="display:block;color:var(--text-muted);font-size:0.74rem;">Contributions vs Compounding</small>
+            </div>
+            <div>
+              <span style="font-size:0.75rem;color:var(--text-dim);display:block;">20-Year Projected Portfolio</span>
+              <strong id="fi-res-20y" style="font-family:var(--font-mono);font-size:1.25rem;color:var(--profit);">$212,840</strong>
+              <small id="fi-res-20y-sub" style="display:block;color:var(--text-muted);font-size:0.74rem;">Compound growth snowballs</small>
+            </div>
+            <div>
+              <span style="font-size:0.75rem;color:var(--text-dim);display:block;">"Financial Independence" Number (4% Rule)</span>
+              <strong id="fi-res-target" style="font-family:var(--font-mono);font-size:1.25rem;color:var(--asx-blue);">$1,125,000</strong>
+              <small style="display:block;color:var(--text-muted);font-size:0.74rem;">25× annual expenses invested</small>
+            </div>
+            <div>
+              <span style="font-size:0.75rem;color:var(--text-dim);display:block;">Estimated Time to Independence</span>
+              <strong id="fi-res-years" style="font-family:var(--font-mono);font-size:1.25rem;color:#fcd34d;">~31 Years</strong>
+              <small style="display:block;color:var(--text-muted);font-size:0.74rem;">When passive returns pay your lifestyle</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Week Filter Pills -->
+        <div style="display:flex;gap:0.6rem;margin-bottom:1.25rem;flex-wrap:wrap;" id="mission-week-tabs">
+          <button class="filter-chip active" onclick="GameApp.filterMissionWeek(0, this)">📅 All 3 Weeks (Lessons 1–9)</button>
+          <button class="filter-chip" onclick="GameApp.filterMissionWeek(1, this)">🌱 Week 1: Foundations &amp; ASX Core</button>
+          <button class="filter-chip" onclick="GameApp.filterMissionWeek(2, this)">🌐 Week 2: Global Markets, FX &amp; Macro</button>
+          <button class="filter-chip" onclick="GameApp.filterMissionWeek(3, this)">🚀 Week 3: Alpha, Rebalancing &amp; Independence Plan</button>
+        </div>
+
+        <!-- Dynamic 3-Week Modules Container -->
+        <div id="missions-program-container">
+          <!-- Injected via GameApp.renderMissions() -->
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 3: INVESTMENT JOURNAL (ASSESSMENT)
+           ========================================== -->
+      <section id="tab-journal" class="tab-content">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">
+                <span>📔</span> Student Investment Journal &amp; Rationale
+              </div>
+              <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.2rem;">
+                Document your economic research, risk assessment, and justification for your investment decisions. Your teacher can review this for assessment.
+              </p>
+            </div>
+            <span class="kpi-badge up" id="journal-autosave-badge">✓ Autosaved</span>
+          </div>
+
+          <div id="journal-cards-wrap">
+            <!-- Rendered dynamically by GameApp.renderJournal() -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 4: TRADE LEDGER / AUDIT HISTORY
+           ========================================== -->
+      <section id="tab-ledger" class="tab-content">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              <span>📜</span> Complete Order Audit Trail
+            </div>
+            <button class="btn-secondary" id="btn-export-ledger">
+              <span>📥 Download Trade History (CSV)</span>
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date &amp; Time</th>
+                  <th>Action</th>
+                  <th>Security</th>
+                  <th>Quantity</th>
+                  <th>Execution Price</th>
+                  <th>Brokerage (AUD)</th>
+                  <th>Total Consideration (AUD)</th>
+                  <th>Realized P&amp;L</th>
+                  <th>Trade Rationale</th>
+                </tr>
+              </thead>
+              <tbody id="ledger-table-body">
+                <!-- Injected via GameApp.renderTradeLedger() -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="ledger-empty-state" style="text-align:center;padding:3rem 1rem;display:none;">
+            <div style="font-size:2rem;margin-bottom:0.5rem;">📝</div>
+            <h4 style="font-family:var(--font-head);color:#fff;">No Orders Executed Yet</h4>
+            <p style="color:var(--text-dim);font-size:0.85rem;">Every buy and sell transaction you submit will appear here with execution timestamps and brokerage audit details.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 5: CLASS LEADERBOARD & COMMERCE HUB
+           ========================================== -->
+      <section id="tab-leaderboard" class="tab-content">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">
+                <span>🏆</span> Class Portfolio Rankings
+              </div>
+              <div style="font-size:0.8rem;color:var(--text-dim);margin-top:0.2rem;">
+                Initial Capital: <strong>$150,000 AUD</strong> • Brokerage: <strong>$10.00</strong> • Position Cap: <strong>25% Max</strong>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span style="font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;">Filter Class:</span>
+              <select id="leaderboard-class-filter" class="search-input" style="max-width:220px;font-size:0.8rem;padding:0.4rem 0.75rem;cursor:pointer;" onchange="GameApp.renderLeaderboard()"></select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Trader</th>
+                  <th>Portfolio Value (AUD)</th>
+                  <th>Return on Investment (%)</th>
+                  <th>Syllabus Badges</th>
+                  <th>Cash Balance</th>
+                  <th>Total Trades</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-table-body">
+                <!-- Injected via GameApp.renderLeaderboard() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Commerce Curriculum Learning Cards -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:2rem;">
+          <h3 style="font-family:var(--font-head);font-size:1.25rem;color:#fff;margin:0;">
+            📚 Commerce &amp; Economics Investor Toolkit
+          </h3>
+          <a href="investing-worksheet.html" target="_blank" class="btn-secondary" style="background:rgba(59,130,246,0.2);color:#60a5fa;border:1px solid rgba(59,130,246,0.4);padding:0.35rem 0.75rem;font-size:0.8rem;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+            <span>📄</span> Student Simulation Lab Worksheet ➔
+          </a>
+        </div>
+        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1rem;">
+          Key financial concepts to help you build a resilient, high-performing share portfolio.
+        </p>
+
+        <div class="study-grid">
+          <div class="study-card">
+            <div class="study-card-icon">🧺</div>
+            <h4>Portfolio Diversification (25% Rule)</h4>
+            <p>
+              "Don't put all your eggs in one basket." Under our classroom rules, no single stock can exceed 25% of your total portfolio. Spreading investments across different sectors cushions against company-specific shocks.
+            </p>
+          </div>
+
+          <div class="study-card">
+            <div class="study-card-icon">💱</div>
+            <h4>Currency Risk (AUD vs. USD)</h4>
+            <p>
+              When investing in US shares (NYSE/NASDAQ), your returns depend on both the stock price and the AUD/USD exchange rate. If the Aussie Dollar falls against the US Dollar, your US holdings gain value when converted back to AUD.
+            </p>
+          </div>
+
+          <div class="study-card">
+            <div class="study-card-icon">💸</div>
+            <h4>Brokerage Impact &amp; Over-Trading</h4>
+            <p>
+              Every trade incurs a $10 AUD transaction fee. Day-trading tiny share parcels frequently can quickly erode student profits. Consider position sizing before placing orders.
+            </p>
+          </div>
+
+          <div class="study-card">
+            <div class="study-card-icon">🐂</div>
+            <h4>Market Cycles &amp; Benchmarks</h4>
+            <p>
+              Compare your portfolio's performance against the S&amp;P/ASX 200 benchmark line. Generating "Alpha" means delivering a return higher than simply holding the broader market index fund.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==========================================
+       STOCK DETAILS & BUY / SELL ORDER MODAL
+       ========================================== -->
+  <div class="modal-overlay" id="stock-modal">
+    <div class="modal-box">
+      <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+
+      <div class="modal-content-grid">
+        <!-- Left: Stock Overview & Interactive Timeline Chart -->
+        <div>
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.6rem;">
+            <div>
+              <div style="display:flex;align-items:center;gap:0.5rem;">
+                <span id="modal-stock-flag" style="font-size:1.3rem;">🇦🇺</span>
+                <h2 id="modal-stock-sym" style="font-family:var(--font-mono);font-size:1.6rem;font-weight:800;color:#fff;">BHP.AX</h2>
+                <span id="modal-exchange-badge" class="exchange-chip asx">ASX</span>
+                <button id="modal-btn-watchlist" class="btn-secondary" style="padding:0.2rem 0.55rem;font-size:0.75rem;" onclick="GameApp.toggleWatchlistCurrent()">
+                  ⭐ Watch
+                </button>
+              </div>
+              <p id="modal-stock-name" style="color:var(--text-muted);font-size:0.88rem;margin-top:0.2rem;">BHP Group Ltd</p>
+            </div>
+            <div style="text-align:right;">
+              <div id="modal-stock-price" style="font-family:var(--font-mono);font-size:1.6rem;font-weight:800;color:#fff;">$41.80</div>
+              <div id="modal-stock-price-aud" style="font-size:0.8rem;color:var(--text-dim);"></div>
+              <span id="modal-stock-change" class="kpi-badge up">+1.25%</span>
+            </div>
+          </div>
+
+          <!-- Company News Catalyst -->
+          <div id="modal-stock-catalyst" style="background:rgba(6,182,212,0.08);border-left:3px solid var(--asx-blue);padding:0.6rem 0.8rem;border-radius:0 8px 8px 0;margin:0.6rem 0 0.85rem;font-size:0.8rem;color:#e2e8f0;line-height:1.4;">
+            Loading market catalyst...
+          </div>
+
+          <!-- Per-Share Timeline Controls -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:1.25rem 0 0.75rem;">
+            <span style="font-size:0.75rem;text-transform:uppercase;color:var(--text-dim);font-weight:700;">Price History</span>
+            <div class="timeline-pills" id="stock-timeline-pills">
+              <button class="time-pill" data-range="1d">1D</button>
+              <button class="time-pill" data-range="5d">5D</button>
+              <button class="time-pill active" data-range="1mo">1M</button>
+              <button class="time-pill" data-range="6mo">6M</button>
+              <button class="time-pill" data-range="1y">1Y</button>
+              <button class="time-pill" data-range="5y">5Y</button>
+              <button class="time-pill" data-range="max">MAX</button>
+            </div>
+          </div>
+
+          <!-- Single Stock Interactive Canvas Chart -->
+          <div class="chart-canvas-wrap" style="height:260px;margin-bottom:1.25rem;">
+            <canvas id="stock-modal-canvas"></canvas>
+          </div>
+
+          <!-- Key Financial Statistics -->
+          <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:0.6rem;background:var(--bg-card2);padding:0.85rem;border-radius:12px;border:1px solid var(--border);font-size:0.76rem;">
+            <div>
+              <span style="color:var(--text-dim);display:block;margin-bottom:0.2rem;">52W Range</span>
+              <strong id="modal-meta-range52" style="font-family:var(--font-mono);color:#fff;">$38.20 - $47.40</strong>
+            </div>
+            <div>
+              <span style="color:var(--text-dim);display:block;margin-bottom:0.2rem;">Market Cap</span>
+              <strong id="modal-meta-mktcap" style="font-family:var(--font-mono);color:#fff;">$212B</strong>
+            </div>
+            <div>
+              <span style="color:var(--text-dim);display:block;margin-bottom:0.2rem;">P/E Ratio</span>
+              <strong id="modal-meta-pe" style="font-family:var(--font-mono);color:#fff;">11.8</strong>
+            </div>
+            <div>
+              <span style="color:var(--text-dim);display:block;margin-bottom:0.2rem;" title="Beta (β) measures volatility vs market (1.0 = market baseline, >1.0 = high volatility, <1.0 = defensive)">Beta (β)</span>
+              <strong id="modal-meta-beta" style="font-family:var(--font-mono);color:var(--asx-blue);">1.05</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Order Execution Panel -->
+        <div class="order-panel">
+          <div class="order-panel-title">Trade Execution Panel</div>
+
+          <!-- Buy / Sell Mode Toggle -->
+          <div class="order-toggle">
+            <button class="order-toggle-btn buy active" id="btn-order-buy">BUY SHARES</button>
+            <button class="order-toggle-btn sell" id="btn-order-sell">SELL SHARES</button>
+          </div>
+
+          <div style="background:rgba(0,0,0,0.2);padding:0.6rem 0.8rem;border-radius:8px;margin-bottom:1rem;font-size:0.78rem;display:flex;justify-content:space-between;">
+            <span style="color:var(--text-dim);">You Currently Own:</span>
+            <strong id="modal-owned-shares" style="color:#fff;font-family:var(--font-mono);">0 shares</strong>
+          </div>
+
+          <div class="order-field">
+            <label for="order-shares-input">Number of Shares</label>
+            <div class="order-input-group">
+              <input type="number" id="order-shares-input" class="order-input" min="1" step="1" value="10"/>
+              <button class="btn-secondary" id="btn-max-shares" style="margin-right:0.4rem;padding:0.3rem 0.6rem;font-size:0.72rem;">MAX (25%)</button>
+            </div>
+          </div>
+
+          <!-- Position Diversification Cap Indicator -->
+          <div id="position-allocation-pill" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.2);border-radius:8px;padding:0.45rem 0.75rem;margin-bottom:0.9rem;font-size:0.76rem;display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:var(--text-dim);">Projected Position Size:</span>
+            <strong id="modal-position-pct" style="font-family:var(--font-mono);color:var(--asx-blue);">0.0% / 25% Max</strong>
+          </div>
+
+          <!-- Trade Rationale Field for Assessment (Mandatory 15+ Chars) -->
+          <div class="order-field" id="trade-justification-field">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">
+              <label for="order-justification-input" style="margin:0;font-size:0.74rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;">
+                Investment Thesis &amp; Rationale <span style="color:#f87171;">*</span>
+              </label>
+              <span id="rationale-char-counter" style="font-size:0.72rem;color:var(--text-dim);font-family:var(--font-mono);">0 / 15 min</span>
+            </div>
+            <textarea id="order-justification-input" class="order-input" rows="2" style="resize:vertical;font-size:0.85rem;padding:0.6rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;" placeholder="Explain your investment thesis (e.g. strong earnings report, defensive dividend yield, RBA rate sensitivity)..."></textarea>
+          </div>
+
+          <div class="order-calc-breakdown">
+            <div class="calc-row">
+              <span>Subtotal:</span>
+              <span id="calc-subtotal" style="font-family:var(--font-mono);">$0.00 AUD</span>
+            </div>
+            <div class="calc-row">
+              <span>Brokerage Fee:</span>
+              <span id="calc-brokerage" style="font-family:var(--font-mono);">$10.00 AUD</span>
+            </div>
+            <div class="calc-row total">
+              <span>Total Consideration:</span>
+              <span id="calc-total" style="font-family:var(--font-mono);color:var(--asx-blue);">$0.00 AUD</span>
+            </div>
+          </div>
+
+          <div id="order-warning-msg" style="display:none;color:#fca5a5;font-size:0.78rem;margin-bottom:0.75rem;padding:0.5rem;background:rgba(239,68,68,0.1);border-radius:6px;">
+            Warning text
+          </div>
+
+          <button class="btn-execute buy" id="btn-execute-order">
+            Confirm Buy Order ➔
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Alerts Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Firebase SDK Compat for Cross-Laptop Real-Time Sync -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <!-- Application Scripts -->
+  <script src="/datatrends-sdk.js"></script>
+  <script src="/config.js"></script>
+    <script src="config.js"></script>
+  <script src="firestore_sync.js"></script>
+  <script src="market_service.js"></script>
+  <script src="chart_manager.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

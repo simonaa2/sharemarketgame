@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-T56TBQ81V1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-T56TBQ81V1');
+  </script>
+  <title>Live Projector Floor — Share Market Arena</title>
+  <meta name="description" content="Fullscreen real-time smartboard and projector classroom display for the Share Market Challenge."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+
+  <!-- Google Firebase Cloud SDK (maths-f3c6d) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+  <style>
+    body {
+      background: #070b14;
+      color: #f8fafc;
+      font-family: var(--font-body);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .projector-nav {
+      background: rgba(11, 17, 33, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .projector-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .projector-brand .icon-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+    }
+    .projector-title {
+      font-family: var(--font-head);
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+    .projector-sub {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .projector-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .live-clock-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      padding: 0.4rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+    }
+
+    /* Podium Section */
+    .podium-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .podium-card {
+      background: linear-gradient(135deg, rgba(17, 24, 39, 0.8), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+    .podium-card.rank-1 {
+      border-color: rgba(245, 158, 11, 0.6);
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(15, 23, 42, 0.95));
+      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.15);
+      order: 2;
+      transform: translateY(-8px);
+    }
+    .podium-card.rank-2 {
+      border-color: rgba(148, 163, 184, 0.4);
+      order: 1;
+    }
+    .podium-card.rank-3 {
+      border-color: rgba(217, 119, 6, 0.4);
+      order: 3;
+    }
+    .podium-rank-badge {
+      font-size: 2.2rem;
+      margin-bottom: 0.4rem;
+    }
+    .podium-name {
+      font-family: var(--font-head);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+    .podium-val {
+      font-family: var(--font-mono);
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .podium-roi {
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* Table styles */
+    .projector-table-wrap {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 4rem;
+    }
+    .projector-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    .projector-table th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      padding: 1rem 1.25rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .projector-table td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .projector-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Live Ticker Tape at Bottom */
+    .ticker-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #090d16;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.6rem 0;
+      overflow: hidden;
+      white-space: nowrap;
+      z-index: 99;
+      display: flex;
+    }
+    .ticker-track {
+      display: flex;
+      gap: 2.5rem;
+      animation: tickerScroll 45s linear infinite;
+    }
+    @keyframes tickerScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+      .podium-container {
+        grid-template-columns: 1fr;
+      }
+      .podium-card.rank-1 {
+        order: 1;
+        transform: none;
+      }
+      .podium-card.rank-2 { order: 2; }
+      .podium-card.rank-3 { order: 3; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Navigation -->
+  <header class="projector-nav">
+    <div class="projector-brand">
+      <div class="icon-badge">🖥️</div>
+      <div>
+        <div class="projector-title">Live Classroom Projector Floor</div>
+        <div class="projector-sub">Share Market Arena — Real-Time Trading Leaderboard</div>
+      </div>
+    </div>
+
+    <div class="projector-meta">
+      <select id="p-class-filter" class="search-input" style="padding:0.4rem 0.8rem;font-size:0.82rem;width:150px;background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.15);color:#fff;" onchange="ProjectorApp.onFilterChange()">
+        <option value="ALL">All Classes</option>
+        <option value="10COMM1" selected>Class 10COMM1</option>
+        <option value="10COMM2">Class 10COMM2</option>
+        <option value="11ECON">Class 11ECON</option>
+        <option value="12BUS">Class 12BUS</option>
+      </select>
+
+      <div class="live-clock-pill">
+        <span class="pulse-dot"></span>
+        <span id="p-sydney-clock">--:--:-- AEST</span>
+        <span style="color:var(--text-dim);font-size:0.75rem;">|</span>
+        <span id="p-market-status" style="color:#10b981;font-weight:700;">ASX OPEN</span>
+      </div>
+
+      <button class="btn-secondary" onclick="ProjectorApp.toggleFullscreen()" style="padding:0.4rem 0.8rem;font-size:0.8rem;border-color:rgba(255,255,255,0.2);">
+        <span>⛶ Fullscreen</span>
+      </button>
+
+      <a href="teacher.html" class="btn-secondary" style="text-decoration:none;padding:0.4rem 0.8rem;font-size:0.8rem;border-color:rgba(255,255,255,0.2);">
+        <span>👨‍🏫 Teacher Console</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="container" style="max-width:1400px;padding:1.5rem 1.5rem 5rem;">
+
+    <!-- Breaking Macro Catalyst Broadcast Banner (Hidden until triggered) -->
+    <div id="p-macro-banner" style="display:none;background:linear-gradient(135deg,rgba(124,58,237,0.25),rgba(239,68,68,0.2));border:1px solid rgba(167,139,250,0.5);border-radius:16px;padding:1rem 1.5rem;margin-bottom:1.5rem;align-items:center;justify-content:space-between;gap:1rem;">
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <span style="font-size:1.8rem;">🚨</span>
+        <div>
+          <div style="font-size:0.72rem;font-weight:800;color:#c084fc;text-transform:uppercase;letter-spacing:0.06em;">Breaking Classroom Macro Catalyst</div>
+          <div id="p-macro-text" style="font-family:var(--font-head);font-size:1.15rem;font-weight:800;color:#fff;">RBA Hikes Cash Rate (+25 bps)</div>
+        </div>
+      </div>
+      <button class="btn-secondary" onclick="document.getElementById('p-macro-banner').style.display='none'" style="font-size:0.75rem;padding:0.3rem 0.6rem;">Dismiss</button>
+    </div>
+
+    <!-- Top 3 Podium Cards -->
+    <div class="podium-container" id="p-podium">
+      <!-- Injected via JavaScript -->
+    </div>
+
+    <!-- Full Class Leaderboard Table -->
+    <div class="projector-table-wrap">
+      <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.015);">
+        <div style="font-family:var(--font-head);font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:0.5rem;">
+          <span>🏆</span> Class Rankings &amp; Live Portfolios
+          <span id="p-student-count-badge" style="background:rgba(255,255,255,0.1);padding:0.15rem 0.6rem;border-radius:100px;font-size:0.75rem;font-weight:600;color:var(--text-muted);">0 Students</span>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-dim);font-family:var(--font-mono);">
+          Baseline: $150,000.00 AUD • Auto-updating
+        </div>
+      </div>
+
+      <table class="projector-table">
+        <thead>
+          <tr>
+            <th style="width:70px;text-align:center;">Rank</th>
+            <th>Student Name</th>
+            <th>Class</th>
+            <th style="text-align:right;">Portfolio Value</th>
+            <th style="text-align:right;">Total Return</th>
+            <th style="text-align:right;">Cash / Invested</th>
+            <th style="text-align:center;">Trades</th>
+            <th>Top Holdings</th>
+          </tr>
+        </thead>
+        <tbody id="p-leaderboard-body">
+          <tr>
+            <td colspan="8" style="text-align:center;padding:3rem;color:var(--text-dim);">
+              Connecting to live classroom trading floor...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <!-- Real-Time Scrolling Ticker Bar at Bottom -->
+  <footer class="ticker-bar">
+    <div class="ticker-track" id="p-ticker-track">
+      <!-- Injected via JavaScript -->
+    </div>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="firestore_sync.js"></script>
+  <script src="projector.js"></script>
+</body>
+</html>

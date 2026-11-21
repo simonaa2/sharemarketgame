@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-T56TBQ81V1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-T56TBQ81V1');
+  </script>
+  <title>Teacher &amp; Admin Dashboard — Share Market Arena</title>
+  <meta name="description" content="Monitor student portfolios, inspect trade logs, view rankings, and manage class market parameters."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+
+  <style>
+    /* Teacher specific styles */
+    .teacher-login-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .teacher-login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .teacher-login-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 24px 24px 0 0;
+      background: linear-gradient(90deg, var(--gold), var(--asx-blue));
+    }
+
+    .admin-controls-card {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Drawer/Modal for Student Inspector */
+    .inspector-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 150;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .inspector-modal.open {
+      display: flex;
+    }
+    .inspector-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 950px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 2rem;
+      position: relative;
+      box-shadow: var(--shadow-lg);
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+
+  <!-- PASSWORD GATE (Visible until authenticated) -->
+  <div class="teacher-login-wrap" id="teacher-gate">
+    <div class="teacher-login-card">
+      <div class="login-badge" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.3);color:#fcd34d;">
+        <span>🔐</span> Teacher &amp; Faculty Access
+      </div>
+      <h1 class="login-title" style="font-size:1.8rem;">Educator <span class="accent" style="background:linear-gradient(135deg,#fbbf24,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Dashboard</span></h1>
+      <p class="login-subtitle">Enter teacher password to inspect student performance, view rankings, and review investment journals.</p>
+
+      <div class="login-field">
+        <label for="teacher-pw-input">Teacher Password</label>
+        <input type="password" id="teacher-pw-input" class="login-input" placeholder="Enter teacher password (e.g. market10 or hscsando1603)" onkeydown="if(event.key==='Enter') TeacherApp.attemptLogin()"/>
+      </div>
+
+      <button class="login-btn" style="background:linear-gradient(135deg,var(--gold),#d97706);" onclick="TeacherApp.attemptLogin()">
+        Unlock Dashboard ➔
+      </button>
+
+      <div class="login-error" id="teacher-pw-error">
+        <span>⚠️</span> Incorrect password. Accepted passwords: <code>market10</code> or <code>hscsando1603</code>.
+      </div>
+
+      <div style="text-align:center;margin-top:1.5rem;">
+        <a href="/" style="color:var(--text-dim);font-size:0.8rem;text-decoration:none;">← DataTrends Portal</a>
+        <a href="index.html" style="color:var(--text-dim);font-size:0.8rem;text-decoration:none;">← Return to Student Login</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD MAIN VIEW (Hidden until unlocked) -->
+  <div class="app-wrapper" id="teacher-dashboard" style="display:none;">
+    <header class="main-header">
+      <div class="container">
+        <div class="header-inner">
+          <div class="brand-group">
+            <div class="brand-logo" style="background:linear-gradient(135deg,var(--gold),#06b6d4);">👨‍🏫</div>
+            <div>
+              <div class="brand-title">Teacher <span class="accent">Command Center</span></div>
+              <span class="class-tag">Share Market Challenge Management</span>
+            </div>
+          </div>
+
+          <div class="user-controls">
+            <a href="/" class="btn-secondary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;" title="Back to DataTrends Portal">
+              <span>🏠 Portal</span>
+            </a>
+            <a href="projector.html" target="_blank" class="btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f59e0b,#ef4444);box-shadow:0 4px 14px rgba(245,158,11,0.3);color:#fff;font-weight:700;" title="Open Smartboard / Fullscreen Classroom Display">
+              <span>🖥️ Live Projector Floor</span>
+            </a>
+            <a href="stock-research-worksheet.html" target="_blank" class="btn-secondary" style="border-color:rgba(14,165,233,0.4);color:#38bdf8;text-decoration:none;display:inline-flex;align-items:center;gap:6px;" title="Printable Stock Research & Statistics Worksheet">
+              <span>🔍 Stock Research Worksheet</span>
+            </a>
+            <a href="investing-worksheet.html" target="_blank" class="btn-secondary" style="border-color:rgba(59,130,246,0.4);color:#60a5fa;text-decoration:none;display:inline-flex;align-items:center;gap:6px;" title="Printable Full Simulation Lab Worksheet">
+              <span>📄 Full Lab Booklet</span>
+            </a>
+            <button class="btn-secondary" style="border-color:rgba(16,185,129,0.4);color:#34d399;" onclick="TeacherApp.toggleUnitPlan()">
+              <span>📅 3-Week Unit Plan</span>
+            </button>
+            <button class="btn-secondary" onclick="TeacherApp.seedSampleData(true)">
+              <span>⚡ Populate Demo Class</span>
+            </button>
+            <button class="btn-secondary" onclick="TeacherApp.exportClassCSV()">
+              <span>📥 Export Class CSV</span>
+            </button>
+            <button class="btn-secondary" onclick="TeacherApp.logout()">
+              <span>Lock / Exit</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container" style="padding-top:2rem;padding-bottom:4rem;">
+      <!-- Class Overview KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Active Students</div>
+          <div class="kpi-value" id="t-kpi-students">0</div>
+          <div class="kpi-sub" style="color:var(--text-dim);">Registered in class</div>
+        </div>
+
+        <div class="kpi-card profit">
+          <div class="kpi-label">Top Gainer Return</div>
+          <div class="kpi-value" id="t-kpi-top-roi">+0.00%</div>
+          <div class="kpi-sub" id="t-kpi-top-name" style="color:var(--profit);">--</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Class Average Return</div>
+          <div class="kpi-value" id="t-kpi-avg-roi">0.00%</div>
+          <div class="kpi-sub" id="t-kpi-avg-val" style="color:var(--text-muted);">$150,000.00 avg</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Total Trades Executed</div>
+          <div class="kpi-value" id="t-kpi-trades">0</div>
+          <div class="kpi-sub" style="color:var(--text-dim);">Across ASX, NYSE &amp; NASDAQ</div>
+        </div>
+      </div>
+
+      <!-- Administrative Controls Bar -->
+      <div class="admin-controls-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+          <div>
+            <h3 style="font-family:var(--font-head);color:#fff;font-size:1.15rem;display:flex;align-items:center;gap:0.5rem;">
+              <span>👨‍🏫</span> Classroom Market Controls &amp; Macro Catalysts
+            </h3>
+            <p style="color:var(--text-dim);font-size:0.8rem;margin-top:0.2rem;">
+              Trigger real-time economic events to all student screens, freeze trading for assessment, or manage class rosters.
+            </p>
+          </div>
+          <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+            <!-- Macro Catalyst Trigger Dropdown -->
+            <select id="teacher-catalyst-select" class="search-input" style="max-width:260px;font-size:0.82rem;cursor:pointer;background:rgba(124,58,237,0.15);border-color:rgba(167,139,250,0.4);color:#e9d5ff;">
+              <option value="">⚡ Trigger Macro Catalyst...</option>
+              <option value="rba_hike">🏦 RBA Hikes Cash Rate (+25 bps)</option>
+              <option value="mining_boom">⛏️ Resources Super-Cycle Surge</option>
+              <option value="tech_correction">📉 Tech &amp; AI Valuation Pullback</option>
+              <option value="oil_shock">⚡ Energy Supply Disruption</option>
+              <option value="dividend_season">💰 ASX Semi-Annual Dividend (2%)</option>
+            </select>
+            <button class="btn-primary" onclick="TeacherApp.broadcastSelectedCatalyst()" style="font-size:0.8rem;padding:0.45rem 0.9rem;">
+              Broadcast Event ➔
+            </button>
+            <button class="btn-secondary" id="btn-freeze-toggle" onclick="TeacherApp.toggleTradingFreeze()" style="font-size:0.8rem;">
+              <span>🔒 Freeze Trading</span>
+            </button>
+            <button class="btn-secondary" onclick="TeacherApp.clearAllData()" style="color:#f87171;border-color:rgba(248,113,113,0.3);font-size:0.8rem;">
+              <span>🗑️ Reset Roster</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3-Week Unit Plan & Teacher Pacing Guide (Collapsible) -->
+      <div class="section-card" id="teacher-unit-plan-card" style="margin-bottom:2rem;border:1px solid rgba(16,185,129,0.35);background:linear-gradient(135deg, rgba(14,21,38,0.98), rgba(17,24,39,0.98));">
+        <div class="section-header" style="border-bottom:1px solid var(--border);padding-bottom:1rem;margin-bottom:1.25rem;">
+          <div>
+            <div style="display:inline-flex;align-items:center;gap:0.4rem;background:rgba(16,185,129,0.15);color:#34d399;padding:0.2rem 0.7rem;border-radius:100px;font-size:0.72rem;font-weight:700;text-transform:uppercase;margin-bottom:0.4rem;">
+              <span>📚</span> Stage 5 Commerce / Stage 6 Economics Teaching Sequence
+            </div>
+            <div class="section-title" style="font-size:1.25rem;">
+              <span>📅</span> 3-Week Student Self-Directed Program: Investing &amp; Financial Independence
+            </div>
+            <p style="color:var(--text-dim);font-size:0.82rem;margin-top:0.2rem;">
+              Students complete this 9-lesson program inside their <strong>"🎯 3-Week Missions &amp; Independence"</strong> tab. Their practical trades and written reflections sync live to your Student Inspector below.
+            </p>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn-secondary" onclick="window.print()" style="font-size:0.78rem;">🖨️ Print Guide</button>
+            <button class="btn-secondary" onclick="TeacherApp.toggleUnitPlan()" style="font-size:0.78rem;">Hide Guide ▲</button>
+          </div>
+        </div>
+
+        <div id="teacher-unit-plan-body" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:1.25rem;">
+          <!-- Week 1 -->
+          <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:14px;padding:1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">
+              <span class="tab-badge" style="background:rgba(6,182,212,0.15);color:var(--asx-blue);font-weight:700;">WEEK 1 (Lessons 1–3)</span>
+              <span style="font-size:0.75rem;color:var(--text-dim);">Foundations &amp; ASX</span>
+            </div>
+            <h4 style="font-family:var(--font-head);color:#fff;font-size:1.05rem;margin-bottom:0.5rem;">Wealth Foundations, Risk &amp; Core ASX Portfolio</h4>
+            <ul style="color:var(--text-muted);font-size:0.82rem;line-height:1.6;padding-left:1.1rem;margin-bottom:0.85rem;">
+              <li><strong>Lesson 1 (Why Invest &amp; Independence):</strong> Inflation (~3% p.a.) vs compound growth &amp; the "4% Financial Independence Rule" (25× annual expenses). Students model goals in the FI Calculator.</li>
+              <li><strong>Lesson 2 (ASX Blue Chips &amp; Sectors):</strong> Defensive (CBA, WOW, CSL, TLS) vs Cyclical (BHP, FMG, QAN, FLT) shares &amp; franked dividends. <em>Task: Buy 2+ ASX stocks.</em></li>
+              <li><strong>Lesson 3 (25% Cap &amp; Brokerage):</strong> Unsystematic risk, $10 brokerage drag on small trades, and position sizing. <em>Task: Hold 3+ diversified stocks.</em></li>
+            </ul>
+            <div style="background:rgba(6,182,212,0.08);padding:0.6rem 0.75rem;border-radius:8px;font-size:0.76rem;color:#e2e8f0;">
+              <strong>👨‍🏫 Teacher Action:</strong> Have students log in with class code <code>10COMM1</code> and complete Week 1 in the <strong>🎯 3-Week Missions</strong> tab.
+            </div>
+          </div>
+
+          <!-- Week 2 -->
+          <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:14px;padding:1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">
+              <span class="tab-badge" style="background:rgba(167,139,250,0.15);color:#c084fc;font-weight:700;">WEEK 2 (Lessons 4–6)</span>
+              <span style="font-size:0.75rem;color:var(--text-dim);">Global &amp; Macro</span>
+            </div>
+            <h4 style="font-family:var(--font-head);color:#fff;font-size:1.05rem;margin-bottom:0.5rem;">Wall Street (NYSE/NASDAQ), FX Risk &amp; Macro Shocks</h4>
+            <ul style="color:var(--text-muted);font-size:0.82rem;line-height:1.6;padding-left:1.1rem;margin-bottom:0.85rem;">
+              <li><strong>Lesson 4 (Global Markets &amp; AUD/USD):</strong> Why invest beyond Australia (&lt;2% of global market) into US tech/global leaders, and how AUD/USD currency movements impact returns. <em>Task: Execute 1+ US trade.</em></li>
+              <li><strong>Lesson 5 (Valuation Metrics):</strong> P/E ratios, Market Cap, and 52-week ranges (Growth vs Value). <em>Task: Complete 3+ Stock Journal entries with target prices.</em></li>
+              <li><strong>Lesson 6 (Macro Catalysts):</strong> RBA interest rate hikes, inflation, and sector rotation. <em>Task: Written catalyst impact reflection.</em></li>
+            </ul>
+            <div style="background:rgba(167,139,250,0.1);padding:0.6rem 0.75rem;border-radius:8px;font-size:0.76rem;color:#e2e8f0;">
+              <strong>👨‍🏫 Teacher Action:</strong> Mid-Week 2, use the <strong>⚡ Trigger Macro Catalyst</strong> bar above to broadcast <em>"🏦 RBA Hikes Cash Rate (+25 bps)"</em> or <em>"📉 Tech Valuation Pullback"</em>.
+            </div>
+          </div>
+
+          <!-- Week 3 -->
+          <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:14px;padding:1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">
+              <span class="tab-badge" style="background:rgba(16,185,129,0.15);color:#34d399;font-weight:700;">WEEK 3 (Lessons 7–9)</span>
+              <span style="font-size:0.75rem;color:var(--text-dim);">Alpha &amp; Independence</span>
+            </div>
+            <h4 style="font-family:var(--font-head);color:#fff;font-size:1.05rem;margin-bottom:0.5rem;">Passive ETFs vs Active Alpha, Rebalancing &amp; Final Audit</h4>
+            <ul style="color:var(--text-muted);font-size:0.82rem;line-height:1.6;padding-left:1.1rem;margin-bottom:0.85rem;">
+              <li><strong>Lesson 7 (Active vs Passive Index):</strong> Evaluating portfolio "Alpha" against the S&amp;P/ASX 200 (8.2% p.a.) and why low-cost Index ETFs suit long-term independence.</li>
+              <li><strong>Lesson 8 (Rebalancing &amp; Psychology):</strong> Avoiding FOMO &amp; panic selling, reinvesting dividends, and trimming/rebalancing. <em>Task: 4+ total trades executed.</em></li>
+              <li><strong>Lesson 9 (Personal Independence Blueprint):</strong> Dollar-Cost Averaging, Superannuation, and post-school wealth plan + CSV Ledger export.</li>
+            </ul>
+            <div style="background:rgba(16,185,129,0.1);padding:0.6rem 0.75rem;border-radius:8px;font-size:0.76rem;color:#e2e8f0;">
+              <strong>👨‍🏫 Teacher Action:</strong> Broadcast <em>"💰 ASX Semi-Annual Dividend (2%)"</em>, then click <strong>🔍 Inspect</strong> on each student below to grade out of 20 and export CSV.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Class Roster & Leaderboard Table -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">
+            <span>📊</span> Student Portfolio Standings
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+            <button class="btn-secondary" style="font-size:0.78rem;padding:0.4rem 0.75rem;" onclick="TeacherApp.refreshRoster()">🔄 Refresh Roster</button>
+            <select id="teacher-class-filter" class="search-input" style="max-width:220px;cursor:pointer;" onchange="TeacherApp.renderDashboard()"></select>
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="teacher-search-input" class="search-input" placeholder="Search student name..."/>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Student Name</th>
+                <th>Class</th>
+                <th>Portfolio Value (AUD)</th>
+                <th>Return (%)</th>
+                <th>Available Cash</th>
+                <th>Trades</th>
+                <th>3-Wk Missions</th>
+                <th>Grade (/20)</th>
+                <th>Last Active</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="teacher-roster-tbody">
+              <!-- Rendered via teacher.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- STUDENT PORTFOLIO & JOURNAL INSPECTOR MODAL -->
+  <div class="inspector-modal" id="inspector-modal">
+    <div class="inspector-box">
+      <button class="modal-close-btn" onclick="TeacherApp.closeInspector()">&times;</button>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
+        <div>
+          <h2 id="insp-student-name" style="font-family:var(--font-head);font-size:1.6rem;color:#fff;">Student Name</h2>
+          <span id="insp-student-code" class="class-tag">Class Code</span>
+        </div>
+        <div style="text-align:right;">
+          <div id="insp-total-val" style="font-family:var(--font-mono);font-size:1.5rem;font-weight:700;color:#fff;">$150,000.00 AUD</div>
+          <span id="insp-roi-badge" class="kpi-badge up">+0.00%</span>
+        </div>
+      </div>
+
+      <!-- Active Holdings -->
+      <div style="margin-bottom:1.5rem;">
+        <h4 style="font-family:var(--font-head);color:#fff;margin-bottom:0.75rem;">Active Holdings</h4>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Security</th>
+                <th>Exchange</th>
+                <th>Shares</th>
+                <th>Avg Buy (AUD)</th>
+                <th>Current Value (AUD)</th>
+              </tr>
+            </thead>
+            <tbody id="insp-holdings-tbody">
+              <!-- Injected via teacher.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Student 3-Week Missions & Independence Workbook -->
+      <div style="margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+          <h4 style="font-family:var(--font-head);color:#fff;margin:0;">🎯 3-Week Missions &amp; Financial Independence Workbook</h4>
+          <span id="insp-missions-badge" class="tab-badge" style="background:rgba(16,185,129,0.15);color:#34d399;font-weight:700;">0 / 9 Completed</span>
+        </div>
+        <div id="insp-missions-wrap" style="background:var(--bg-card2);border-radius:12px;padding:1rem;border:1px solid var(--border);font-size:0.85rem;max-height:280px;overflow-y:auto;">
+          <!-- Injected via teacher.js -->
+        </div>
+      </div>
+
+      <!-- Student Investment Journal & Theses -->
+      <div style="margin-bottom:1.5rem;">
+        <h4 style="font-family:var(--font-head);color:#fff;margin-bottom:0.75rem;">📔 Student Investment Journal &amp; Rationale</h4>
+        <div id="insp-journal-wrap" style="background:var(--bg-card2);border-radius:12px;padding:1rem;border:1px solid var(--border);font-size:0.85rem;">
+          <!-- Injected via teacher.js -->
+        </div>
+      </div>
+
+      <!-- Full Trade Ledger -->
+      <div>
+        <h4 style="font-family:var(--font-head);color:#fff;margin-bottom:0.75rem;">Full Trade Ledger &amp; Order History</h4>
+        <div class="table-responsive" style="max-height:240px;overflow-y:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Type</th>
+                <th>Symbol</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total (AUD)</th>
+                <th>Trade Rationale</th>
+              </tr>
+            </thead>
+            <tbody id="insp-trades-tbody">
+              <!-- Injected via teacher.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Assessment Marking Rubric -->
+      <div style="margin-top:1.5rem;background:var(--bg-card2);border-radius:14px;padding:1.25rem;border:1px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+          <div>
+            <h4 style="font-family:var(--font-head);color:#fff;font-size:1.05rem;">📝 Assessment Marking Rubric</h4>
+            <p style="color:var(--text-dim);font-size:0.78rem;">Assign marks against Commerce / Economics syllabus outcomes.</p>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;">Total Mark:</span>
+            <span id="rubric-total-display" style="font-family:var(--font-mono);font-size:1.3rem;font-weight:800;color:var(--asx-blue);margin-left:0.3rem;">0 / 20</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;margin-bottom:1rem;">
+          <div>
+            <label style="display:block;font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;margin-bottom:0.3rem;">
+              1. Journal &amp; Rationale (/10)
+            </label>
+            <input type="number" id="grade-journal" min="0" max="10" step="0.5" class="login-input" placeholder="0 - 10" oninput="TeacherApp.calcTotalGrade()"/>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;margin-bottom:0.3rem;">
+              2. Diversification (/5)
+            </label>
+            <input type="number" id="grade-divers" min="0" max="5" step="0.5" class="login-input" placeholder="0 - 5" oninput="TeacherApp.calcTotalGrade()"/>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;margin-bottom:0.3rem;">
+              3. Market Reflection (/5)
+            </label>
+            <input type="number" id="grade-reflect" min="0" max="5" step="0.5" class="login-input" placeholder="0 - 5" oninput="TeacherApp.calcTotalGrade()"/>
+          </div>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <label style="display:block;font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;margin-bottom:0.3rem;">
+            Teacher Feedback &amp; Commentary
+          </label>
+          <textarea id="grade-comments" class="order-input" rows="2" style="width:100%;font-size:0.85rem;padding:0.6rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;" placeholder="Constructive feedback on portfolio construction, research thesis, and risk management..."></textarea>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;">
+          <button class="btn-secondary" style="background:var(--profit);color:#fff;font-weight:700;border:none;padding:0.5rem 1.2rem;" onclick="TeacherApp.saveGrade()">
+            💾 Save Student Grade
+          </button>
+        </div>
+      </div>
+
+      <div style="margin-top:1.5rem;display:flex;justify-content:flex-end;gap:0.75rem;">
+        <button class="btn-secondary" style="color:#fca5a5;border-color:rgba(239,68,68,0.3);" onclick="TeacherApp.resetSelectedStudent()">
+          <span>⚠️ Reset Student Portfolio</span>
+        </button>
+        <button class="btn-secondary" onclick="TeacherApp.closeInspector()">
+          <span>Close</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Firebase SDK Compat for Live Real-Time Dashboard Sync -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <script src="/config.js"></script>
+    <script src="config.js"></script>
+  <script src="firestore_sync.js"></script>
+  <script src="market_service.js"></script>
+  <script src="teacher.js"></script>
+</body>
+</html>
