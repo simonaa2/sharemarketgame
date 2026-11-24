@@ -86,7 +86,7 @@ const CONFIG = {
   // 'INITIALS': Displays First Name + Last Initial (e.g. Samuel G.) - Recommended for student privacy
   // 'FULL': Displays Full Student Name
   // 'ANONYMOUS': Displays Trader Alias / Code (e.g. Trader #4)
-  PRIVACY_MODE: 'INITIALS',
+  PRIVACY_MODE: 'FULL',
 
   // Automated Dividend Yield (3.8% p.a. prorated weekly into cash balances)
   AUTO_DIVIDENDS_ENABLED: true,
@@ -233,7 +233,26 @@ const CONFIG = {
   SCRIPT_URL: '',
 
   // Student Roster (Populated dynamically via Class Code / Firestore)
-  STUDENTS: [],
+    STUDENTS: [
+    { name: 'Joshua Duffey', classCode: '10COMM1', password: 'joshua5192' },
+    { name: 'Tobias Filipek', classCode: '10COMM1', password: 'tobias8374' },
+    { name: 'Jasper Ghodosi', classCode: '10COMM1', password: 'jasper6201' },
+    { name: 'Charlie Jurd-Smith', classCode: '10COMM1', password: 'charlie4093' },
+    { name: 'Anthony Lattouf', classCode: '10COMM1', password: 'anthony7182' },
+    { name: 'Jacob Lattouf', classCode: '10COMM1', password: 'jacob3510' },
+    { name: 'Oliver Martin', classCode: '10COMM1', password: 'oliver9024' },
+    { name: 'Max Mirabello', classCode: '10COMM1', password: 'max4831' },
+    { name: 'Dominic Mobberley-Barreto', classCode: '10COMM1', password: 'dominic5729' },
+    { name: 'Noah Ntzeremes', classCode: '10COMM1', password: 'noah8214' },
+    { name: 'Patrick O\'Connor', classCode: '10COMM1', password: 'patrick6392' },
+    { name: 'Jacob Salem', classCode: '10COMM1', password: 'jacob5183' },
+    { name: 'Luca Toffolo', classCode: '10COMM1', password: 'luca4920' },
+    { name: 'James Tzirtzilakis', classCode: '10COMM1', password: 'james6304' },
+    { name: 'William Tzirtzilakis', classCode: '10COMM1', password: 'william1759' },
+    { name: 'Kaiden Walker', classCode: '10COMM1', password: 'kaiden3810' },
+    { name: 'Jesper Whippy', classCode: '10COMM1', password: 'jesper9240' },
+    { name: 'Shine Sajjathiityanond', classCode: '10COMM1', password: 'shine7712' }
+  ],
 
   // Supported Exchanges
   EXCHANGES: {

@@ -129,6 +129,14 @@ const ProjectorApp = {
       if (!p) return null;
       const name = (p.studentName || p.name || '').trim();
       if (!name) return null;
+      const demoNames = [
+        'liam zhang', 'chloe davies', 'marcus wong', 'sophie miller', 'ethan brown',
+        'chloe d.', 'liam z.', 'marcus w.', 'chloe d', 'liam z', 'marcus w',
+        'guest trader', 'teacher demo', '[deactivated demo account]'
+      ];
+      if (p.isDeleted || p.isDemo || (p.totalValue !== undefined && p.totalValue <= 0) || demoNames.some(d => name.toLowerCase().includes(d))) {
+        return null;
+      }
       const classCode = (p.classCode || '10COMM1').trim();
 
       if (this.currentClass !== 'ALL' && classCode.toUpperCase() !== this.currentClass.toUpperCase()) {

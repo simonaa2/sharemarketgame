@@ -2095,9 +2095,18 @@ const GameApp = {
       } catch (e) {}
     }
 
-    // Purge any legacy simulated demo classmates
-    const demoNames = ['liam zhang', 'chloe davies', 'marcus wong', 'sophie miller', 'ethan brown'];
-    roster = roster.filter(s => !demoNames.includes((s.name || '').trim().toLowerCase()));
+    // Purge any legacy simulated demo classmates or deactivated accounts
+    const demoNames = [
+      'liam zhang', 'chloe davies', 'marcus wong', 'sophie miller', 'ethan brown',
+      'chloe d.', 'liam z.', 'marcus w.', 'chloe d', 'liam z', 'marcus w',
+      'guest trader', 'teacher demo', '[deactivated demo account]'
+    ];
+    roster = roster.filter(s => {
+      if (!s || s.isDeleted || s.isDemo || (s.totalValue !== undefined && s.totalValue <= 0)) return false;
+      const lower = (s.name || '').trim().toLowerCase();
+      if (demoNames.some(d => lower.includes(d))) return false;
+      return true;
+    });
 
     // Include current student only if they have placed at least 1 trade or registered
     const userTradeCount = (this.portfolio && this.portfolio.trades) ? this.portfolio.trades.length : 0;

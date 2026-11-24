@@ -41,6 +41,19 @@ const FirestoreSync = {
   },
 
   toPrivacyName(rawName) {
+    const clean = (rawName || 'Anonymous').trim().replace(/\s+/g, ' ');
+    if (typeof CONFIG !== 'undefined' && CONFIG.PRIVACY_MODE === 'FULL') {
+      const FULL_MAP = {
+        'anthony': 'Anthony Lattouf', 'charlie': 'Charlie Jurd-Smith', 'dominic': 'Dominic Mobberley-Barreto',
+        'jacob': 'Jacob Lattouf', 'james': 'James Tzirtzilakis', 'jasper': 'Jasper Ghodosi', 'jesper': 'Jesper Whippy',
+        'joshua': 'Joshua Duffey', 'kaiden': 'Kaiden Walker', 'luca': 'Luca Toffolo', 'max': 'Max Mirabello',
+        'noah': 'Noah Ntzeremes', 'oliver': 'Oliver Martin', 'patrick': 'Patrick O\'Connor', 'shine': 'Shine Sajjathiityanond',
+        'tobias': 'Tobias Filipek', 'william': 'William Tzirtzilakis'
+      };
+      const first = clean.split(' ')[0].toLowerCase().replace(/[^a-z]/g, '');
+      if (FULL_MAP[first] && clean.length <= first.length + 3) return FULL_MAP[first];
+      return clean;
+    }
     const MAP = {
       'anthony': 'Anthony L.', 'charlie': 'Charlie J.', 'dominic': 'Dominic M.',
       'jacob': 'Jacob L.', 'james': 'James T.', 'jasper': 'Jasper G.', 'jesper': 'Jesper W.',
@@ -48,7 +61,6 @@ const FirestoreSync = {
       'noah': 'Noah N.', 'oliver': 'Oliver M.', 'patrick': 'Patrick O.', 'shine': 'Shine S.',
       'tobias': 'Tobias F.', 'william': 'William T.'
     };
-    const clean = (rawName || 'Anonymous').trim().replace(/\s+/g, ' ');
     if (clean.toLowerCase() === 'guest trader') return 'Guest Trader';
     if (clean.toLowerCase() === 'simon anderson' || clean.toLowerCase() === 'teacher demo') return 'Teacher Demo';
     const parts = clean.split(' ');
@@ -178,9 +190,20 @@ const FirestoreSync = {
       }
 
       const unsubscribe = query.onSnapshot(snapshot => {
+        const demoNames = [
+          'liam zhang', 'chloe davies', 'marcus wong', 'sophie miller', 'ethan brown',
+          'chloe d.', 'liam z.', 'marcus w.', 'chloe d', 'liam z', 'marcus w',
+          'guest trader', 'teacher demo', '[deactivated demo account]'
+        ];
         const students = [];
         snapshot.forEach(doc => {
-          students.push(doc.data());
+          const d = doc.data();
+          if (d && !d.isDeleted && !d.isDemo && (d.totalValue === undefined || d.totalValue > 0)) {
+            const nameLower = (d.studentName || d.name || '').toLowerCase().trim();
+            if (!demoNames.some(dn => nameLower.includes(dn))) {
+              students.push(d);
+            }
+          }
         });
         if (students.length > 0) {
           try {

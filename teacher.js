@@ -225,6 +225,16 @@ const TeacherApp = {
         calculatedTotal += delta;
         calculatedCash += delta;
       }
+      // Filter out demo/deactivated accounts
+      const demoNames = [
+        'liam zhang', 'chloe davies', 'marcus wong', 'sophie miller', 'ethan brown',
+        'chloe d.', 'liam z.', 'marcus w.', 'chloe d', 'liam z', 'marcus w',
+        'guest trader', 'teacher demo', '[deactivated demo account]'
+      ];
+      if (p.isDeleted || p.isDemo || (p.totalValue !== undefined && p.totalValue <= 0) || demoNames.some(d => name.toLowerCase().includes(d))) {
+        return null;
+      }
+
       // Filter out glitched / fake holdings from stale local caches
       const fakeKeys = ['TRIVAGO', 'GERMANY', 'TEMU', 'BITCOIN', 'ASX 500', 'TECHNOLOGY WEST LTD', 'RESMED.INC'];
       const rawHoldings = Array.isArray(p.holdings) ? p.holdings : [];
