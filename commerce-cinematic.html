@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commerce to Stage 6: The Cinematic Journey</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    @keyframes scanline {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(1000%); }
+    }
+    .cinema-ratio {
+      aspect-ratio: 16 / 9;
+    }
+    .glow-gold {
+      text-shadow: 0 0 20px rgba(245, 158, 11, 0.6), 0 0 40px rgba(245, 158, 11, 0.3);
+    }
+    .glow-blue {
+      text-shadow: 0 0 20px rgba(56, 189, 248, 0.6), 0 0 40px rgba(56, 189, 248, 0.3);
+    }
+    .glow-red {
+      text-shadow: 0 0 20px rgba(244, 63, 94, 0.6), 0 0 40px rgba(244, 63, 94, 0.3);
+    }
+    .glow-green {
+      text-shadow: 0 0 20px rgba(52, 211, 153, 0.6), 0 0 40px rgba(52, 211, 153, 0.3);
+    }
+  </style>
+</head>
+<body class="bg-[#090d16] text-slate-100 min-h-screen font-sans antialiased selection:bg-amber-500 selection:text-black">
+
+  <!-- Top Hero Header -->
+  <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 px-4 py-3 sm:px-8">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 via-rose-500 to-sky-500 flex items-center justify-center shadow-lg shadow-amber-500/20 font-black text-black text-base">
+          ⌘
+        </div>
+        <div>
+          <h1 class="text-sm sm:text-base font-bold tracking-tight text-white flex items-center gap-2">
+            NSW COMMERCE <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-semibold uppercase tracking-wider">Stage 5 Gateway</span>
+          </h1>
+          <p class="text-[11px] text-slate-400">The Cinematic Pathway to Stage 6 Business Studies, Legal Studies &amp; Economics</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btn-audio-toggle" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800/80 border border-slate-700 hover:bg-slate-700 text-slate-200 transition">
+          <span id="audio-icon">🔊</span>
+          <span id="audio-label">Soundtrack: ON</span>
+        </button>
+        <button id="btn-voice-toggle" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800/80 border border-slate-700 hover:bg-slate-700 text-slate-200 transition">
+          <span id="voice-icon">🎙️</span>
+          <span id="voice-label">Voiceover: ON</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6 sm:px-8 space-y-8">
+
+    <!-- Cinema Viewport Card -->
+    <div class="relative bg-black rounded-2xl overflow-hidden border border-slate-800 shadow-2xl shadow-black/80 flex flex-col">
+      
+      <!-- Video Screen Area (Canvas + Overlay Layer) -->
+      <div id="cinema-frame" class="relative w-full cinema-ratio max-h-[640px] overflow-hidden bg-slate-950 flex items-center justify-center select-none">
+        <!-- Live Visual Canvas (Particles, Stars, Neural Pathway Graphics) -->
+        <canvas id="cinema-canvas" class="absolute inset-0 w-full h-full"></canvas>
+
+        <!-- Cinematic Letterbox Vignette -->
+        <div class="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/80 via-transparent to-black/80"></div>
+        <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.85)_100%)]"></div>
+
+        <!-- Watermark / Stage Indicator -->
+        <div class="absolute top-4 left-6 pointer-events-none flex items-center gap-2 z-20">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+          <span id="scene-category-pill" class="text-[11px] font-mono tracking-widest uppercase font-bold text-amber-400 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded border border-amber-500/30">
+            SCENE 01 • THE GENESIS OF COMMERCE
+          </span>
+        </div>
+
+        <!-- Chapter Progress Badge -->
+        <div class="absolute top-4 right-6 pointer-events-none z-20">
+          <span id="scene-time-code" class="text-xs font-mono tracking-widest text-slate-400 bg-black/60 backdrop-blur px-2.5 py-1 rounded border border-slate-800">
+            00:00 / 02:40
+          </span>
+        </div>
+
+        <!-- Center Dynamic Motion Graphics Container -->
+        <div id="scene-content" class="relative z-10 w-full px-8 max-w-4xl text-center flex flex-col items-center justify-center transition-all duration-700">
+          <!-- Injected via JavaScript based on current scene timestamp -->
+        </div>
+
+        <!-- Cinematic Subtitles Box -->
+        <div class="absolute bottom-6 left-0 right-0 px-6 sm:px-12 text-center z-20 pointer-events-none">
+          <div class="inline-block max-w-3xl bg-black/75 backdrop-blur-md px-5 py-2.5 rounded-xl border border-slate-700/60 shadow-xl">
+            <p id="cinema-subtitles" class="text-sm sm:text-base font-medium text-slate-100 tracking-wide leading-relaxed">
+              Every decision shapes the world around you. Welcome to Commerce.
+            </p>
+          </div>
+        </div>
+
+        <!-- Click-to-Play Overlay (when paused initially) -->
+        <div id="play-overlay" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-30 flex flex-col items-center justify-center cursor-pointer hover:bg-black/50 transition">
+          <button id="btn-giant-play" class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-amber-500 to-rose-500 flex items-center justify-center shadow-2xl shadow-amber-500/40 text-black text-3xl sm:text-4xl pl-2 hover:scale-105 active:scale-95 transition-transform">
+            ▶
+          </button>
+          <span class="mt-4 text-xs sm:text-sm font-semibold tracking-wider text-slate-200 uppercase">
+            Click to Begin Cinematic Presentation
+          </span>
+          <span class="text-[11px] text-slate-400 mt-1">Includes procedural soundtrack &amp; audio narration</span>
+        </div>
+      </div>
+
+      <!-- Video Control Bar -->
+      <div class="bg-slate-950 px-4 py-3 sm:px-6 border-t border-slate-800 flex flex-col gap-2.5 z-20">
+        <!-- Interactive Scrubber Bar -->
+        <div class="relative w-full group cursor-pointer py-1" id="scrubber-container">
+          <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden relative">
+            <div id="scrubber-progress" class="h-full bg-gradient-to-r from-amber-500 via-rose-500 to-sky-400 w-0 transition-all duration-100"></div>
+          </div>
+          <!-- Hover indicator -->
+          <div id="scrubber-head" class="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 rounded-full bg-white shadow-md shadow-amber-500/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+        </div>
+
+        <!-- Controls Row -->
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div class="flex items-center gap-3">
+            <button id="btn-play-pause" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center text-sm font-bold border border-slate-700 transition">
+              ▶
+            </button>
+            <button id="btn-restart" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm border border-slate-700 transition" title="Restart from Beginning">
+              ↺
+            </button>
+            <div class="hidden sm:flex items-center gap-1 font-mono text-xs text-slate-400">
+              <span id="current-time-text">0:00</span>
+              <span>/</span>
+              <span id="total-time-text">2:40</span>
+            </div>
+          </div>
+
+          <!-- Scene Quick Switchers -->
+          <div class="hidden md:flex items-center gap-1 text-xs">
+            <button class="scene-nav-btn px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-amber-400 transition" data-scene="0">1. Genesis</button>
+            <button class="scene-nav-btn px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-amber-400 transition" data-scene="1">2. Markets</button>
+            <button class="scene-nav-btn px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-amber-400 transition" data-scene="2">3. Law &amp; Work</button>
+            <button class="scene-nav-btn px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-amber-400 transition" data-scene="3">4. Crossroads</button>
+            <button class="scene-nav-btn px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition" data-scene="4">5. Business</button>
+            <button class="scene-nav-btn px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-rose-400 transition" data-scene="5">6. Legal</button>
+            <button class="scene-nav-btn px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-emerald-400 transition" data-scene="6">7. Economics</button>
+            <button class="scene-nav-btn px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-purple-400 transition" data-scene="7">8. Synthesis</button>
+          </div>
+
+          <!-- Right Options -->
+          <div class="flex items-center gap-2">
+            <button id="btn-speed" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs border border-slate-700 transition" title="Playback Speed">
+              1.0x
+            </button>
+            <button id="btn-fullscreen" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm border border-slate-700 transition" title="Fullscreen View">
+              ⛶
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Syllabus Matrix & Pathway Exploration Cards -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <span>🗺️</span> The Commerce-to-HSC Architectural Map
+          </h2>
+          <p class="text-xs text-slate-400">Click any senior HSC discipline to inspect its direct syllabus lineage from Stage 5 Commerce.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        
+        <!-- Stage 6 Business Studies Card -->
+        <div class="bg-gradient-to-b from-sky-950/40 via-slate-900/60 to-slate-950 p-6 rounded-2xl border border-sky-800/40 hover:border-sky-500/60 transition group flex flex-col justify-between shadow-lg shadow-sky-950/30">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-2xl">🏢</span>
+              <span class="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded bg-sky-500/10 border border-sky-500/30 text-sky-400">
+                Stage 6 HSC
+              </span>
+            </div>
+            <h3 class="text-lg font-bold text-white group-hover:text-sky-300 transition">Stage 6 Business Studies</h3>
+            <p class="text-xs text-slate-400 mt-1 mb-4 leading-relaxed">
+              From managing school investments and understanding consumer choice to orchestrating multinational enterprises.
+            </p>
+
+            <div class="space-y-2 border-t border-slate-800/80 pt-3 text-xs">
+              <div class="flex items-start gap-2">
+                <span class="text-sky-400 font-bold">↳</span>
+                <div>
+                  <strong class="text-slate-200">Commerce Roots:</strong>
+                  <span class="text-slate-400"> Core 1 (Consumer &amp; Financial Choices), Core 3 (Employment), Option (Running a Business &amp; Promoting).</span>
+                </div>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-sky-400 font-bold">↳</span>
+                <div>
+                  <strong class="text-slate-200">HSC 4 Core Pillars:</strong>
+                  <span class="text-slate-400"> Operations, Marketing, Finance &amp; Human Resources.</span>
+                </div>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-sky-400 font-bold">↳</span>
+                <div>
+                  <strong class="text-slate-200">Career Trajectories:</strong>
+                  <span class="text-slate-400"> Corporate Strategy, Investment Banking, Entrepreneurship, Brand Management.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="CinemaEngine.jumpToScene(4)" class="mt-5 w-full py-2 rounded-lg bg-sky-500/10 hover:bg-sky-500 text-sky-300 hover:text-black text-xs font-bold border border-sky-500/30 transition flex items-center justify-center gap-1.5">
+            <span>Play Business Studies Segment</span>
+            <span>➔</span>
+          </button>
+        </div>
+
+        <!-- Stage 6 Legal Studies Card -->
+        <div class="bg-gradient-to-b from-rose-950/40 via-slate-900/60 to-slate-950 p-6 rounded-2xl border border-rose-800/40 hover:border-rose-500/60 transition group flex flex-col justify-between shadow-lg shadow-rose-950/30">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-2xl">⚖️</span>
+              <span class="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/30 text-rose-400">
+                Stage 6 HSC
+              </span>
+            </div>
+            <h3 class="text-lg font-bold text-white group-hover:text-rose-300 transition">Stage 6 Legal Studies</h3>
+            <p class="text-xs text-slate-400 mt-1 mb-4 leading-relaxed">
+              From courtroom basics and consumer protection acts to constitutional power, criminal justice, and international human rights.
+            </p>
+
+            <div class="space-y-2 border-t border-slate-800/80 pt-3 text-xs">
+              <div class="flex items-start gap-2">
+                <span class="text-rose-400 font-bold">↳</span>
+                <div>
+                  <strong class="text-slate-200">Commerce Roots:</strong>
+                  <span class="text-slate-400"> Core 4 (Law, Society &amp; Political Involvement), Consumer Redress (Core 1), Fair Work (Core 3).</span>
+                </div>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-rose-400 font-bold">↳</span>
+                <div>
+                  <strong class="text-slate-200">HSC 3 Core Pillars:</strong>
+                  <span class="text-slate-400"> The Legal System, The Individual &amp; Law, Crime, Human Rights &amp; Electives.</span>
+                </div>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-rose-400 font-bold">↳</span>
+                <div>
+                  <strong class="text-slate-200">Career Trajectories:</strong>
+                  <span class="text-slate-400"> Barrister / Solicitor, Commercial Litigation, Human Rights Advocacy, Public Policy.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="CinemaEngine.jumpToScene(5)" class="mt-5 w-full py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500 text-rose-300 hover:text-black text-xs font-bold border border-rose-500/30 transition flex items-center justify-center gap-1.5">
+            <span>Play Legal Studies Segment</span>
+            <span>➔</span>
+          </button>
+        </div>
+
+        <!-- Stage 6 Economics Card -->
+        <div class="bg-gradient-to-b from-emerald-950/40 via-slate-900/60 to-slate-950 p-6 rounded-2xl border border-emerald-800/40 hover:border-emerald-500/60 transition group flex flex-col justify-between shadow-lg shadow-emerald-950/30">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-2xl">📈</span>
+              <span class="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                Stage 6 HSC
+              </span>
+            </div>
+            <h3 class="text-lg font-bold text-white group-hover:text-emerald-300 transition">Stage 6 Economics</h3>
+            <p class="text-xs text-slate-400 mt-1 mb-4 leading-relaxed">
+              From household budgets and local markets to the Reserve Bank, cash rates, international trade, and global macroeconomics.
+            </p>
+
+            <div class="space-y-2 border-t border-slate-800/80 pt-3 text-xs">
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-400 font-bold">↳</span>
+                <div>
+                  <strong class="text-slate-200">Commerce Roots:</strong>
+                  <span class="text-slate-400"> Core 2 (The Economic &amp; Business Environment), Sharemarket Simulation, Scarcity &amp; Price.</span>
+                </div>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-400 font-bold">↳</span>
+                <div>
+                  <strong class="text-slate-200">HSC 4 Core Pillars:</strong>
+                  <span class="text-slate-400"> The Global Economy, Australia's Place in Global Trade, Economic Issues &amp; Policies.</span>
+                </div>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-400 font-bold">↳</span>
+                <div>
+                  <strong class="text-slate-200">Career Trajectories:</strong>
+                  <span class="text-slate-400"> Central Banking (RBA), Macroeconomic Forecasting, Treasury, Global Asset Allocation.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="CinemaEngine.jumpToScene(6)" class="mt-5 w-full py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-300 hover:text-black text-xs font-bold border border-emerald-500/30 transition flex items-center justify-center gap-1.5">
+            <span>Play Economics Segment</span>
+            <span>➔</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Complete Production Script & Syllabus Lineage Reference Table -->
+    <div class="bg-slate-900/60 rounded-2xl border border-slate-800 p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <span>📜</span> Full Production Storyboard &amp; Syllabus Lineage Reference
+        </h3>
+        <span class="text-xs text-slate-400 font-mono">NSW Department of Education / NESA Aligned</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-400 font-mono text-[11px] uppercase tracking-wider">
+              <th class="py-2.5 px-3">Scene / Timestamp</th>
+              <th class="py-2.5 px-3">Stage 5 Commerce Core Topic</th>
+              <th class="py-2.5 px-3">Stage 6 Senior Subject Link</th>
+              <th class="py-2.5 px-3">Core Syllabic Progression</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/60 text-slate-300">
+            <tr>
+              <td class="py-3 px-3 font-mono text-amber-400 font-bold">01 • 0:00 - 0:20</td>
+              <td class="py-3 px-3 font-semibold text-white">Stage 5 Foundation (All Cores)</td>
+              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">The Triad</span></td>
+              <td class="py-3 px-3 text-slate-400">Establishes the individual as Consumer, Citizen, Worker, and Investor navigating society.</td>
+            </tr>
+            <tr>
+              <td class="py-3 px-3 font-mono text-amber-400 font-bold">02 • 0:20 - 0:40</td>
+              <td class="py-3 px-3 font-semibold text-white">Core 1: Consumer &amp; Financial Decisions</td>
+              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20">Business &amp; Legal</span></td>
+              <td class="py-3 px-3 text-slate-400">Personal budgeting &amp; investment expand into corporate financial management &amp; Australian Consumer Law (ACL).</td>
+            </tr>
+            <tr>
+              <td class="py-3 px-3 font-mono text-amber-400 font-bold">03 • 0:40 - 1:00</td>
+              <td class="py-3 px-3 font-semibold text-white">Core 2: Economic &amp; Business Environment</td>
+              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Economics</span></td>
+              <td class="py-3 px-3 text-slate-400">Circular flow, price mechanism, and market structures evolve directly into Preliminary &amp; HSC Economics.</td>
+            </tr>
+            <tr>
+              <td class="py-3 px-3 font-mono text-amber-400 font-bold">04 • 1:00 - 1:20</td>
+              <td class="py-3 px-3 font-semibold text-white">Core 3 &amp; 4: Work Futures &amp; Law/Society</td>
+              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20">Legal &amp; Business HR</span></td>
+              <td class="py-3 px-3 text-slate-400">Fair Work awards, court hierarchies, and democratic institutions feed Human Resource management &amp; Legal Studies.</td>
+            </tr>
+            <tr>
+              <td class="py-3 px-3 font-mono text-sky-400 font-bold">05 • 1:20 - 1:45</td>
+              <td class="py-3 px-3 font-semibold text-white">Focus: Business Studies</td>
+              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 font-bold">HSC Business Studies</span></td>
+              <td class="py-3 px-3 text-slate-400">Mastering the 4 Key Business Functions: Operations, Marketing, Finance, and Human Resources.</td>
+            </tr>
+            <tr>
+              <td class="py-3 px-3 font-mono text-rose-400 font-bold">06 • 1:45 - 2:10</td>
+              <td class="py-3 px-3 font-semibold text-white">Focus: Legal Studies</td>
+              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold">HSC Legal Studies</span></td>
+              <td class="py-3 px-3 text-slate-400">Critical evaluation of justice, statute vs common law, the constitution, and achieving just outcomes.</td>
+            </tr>
+            <tr>
+              <td class="py-3 px-3 font-mono text-emerald-400 font-bold">07 • 2:10 - 2:30</td>
+              <td class="py-3 px-3 font-semibold text-white">Focus: Economics</td>
+              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">HSC Economics</span></td>
+              <td class="py-3 px-3 text-slate-400">Understanding macro-management, cash rates, trade balance, inflation targets (2-3%), and global economics.</td>
+            </tr>
+            <tr>
+              <td class="py-3 px-3 font-mono text-purple-400 font-bold">08 • 2:30 - 2:40</td>
+              <td class="py-3 px-3 font-semibold text-white">The Synthesis</td>
+              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">The HSIE Masterclass</span></td>
+              <td class="py-3 px-3 text-slate-400">Commerce unifies all three disciplines into an unstoppable strategic foundation for university and career.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Procedural Web Audio & Animation Cinema Engine -->
+  <script>
+    const CinemaEngine = {
+      canvas: null,
+      ctx: null,
+      isPlaying: false,
+      currentTime: 0,
+      duration: 160, // 2 minutes 40 seconds
+      playbackRate: 1.0,
+      audioCtx: null,
+      audioEnabled: true,
+      voiceEnabled: true,
+      currentSceneIndex: 0,
+      speechUtterance: null,
+      animationFrameId: null,
+      particles: [],
+      neuralNodes: [],
+      
+      // Soundtrack Audio Nodes
+      synthNodes: {},
+
+      scenes: [
+        {
+          id: 0,
+          startTime: 0,
+          endTime: 20,
+          category: "SCENE 01 • THE GENESIS",
+          title: "THE POWER OF COMMERCE",
+          subtitle: "Stage 5 NSW Syllabus Foundation",
+          color: "#f59e0b",
+          narration: "Every single day, trillions of dollars flow across the globe, laws govern human conduct, and enterprise builds our civilization. Welcome to Commerce.",
+          render: (t) => `
+            <div class="space-y-3 transform transition-all duration-700 animate-fadeIn">
+              <span class="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">
+                NSW Stage 5 Commerce (Years 9–10)
+              </span>
+              <h2 class="text-3xl sm:text-5xl font-black tracking-tight text-white glow-gold">
+                THE GENESIS OF MODERN COMMERCE
+              </h2>
+              <p class="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                You began as an everyday consumer. But Commerce transformed you into an informed citizen, an active worker, and an agile investor.
+              </p>
+              <div class="flex items-center justify-center gap-3 pt-2">
+                <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-700 text-slate-300 text-xs">Core 1: Consumer Decisions</span>
+                <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-700 text-slate-300 text-xs">Core 2: The Economic Engine</span>
+                <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-700 text-slate-300 text-xs">Core 3: Work Futures</span>
+                <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-700 text-slate-300 text-xs">Core 4: Law &amp; Society</span>
+              </div>
+            </div>
+          `
+        },
+        {
+          id: 1,
+          startTime: 20,
+          endTime: 40,
+          category: "SCENE 02 • CAPITAL & CONSUMPTION",
+          title: "CORE 1: CONSUMER & FINANCIAL DECISIONS",
+          subtitle: "Scarcity, Opportunity Cost & Australian Consumer Law",
+          color: "#fbbf24",
+          narration: "In Core 1, you unmasked the power of money. You learned why unlimited wants collide with scarce resources, how compound returns build independence, and how the law protects the buyer.",
+          render: (t) => `
+            <div class="space-y-3">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                <span>💰</span> CORE 1 IN FOCUS
+              </div>
+              <h2 class="text-3xl sm:text-5xl font-black text-white glow-gold">
+                FROM SCARCITY TO WEALTH
+              </h2>
+              <p class="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto">
+                Opportunity Cost. Budgeting. The Australian Consumer Law (ACL). Credit risks versus wealth creation. Here, you mastered the fundamental laws of personal capital.
+              </p>
+              <div class="grid grid-cols-3 gap-3 max-w-xl mx-auto pt-2 text-xs">
+                <div class="bg-black/40 border border-amber-500/30 p-2.5 rounded-lg text-amber-300 font-bold">Opportunity Cost</div>
+                <div class="bg-black/40 border border-amber-500/30 p-2.5 rounded-lg text-amber-300 font-bold">ACCC &amp; Consumer Rights</div>
+                <div class="bg-black/40 border border-amber-500/30 p-2.5 rounded-lg text-amber-300 font-bold">Compound Growth</div>
+              </div>
+            </div>
+          `
+        },
+        {
+          id: 2,
+          startTime: 40,
+          endTime: 60,
+          category: "SCENE 03 • THE MARKETPLACE & THE COURTROOM",
+          title: "CORES 2, 3 & 4: BUSINESS, WORK & LAW",
+          subtitle: "The Circular Flow, Fair Work & The Rule of Law",
+          color: "#38bdf8",
+          narration: "Then you expanded outward. The circular flow of income. The rights of workers in a changing digital economy. And the pillars of justice, statutory interpretation, and court hierarchies.",
+          render: (t) => `
+            <div class="space-y-3">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30">
+                <span>⚖️</span> CORES 2, 3 &amp; 4 IN ACTION
+              </div>
+              <h2 class="text-3xl sm:text-5xl font-black text-white glow-blue">
+                MARKETS, LABOUR &amp; JUSTICE
+              </h2>
+              <p class="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto">
+                You modeled how businesses interact with households and government. You scrutinized the Fair Work system, employment contracts, and how the court hierarchy preserves the rule of law.
+              </p>
+              <div class="flex flex-wrap justify-center gap-2 pt-2 text-xs">
+                <span class="px-3 py-1 rounded-full bg-slate-900 border border-sky-500/40 text-sky-300">Circular Flow Model</span>
+                <span class="px-3 py-1 rounded-full bg-slate-900 border border-sky-500/40 text-sky-300">Fair Work Ombudsman</span>
+                <span class="px-3 py-1 rounded-full bg-slate-900 border border-sky-500/40 text-sky-300">Civil vs Criminal Law</span>
+                <span class="px-3 py-1 rounded-full bg-slate-900 border border-sky-500/40 text-sky-300">Court Hierarchy</span>
+              </div>
+            </div>
+          `
+        },
+        {
+          id: 3,
+          startTime: 60,
+          endTime: 80,
+          category: "SCENE 04 • THE SENIOR CROSSROADS",
+          title: "THE SENIOR CROSSROADS",
+          subtitle: "Stage 5 Commerce Unlocks the Stage 6 Triad",
+          color: "#c084fc",
+          narration: "Now, the foundation is set. Stage 5 Commerce was never just a single subject. It is the master blueprint that branches into three premier HSC disciplines: Business Studies, Legal Studies, and Economics.",
+          render: (t) => `
+            <div class="space-y-4">
+              <span class="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-widest bg-purple-500/20 text-purple-300 border border-purple-500/40 uppercase">
+                THE HSC CROSSROADS
+              </span>
+              <h2 class="text-3xl sm:text-6xl font-black text-white tracking-tight glow-purple">
+                WHERE AMBITION TAKES FLIGHT
+              </h2>
+              <p class="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto">
+                Which dimension of Commerce called to you? The thrill of building enterprise? The pursuit of courtroom justice? Or the macroeconomic forces that shape entire nations?
+              </p>
+              <div class="grid grid-cols-3 gap-4 max-w-xl mx-auto pt-2">
+                <div class="bg-sky-950/60 border border-sky-500 p-3 rounded-xl text-center">
+                  <div class="text-xl">🏢</div>
+                  <strong class="text-xs text-sky-300 block mt-1">BUSINESS STUDIES</strong>
+                </div>
+                <div class="bg-rose-950/60 border border-rose-500 p-3 rounded-xl text-center">
+                  <div class="text-xl">⚖️</div>
+                  <strong class="text-xs text-rose-300 block mt-1">LEGAL STUDIES</strong>
+                </div>
+                <div class="bg-emerald-950/60 border border-emerald-500 p-3 rounded-xl text-center">
+                  <div class="text-xl">📈</div>
+                  <strong class="text-xs text-emerald-300 block mt-1">ECONOMICS</strong>
+                </div>
+              </div>
+            </div>
+          `
+        },
+        {
+          id: 4,
+          startTime: 80,
+          endTime: 105,
+          category: "SCENE 05 • PATHWAY 1: BUSINESS STUDIES",
+          title: "STAGE 6 BUSINESS STUDIES",
+          subtitle: "Operations, Marketing, Finance & Human Resources",
+          color: "#38bdf8",
+          narration: "Enter Stage 6 Business Studies. Here, Commerce transforms into strategic executive leadership. You master the four pillars of enterprise: Operations, Marketing, Finance, and Human Resources. You learn how multinational corporations scale from startup to global empire.",
+          render: (t) => `
+            <div class="space-y-3">
+              <span class="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-widest bg-sky-500/20 text-sky-300 border border-sky-500/40 uppercase">
+                PATHWAY 1 • STAGE 6 HSC
+              </span>
+              <h2 class="text-3xl sm:text-5xl font-black text-white glow-blue">
+                BUSINESS STUDIES: THE ENTERPRISE ENGINE
+              </h2>
+              <p class="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto">
+                Commerce taught you how businesses promote and sell. Business Studies turns you into the strategist orchestrating supply chains, global branding, balance sheets, and workforce talent.
+              </p>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-w-2xl mx-auto pt-2 text-xs">
+                <div class="bg-slate-900 border border-sky-500/40 p-2.5 rounded-lg text-sky-300 font-bold">1. Operations</div>
+                <div class="bg-slate-900 border border-sky-500/40 p-2.5 rounded-lg text-sky-300 font-bold">2. Marketing (4Ps)</div>
+                <div class="bg-slate-900 border border-sky-500/40 p-2.5 rounded-lg text-sky-300 font-bold">3. Finance &amp; Cash Flow</div>
+                <div class="bg-slate-900 border border-sky-500/40 p-2.5 rounded-lg text-sky-300 font-bold">4. Human Resources</div>
+              </div>
+            </div>
+          `
+        },
+        {
+          id: 5,
+          startTime: 105,
+          endTime: 130,
+          category: "SCENE 06 • PATHWAY 2: LEGAL STUDIES",
+          title: "STAGE 6 LEGAL STUDIES",
+          subtitle: "The Legal System, Crime, Human Rights & Justice",
+          color: "#f43f5e",
+          narration: "Step into Stage 6 Legal Studies. Where Commerce introduced the courts and Fair Work, Legal Studies puts power on trial. You dissect criminal law, constitutional balances, international human rights, and the eternal fight for just outcomes.",
+          render: (t) => `
+            <div class="space-y-3">
+              <span class="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-widest bg-rose-500/20 text-rose-300 border border-rose-500/40 uppercase">
+                PATHWAY 2 • STAGE 6 HSC
+              </span>
+              <h2 class="text-3xl sm:text-5xl font-black text-white glow-red">
+                LEGAL STUDIES: POWER, LAW &amp; JUSTICE
+              </h2>
+              <p class="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto">
+                Commerce taught you basic rights and court hierarchies. Legal Studies trains you in high-level legal analysis, scrutinizing criminal trials, human rights violations, and family law.
+              </p>
+              <div class="grid grid-cols-3 gap-2.5 max-w-xl mx-auto pt-2 text-xs">
+                <div class="bg-slate-900 border border-rose-500/40 p-2.5 rounded-lg text-rose-300 font-bold">The Legal System</div>
+                <div class="bg-slate-900 border border-rose-500/40 p-2.5 rounded-lg text-rose-300 font-bold">Criminal Jurisprudence</div>
+                <div class="bg-slate-900 border border-rose-500/40 p-2.5 rounded-lg text-rose-300 font-bold">Human Rights &amp; Treaties</div>
+              </div>
+            </div>
+          `
+        },
+        {
+          id: 6,
+          startTime: 130,
+          endTime: 150,
+          category: "SCENE 07 • PATHWAY 3: ECONOMICS",
+          title: "STAGE 6 ECONOMICS",
+          subtitle: "The Global Economy, Central Banks & Macro Policy",
+          color: "#10b981",
+          narration: "And rise into Stage 6 Economics. The science of national prosperity. Commerce showed you how markets clear. Economics reveals how the Reserve Bank sets cash rates, how governments fight unemployment and inflation, and how global currency flows reshape the world.",
+          render: (t) => `
+            <div class="space-y-3">
+              <span class="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">
+                PATHWAY 3 • STAGE 6 HSC
+              </span>
+              <h2 class="text-3xl sm:text-5xl font-black text-white glow-green">
+                ECONOMICS: THE INVISIBLE HAND
+              </h2>
+              <p class="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto">
+                Commerce simulated individual stock trading. Economics explains why the market moves. You will analyze macroeconomic management, fiscal policy, the 2 to 3 percent inflation target, and international trade.
+              </p>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-w-2xl mx-auto pt-2 text-xs">
+                <div class="bg-slate-900 border border-emerald-500/40 p-2.5 rounded-lg text-emerald-300 font-bold">The Global Economy</div>
+                <div class="bg-slate-900 border border-emerald-500/40 p-2.5 rounded-lg text-emerald-300 font-bold">RBA Monetary Policy</div>
+                <div class="bg-slate-900 border border-emerald-500/40 p-2.5 rounded-lg text-emerald-300 font-bold">Inflation &amp; Jobs</div>
+                <div class="bg-slate-900 border border-emerald-500/40 p-2.5 rounded-lg text-emerald-300 font-bold">Balance of Payments</div>
+              </div>
+            </div>
+          `
+        },
+        {
+          id: 7,
+          startTime: 150,
+          endTime: 160,
+          category: "SCENE 08 • THE GRAND SYNTHESIS",
+          title: "THE COMMERCE SYNTHESIS",
+          subtitle: "Choose Your Discipline. Master Your Future.",
+          color: "#f59e0b",
+          narration: "Commerce is your cornerstone. Whether you choose Business Studies, Legal Studies, Economics, or combine them—you hold the strategic keys to university, career, and financial leadership. Choose your path. Shape the future.",
+          render: (t) => `
+            <div class="space-y-4">
+              <span class="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">
+                THE HSIE TRILOGY
+              </span>
+              <h2 class="text-3xl sm:text-6xl font-black text-white tracking-tight glow-gold">
+                COMMERCE: THE ULTIMATE FOUNDATION
+              </h2>
+              <p class="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                Enterprise. Justice. Prosperity. The skills forged in Commerce will distinguish you in the HSC, at university, and across your entire career.
+              </p>
+              <div class="flex items-center justify-center gap-3 pt-3">
+                <button onclick="CinemaEngine.restart()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-black font-extrabold text-xs shadow-lg shadow-amber-500/30 hover:scale-105 active:scale-95 transition">
+                  ↺ Replay Presentation
+                </button>
+              </div>
+            </div>
+          `
+        }
+      ],
+
+      init() {
+        this.canvas = document.getElementById('cinema-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.resizeCanvas();
+        window.addEventListener('resize', () => this.resizeCanvas());
+
+        this.initParticles();
+        this.initControls();
+        this.renderScene(0);
+        this.startVisualLoop();
+      },
+
+      resizeCanvas() {
+        if (!this.canvas) return;
+        const rect = this.canvas.getBoundingClientRect();
+        this.canvas.width = rect.width * window.devicePixelRatio;
+        this.canvas.height = rect.height * window.devicePixelRatio;
+        this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      },
+
+      initParticles() {
+        this.particles = [];
+        const count = 75;
+        for (let i = 0; i < count; i++) {
+          this.particles.push({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * 800,
+            radius: Math.random() * 1.8 + 0.5,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4,
+            hue: Math.random() > 0.6 ? 45 : (Math.random() > 0.5 ? 200 : 350),
+            alpha: Math.random() * 0.6 + 0.2
+          });
+        }
+      },
+
+      initControls() {
+        const btnPlay = document.getElementById('btn-play-pause');
+        const giantPlay = document.getElementById('play-overlay');
+        const btnRestart = document.getElementById('btn-restart');
+        const btnAudio = document.getElementById('btn-audio-toggle');
+        const btnVoice = document.getElementById('btn-voice-toggle');
+        const btnSpeed = document.getElementById('btn-speed');
+        const btnFullscreen = document.getElementById('btn-fullscreen');
+        const scrubber = document.getElementById('scrubber-container');
+
+        btnPlay.addEventListener('click', () => this.togglePlay());
+        giantPlay.addEventListener('click', () => this.play());
+        btnRestart.addEventListener('click', () => this.restart());
+
+        btnAudio.addEventListener('click', () => {
+          this.audioEnabled = !this.audioEnabled;
+          document.getElementById('audio-label').textContent = `Soundtrack: ${this.audioEnabled ? 'ON' : 'OFF'}`;
+          document.getElementById('audio-icon').textContent = this.audioEnabled ? '🔊' : '🔇';
+          if (!this.audioEnabled && this.audioCtx) {
+            this.audioCtx.suspend();
+          } else if (this.audioEnabled && this.audioCtx && this.isPlaying) {
+            this.audioCtx.resume();
+          }
+        });
+
+        btnVoice.addEventListener('click', () => {
+          this.voiceEnabled = !this.voiceEnabled;
+          document.getElementById('voice-label').textContent = `Voiceover: ${this.voiceEnabled ? 'ON' : 'OFF'}`;
+          document.getElementById('voice-icon').textContent = this.voiceEnabled ? '🎙️' : '🔇';
+          if (!this.voiceEnabled && window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+          }
+        });
+
+        btnSpeed.addEventListener('click', () => {
+          if (this.playbackRate === 1.0) this.playbackRate = 1.25;
+          else if (this.playbackRate === 1.25) this.playbackRate = 1.5;
+          else this.playbackRate = 1.0;
+          btnSpeed.textContent = `${this.playbackRate.toFixed(1)}x`;
+        });
+
+        btnFullscreen.addEventListener('click', () => {
+          const frame = document.getElementById('cinema-frame');
+          if (!document.fullscreenElement) {
+            frame.requestFullscreen?.() || frame.webkitRequestFullscreen?.();
+          } else {
+            document.exitFullscreen?.();
+          }
+        });
+
+        scrubber.addEventListener('click', (e) => {
+          const rect = scrubber.getBoundingClientRect();
+          const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+          this.seekTo(pct * this.duration);
+        });
+
+        document.querySelectorAll('.scene-nav-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const sc = parseInt(btn.dataset.scene, 10);
+            this.jumpToScene(sc);
+          });
+        });
+      },
+
+      initAudioEngine() {
+        if (this.audioCtx) return;
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.audioCtx = new AudioContext();
+
+          // Master Gain Node
+          const masterGain = this.audioCtx.createGain();
+          masterGain.gain.setValueAtTime(0.25, this.audioCtx.currentTime);
+          masterGain.connect(this.audioCtx.destination);
+          this.synthNodes.masterGain = masterGain;
+
+          // Sub Bass Drone (Low Sine)
+          const bassOsc = this.audioCtx.createOscillator();
+          bassOsc.type = 'sine';
+          bassOsc.frequency.setValueAtTime(55, this.audioCtx.currentTime); // A1 note
+          const bassFilter = this.audioCtx.createBiquadFilter();
+          bassFilter.type = 'lowpass';
+          bassFilter.frequency.setValueAtTime(110, this.audioCtx.currentTime);
+
+          const bassGain = this.audioCtx.createGain();
+          bassGain.gain.setValueAtTime(0.2, this.audioCtx.currentTime);
+          bassOsc.connect(bassFilter);
+          bassFilter.connect(bassGain);
+          bassGain.connect(masterGain);
+          bassOsc.start();
+          this.synthNodes.bassOsc = bassOsc;
+          this.synthNodes.bassGain = bassGain;
+
+          // Atmospheric Pad (Sawtooth filtered chord swell)
+          const padOsc = this.audioCtx.createOscillator();
+          padOsc.type = 'triangle';
+          padOsc.frequency.setValueAtTime(220, this.audioCtx.currentTime); // A3
+          const padFilter = this.audioCtx.createBiquadFilter();
+          padFilter.type = 'lowpass';
+          padFilter.frequency.setValueAtTime(380, this.audioCtx.currentTime);
+
+          const padGain = this.audioCtx.createGain();
+          padGain.gain.setValueAtTime(0.12, this.audioCtx.currentTime);
+          padOsc.connect(padFilter);
+          padFilter.connect(padGain);
+          padGain.connect(masterGain);
+          padOsc.start();
+          this.synthNodes.padOsc = padOsc;
+          this.synthNodes.padFilter = padFilter;
+        } catch (e) {
+          console.warn('Web Audio not allowed or supported', e);
+        }
+      },
+
+      playCinematicImpact(colorHue = 45) {
+        if (!this.audioEnabled || !this.audioCtx) return;
+        try {
+          const now = this.audioCtx.currentTime;
+          const osc = this.audioCtx.createOscillator();
+          const gain = this.audioCtx.createGain();
+          
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(130, now);
+          osc.frequency.exponentialRampToValueAtTime(35, now + 0.6);
+
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+
+          osc.connect(gain);
+          gain.connect(this.synthNodes.masterGain || this.audioCtx.destination);
+
+          osc.start(now);
+          osc.stop(now + 0.75);
+        } catch (e) {}
+      },
+
+      speakNarration(text) {
+        if (!this.voiceEnabled || !('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.rate = 1.0 * this.playbackRate;
+        utter.pitch = 0.95;
+
+        // Try to pick natural English voice
+        const voices = window.speechSynthesis.getVoices();
+        const preferred = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Daniel') || v.name.includes('Arthur')));
+        if (preferred) utter.voice = preferred;
+
+        window.speechSynthesis.speak(utter);
+      },
+
+      play() {
+        if (this.isPlaying) return;
+        this.isPlaying = true;
+        this.initAudioEngine();
+        if (this.audioCtx && this.audioCtx.state === 'suspended') {
+          this.audioCtx.resume();
+        }
+
+        document.getElementById('play-overlay').style.display = 'none';
+        document.getElementById('btn-play-pause').textContent = '⏸';
+
+        this.lastFrameTime = performance.now();
+        this.triggerCurrentSceneNarration();
+      },
+
+      pause() {
+        if (!this.isPlaying) return;
+        this.isPlaying = false;
+        document.getElementById('btn-play-pause').textContent = '▶';
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+      },
+
+      togglePlay() {
+        if (this.isPlaying) this.pause();
+        else this.play();
+      },
+
+      restart() {
+        this.currentTime = 0;
+        this.currentSceneIndex = -1;
+        this.seekTo(0);
+        this.play();
+      },
+
+      seekTo(time) {
+        this.currentTime = Math.max(0, Math.min(this.duration, time));
+        this.updateTimeDisplay();
+        this.checkSceneUpdate(true);
+      },
+
+      jumpToScene(index) {
+        if (this.scenes[index]) {
+          this.seekTo(this.scenes[index].startTime);
+          if (!this.isPlaying) this.play();
+        }
+      },
+
+      checkSceneUpdate(force = false) {
+        const sceneIndex = this.scenes.findIndex(s => this.currentTime >= s.startTime && this.currentTime < s.endTime);
+        if (sceneIndex >= 0 && (sceneIndex !== this.currentSceneIndex || force)) {
+          this.currentSceneIndex = sceneIndex;
+          this.renderScene(sceneIndex);
+          if (this.isPlaying) {
+            this.playCinematicImpact();
+            this.triggerCurrentSceneNarration();
+          }
+        }
+      },
+
+      triggerCurrentSceneNarration() {
+        const scene = this.scenes[this.currentSceneIndex];
+        if (scene && scene.narration) {
+          this.speakNarration(scene.narration);
+        }
+      },
+
+      renderScene(index) {
+        const scene = this.scenes[index] || this.scenes[0];
+        document.getElementById('scene-category-pill').textContent = scene.category;
+        document.getElementById('scene-category-pill').style.color = scene.color;
+        document.getElementById('scene-category-pill').style.borderColor = `${scene.color}66`;
+
+        const container = document.getElementById('scene-content');
+        container.innerHTML = scene.render(this.currentTime);
+
+        document.getElementById('cinema-subtitles').textContent = scene.narration;
+
+        // Highlight active scene button
+        document.querySelectorAll('.scene-nav-btn').forEach((btn, idx) => {
+          if (idx === index) {
+            btn.classList.add('bg-slate-800', 'text-white', 'font-bold');
+            btn.classList.remove('text-slate-400');
+          } else {
+            btn.classList.remove('bg-slate-800', 'text-white', 'font-bold');
+            btn.classList.add('text-slate-400');
+          }
+        });
+      },
+
+      updateTimeDisplay() {
+        const curM = Math.floor(this.currentTime / 60);
+        const curS = Math.floor(this.currentTime % 60).toString().padStart(2, '0');
+        const totM = Math.floor(this.duration / 60);
+        const totS = Math.floor(this.duration % 60).toString().padStart(2, '0');
+
+        document.getElementById('scene-time-code').textContent = `${curM}:${curS} / ${totM}:${totS}`;
+        document.getElementById('current-time-text').textContent = `${curM}:${curS}`;
+
+        const pct = (this.currentTime / this.duration) * 100;
+        document.getElementById('scrubber-progress').style.width = `${pct}%`;
+      },
+
+      startVisualLoop() {
+        const loop = (timestamp) => {
+          if (this.isPlaying && this.lastFrameTime) {
+            const dt = (timestamp - this.lastFrameTime) / 1000;
+            this.currentTime += dt * this.playbackRate;
+            if (this.currentTime >= this.duration) {
+              this.currentTime = this.duration;
+              this.pause();
+            }
+            this.updateTimeDisplay();
+            this.checkSceneUpdate();
+          }
+          this.lastFrameTime = timestamp;
+
+          this.drawVisuals();
+          this.animationFrameId = requestAnimationFrame(loop);
+        };
+        this.animationFrameId = requestAnimationFrame(loop);
+      },
+
+      drawVisuals() {
+        if (!this.ctx || !this.canvas) return;
+        const width = this.canvas.width / window.devicePixelRatio;
+        const height = this.canvas.height / window.devicePixelRatio;
+
+        this.ctx.clearRect(0, 0, width, height);
+
+        // Draw animated starfield particles
+        const scene = this.scenes[this.currentSceneIndex] || this.scenes[0];
+        this.particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0) p.x = width;
+          if (p.x > width) p.x = 0;
+          if (p.y < 0) p.y = height;
+          if (p.y > height) p.y = 0;
+
+          this.ctx.beginPath();
+          this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          this.ctx.fillStyle = `hsla(${p.hue}, 80%, 65%, ${p.alpha})`;
+          this.ctx.fill();
+        });
+
+        // Draw connecting constellation lines near the center
+        this.ctx.strokeStyle = `${scene.color}15`;
+        this.ctx.lineWidth = 1;
+        for (let i = 0; i < this.particles.length; i += 4) {
+          for (let j = i + 1; j < this.particles.length; j += 8) {
+            const dx = this.particles[i].x - this.particles[j].x;
+            const dy = this.particles[i].y - this.particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 120) {
+              this.ctx.beginPath();
+              this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
+              this.ctx.lineTo(this.particles[j].x, this.particles[j].y);
+              this.ctx.stroke();
+            }
+          }
+        }
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      CinemaEngine.init();
+    });
+  </script>
+</body>
+</html>
